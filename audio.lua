@@ -53,7 +53,7 @@ end
 
 
 function sfx(name,x,y,pitch)
- return
+ if true then return end
 
  local s=sfxs[name]
  local x,y=x or 0, y or 0
@@ -74,8 +74,7 @@ function sfx(name,x,y,pitch)
 end
 
 function music(name)
-
- return
+ if true then return end
 
  if curmusic then
   musics[curmusic]:stop()
