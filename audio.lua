@@ -53,6 +53,8 @@ end
 
 
 function sfx(name,x,y,pitch)
+ return
+
  local s=sfxs[name]
  local x,y=x or 0, y or 0
  local k=200
@@ -72,6 +74,9 @@ function sfx(name,x,y,pitch)
 end
 
 function music(name)
+
+ return
+
  if curmusic then
   musics[curmusic]:stop()
  end
