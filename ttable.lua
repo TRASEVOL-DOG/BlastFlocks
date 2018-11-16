@@ -1,8 +1,5 @@
--- BLAST FLOCK source files - by TRASEVOL_DOG
--- /!\ do not redistribute /!\
--- Download game at trasevol-dog.itch.io/blast-flock
--- Ask questions to @TRASEVOL_DOG on Twitter
--- Support TRASEVOL_DOG on patreon.com/trasevol_dog
+-- BLAST FLOCK source files
+-- by TRASEVOL_DOG (https://trasevol.dog/)
 
 require("maths")
 
