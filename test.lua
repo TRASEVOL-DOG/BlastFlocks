@@ -17,7 +17,7 @@ local playerPos = {
   y = 100
 }
 
---local testsheet = love.graphics.newImage('assets/sheet.png')
+local testsheet = love.graphics.newImage('assets/sheet.png')
 function love.load()
   -- here, you might load resources like images or sounds
   init_graphics(128,128,4,4,"Hello")
