@@ -65,7 +65,7 @@ function sfx(name,x,y,pitch)
  s:setPosition(x,y,1)
  
  if s:isPlaying() then
-  s:rewind()
+  s:seek(0)
  else
   s:play()
  end
