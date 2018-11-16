@@ -57,6 +57,8 @@ function _init()
  camera(0)
  local introt=2.8
  while t<introt do
+  predraw()
+ 
   t=t+0.01
   local kt=t*5
   

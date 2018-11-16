@@ -53,22 +53,25 @@ function init_graphics(w,h,scx,scy,title)
 end
 
 function drawstep()
- love.graphics.setCanvas(render_canvas)
- --love.graphics.origin()
- if love.draw then love.draw() end
+ predraw()
+ _draw()
+ flip()
+end
 
+function predraw()
+ love.graphics.setCanvas(render_canvas)
+-- love.graphics.origin()
+end
+
+function afterdraw()
  love.graphics.setCanvas()
- love.graphics.setColor(255,255,255,255)
+ love.graphics.setColor(1,1,1,1)
  love.graphics.origin()
  love.graphics.draw(render_canvas,0,0,0,graphics.scrn_scalex,graphics.scrn_scaley)
- love.graphics.present()
 end
 
 function flip()
- love.graphics.setCanvas()
- love.graphics.setColor(255,255,255,255)
- love.graphics.origin()
- love.graphics.draw(render_canvas,0,0,0,graphics.scrn_scalex,graphics.scrn_scaley)
+ afterdraw()
  love.graphics.present()
  
 -- love.graphics.setCanvas(render_canvas)
@@ -89,7 +92,7 @@ end
 function color(c)
  if graphics.collock then return end
 
- local col=palette[palswaps[c]]
+ local col=palette_norm[palswaps[c]]
  love.graphics.setColor(col)
  graphics.curcol=c
  return col
@@ -274,7 +277,7 @@ end
 
 
 function new_surface(w,h)
- return love.graphics.newCanvas(w,h,"normal")
+ return love.graphics.newCanvas(w,h)
 end
 
 function draw_to(surf)
