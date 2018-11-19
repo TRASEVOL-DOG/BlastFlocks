@@ -3,26 +3,26 @@
 
 
 function dist(x1,y1,x2,y2)
- local x,y
- if x2 then
-  x=x2-x1
-  y=y2-y1
- else
-  x=x1
-  y=y1
- end
- 
- return sqrt(sqrdist(x,y))
+  local x,y
+  if x2 then
+    x=x2-x1
+    y=y2-y1
+  else
+    x=x1
+    y=y1
+  end
+  
+  return sqrt(sqrdist(x,y))
 end
 
 function sqrdist(x,y)
- return sqr(x)+sqr(y)
+  return sqr(x)+sqr(y)
 end
 
 
 function angle_diff(a1,a2)
- local a=a2-a1
- return (a+0.5)%1-0.5
+  local a=a2-a1
+  return (a+0.5)%1-0.5
 end
 
 

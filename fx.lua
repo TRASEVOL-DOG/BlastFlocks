@@ -10,280 +10,280 @@ require("sprite")
 
 
 function update_convertring(s)
- s.t=s.t+1
- if s.t>=64 then
-  deregister_object(s)
- end
+  s.t=s.t+1
+  if s.t>=64 then
+    deregister_object(s)
+  end
 end
 
 function update_skull(s)
- s.t=s.t+0.01
- 
- if s.t>0.32 then
-  deregister_object(s)
- end
+  s.t=s.t+0.01
+  
+  if s.t>0.32 then
+    deregister_object(s)
+  end
 end
 
 function update_scoretxt(s)
- s.t=s.t+1
- if s.t>=48 then
-  deregister_object(s)
- end
+  s.t=s.t+1
+  if s.t>=48 then
+    deregister_object(s)
+  end
 end
 
 function update_dgrpointer(s)
- s.t=s.t+1
- 
- if s.t>=64 then
-  deregister_object(s)
- end
+  s.t=s.t+1
+  
+  if s.t>=64 then
+    deregister_object(s)
+  end
 end
 
 function update_screenglitch(s)
- if rnd(30)<1 then
-  s.x=s.x+rnd(64)-32
-  s.y=s.y+rnd(64)-32
-  s.c=8+flr(rnd(8))
- end
-
- if rnd(10)<1 then
-  s.x=s.ox
-  s.y=s.oy
- end
-
- s.w=s.w+2
- s.h=s.h-6
+  if rnd(30)<1 then
+    s.x=s.x+rnd(64)-32
+    s.y=s.y+rnd(64)-32
+    s.c=8+flr(rnd(8))
+  end
  
- if s.h<0 or s.w<0 then
-  deregister_object(s)
- end
+  if rnd(10)<1 then
+    s.x=s.ox
+    s.y=s.oy
+  end
+ 
+  s.w=s.w+2
+  s.h=s.h-6
+  
+  if s.h<0 or s.w<0 then
+    deregister_object(s)
+  end
 end
 
 function update_smoke(s)
- s.x=s.x+s.vx
- s.y=s.y+s.vy
- 
- s.vx=lerp(s.vx,0,0.1)
- s.vy=lerp(s.vy,-1,0.1)
- 
- s.r=s.r-0.05
- if s.r<0 then
-  deregister_object(s)
- end
+  s.x=s.x+s.vx
+  s.y=s.y+s.vy
+  
+  s.vx=lerp(s.vx,0,0.1)
+  s.vy=lerp(s.vy,-1,0.1)
+  
+  s.r=s.r-0.05
+  if s.r<0 then
+    deregister_object(s)
+  end
 end
 
 
 function add_shake(p)
- local a=rnd(1)
- shkx=shkx+p*cos(a)
- shky=shky+p*sin(a)
+  local a=rnd(1)
+  shkx=shkx+p*cos(a)
+  shky=shky+p*sin(a)
 end
 
 function update_shake()
- if abs(shkx)<0.5 and abs(shky)<0.5 then
-  shkx,shky=0,0
- end
- 
- shkx=-(0.5+rnd(0.2))*shkx
- shky=-(0.5+rnd(0.2))*shky
+  if abs(shkx)<0.5 and abs(shky)<0.5 then
+    shkx,shky=0,0
+  end
+  
+  shkx=-(0.5+rnd(0.2))*shkx
+  shky=-(0.5+rnd(0.2))*shky
 end
 
 
 
 function draw_convertring(s)
- local ship=s.s
- 
- local plta={7,7,10,9, 9,9,10,7}
- local pltb={7,10,9,4, 4,4,9,10}
- local k=flr(s.t/8)+1
-
- local foo=function()
-  circ(ship.x,ship.y,ship.info.hlen+3+2*cos(s.t/8),pltb[k])
- end
- 
- draw_outline(foo,7)
- foo()
- 
- draw_text("^ SAVED ^",ship.x,ship.y-ship.info.hlen-6-k,1,0,plta[k],pltb[k])
+  local ship=s.s
+  
+  local plta={7,7,10,9, 9,9,10,7}
+  local pltb={7,10,9,4, 4,4,9,10}
+  local k=flr(s.t/8)+1
+  
+  local foo=function()
+    circ(ship.x,ship.y,ship.info.hlen+3+2*cos(s.t/8),pltb[k])
+  end
+  
+  draw_outline(foo,7)
+  foo()
+  
+  font("pico")
+  draw_text("^ SAVED ^",ship.x,ship.y-ship.info.hlen-6-k,1,0,plta[k],pltb[k])
 end
 
 function draw_skull(s)
- draw_anim(s.x,s.y,"skull",nil,s.t)
+  draw_anim(s.x,s.y,"skull",nil,s.t)
 end
 
 function draw_scoretxt(s)
- local plta={7,7,10,9, 9,9,10,7}
- local pltb={7,10,9,4, 4,4,9,10}
- local k=flr(s.t/6)+1
- draw_text(s.txt,s.x,s.y-s.t,1,0,plta[k],pltb[k])
+  local plta={7,7,10,9, 9,9,10,7}
+  local pltb={7,10,9,4, 4,4,9,10}
+  local k=flr(s.t/6)+1
+  draw_text(s.txt,s.x,s.y-s.t,1,0,plta[k],pltb[k])
 end
 
 function draw_dgrpointer(s) -- not displayed atm
- if s.t%4>0 then return end
-
- local scrnw,scrnh=screen_size()
- local x=clamp(s.x,xmod+16,xmod+scrnw-16)
- local y=clamp(s.y,ymod+16,ymod+scrnh-16)
- 
- font("pico2")
- draw_text("!",x,y,1,0,8,2)
- font("pico")
+  if s.t%4>0 then return end
+  
+  local scrnw,scrnh=screen_size()
+  local x=clamp(s.x,xmod+16,xmod+scrnw-16)
+  local y=clamp(s.y,ymod+16,ymod+scrnh-16)
+  
+  font("pico2")
+  draw_text("!",x,y,1,0,8,2)
 end
 
 function draw_explosion(s)
- local c=({0,7,s.c,s.c,s.c})[s.p+1]
- local r=s.r+max(s.p-2,0)
- local foo
- if s.p<3 then foo=circfill
- else foo=circ end
- 
- foo(s.x,s.y,r,c)
- 
- if s.p==1 then
-  if s.r>4 then
-   for i=0,2 do
-    local x=s.x+rnd(2.2*s.r)-1.1*s.r
-    local y=s.y+rnd(2.2*s.r)-1.1*s.r
-    local r=0.25*s.r+rnd(0.5*s.r)
-    create_explosion(x,y,r,s.c)
-   end
-   
-   for i=0,2 do
-    create_smoke(s.x,s.y,1,nil,s.c)
-   end
+  local c=({0,7,s.c,s.c,s.c})[s.p+1]
+  local r=s.r+max(s.p-2,0)
+  local foo
+  if s.p<3 then foo=circfill
+  else foo=circ end
+  
+  foo(s.x,s.y,r,c)
+  
+  if s.p==1 then
+    if s.r>4 then
+      for i=0,2 do
+        local x=s.x+rnd(2.2*s.r)-1.1*s.r
+        local y=s.y+rnd(2.2*s.r)-1.1*s.r
+        local r=0.25*s.r+rnd(0.5*s.r)
+        create_explosion(x,y,r,s.c)
+      end
+      
+      for i=0,2 do
+        create_smoke(s.x,s.y,1,nil,s.c)
+      end
+    end
   end
- end
- 
- s.p=s.p+1
- if s.p>=5 then
-  deregister_object(s)
- end
+  
+  s.p=s.p+1
+  if s.p>=5 then
+    deregister_object(s)
+  end
 end
 
 function draw_smoke(s)
- if s.x+s.r<xmod or s.x-s.r>xmod+screen_width or s.y+s.r<ymod or s.y-s.r>ymod+screen_height then
-  return
- end
- circfill(s.x,s.y,s.r,s.c)
+  if s.x+s.r<xmod or s.x-s.r>xmod+screen_width or s.y+s.r<ymod or s.y-s.r>ymod+screen_height then
+    return
+  end
+  circfill(s.x,s.y,s.r,s.c)
 end
 
 
 
 function create_convertring(s)
- local r={
-  s=s,
-  r=2,
-  t=0,
-  update=update_convertring,
-  draw=draw_convertring,
-  regs={"to_update","to_draw3"}
- }
- 
- register_object(r)
+  local r={
+    s=s,
+    r=2,
+    t=0,
+    update=update_convertring,
+    draw=draw_convertring,
+    regs={"to_update","to_draw3"}
+  }
+  
+  register_object(r)
 end
 
 function create_skull(x,y)
- local s={
-  x=x,
-  y=y,
-  t=0,
-  update=update_skull,
-  draw=draw_skull,
-  regs={"to_update","to_draw3"}
- }
- 
- register_object(s)
+  local s={
+    x=x,
+    y=y,
+    t=0,
+    update=update_skull,
+    draw=draw_skull,
+    regs={"to_update","to_draw3"}
+  }
+  
+  register_object(s)
 end
 
 function create_scoretxt(x,y,amount)
- local s={
-  x=x,
-  y=y,
-  txt="+"..amount,
-  t=t,
-  update=update_scoretxt,
-  draw=draw_scoretxt,
-  regs={"to_update","to_draw3"}
- }
- 
- register_object(s)
- 
- return s
+  local s={
+    x=x,
+    y=y,
+    txt="+"..amount,
+    t=t,
+    update=update_scoretxt,
+    draw=draw_scoretxt,
+    regs={"to_update","to_draw3"}
+  }
+  
+  register_object(s)
+  
+  return s
 end
 
 function create_dgrpointer(x,y)
- local s={
-  x=x,
-  y=y,
-  t=0,
-  update=update_dgrpointer,
-  draw=draw_dgrpointer,
-  regs={"to_update","to_draw3"}
- }
- 
- register_object(s)
- 
- return s
+  local s={
+    x=x,
+    y=y,
+    t=0,
+    update=update_dgrpointer,
+    draw=draw_dgrpointer,
+    regs={"to_update","to_draw3"}
+  }
+  
+  register_object(s)
+  
+  return s
 end
 
 function create_screenglitch(w,h)
- local scrnw,scrnh=screen_size()
- 
- local s={
-  x=xmod+rnd(scrnw),
-  y=ymod+rnd(scrnh),
-  w=0.75*w+rnd(0.5*w),
-  h=0.75*h+rnd(0.5*h),
-  c=8,
-  update=update_screenglitch,
-  regs={"to_update","screen_glitch"}
- }
- 
- s.ox=s.x
- s.oy=s.y
- 
- register_object(s)
- 
- return s
+  local scrnw,scrnh=screen_size()
+  
+  local s={
+    x=xmod+rnd(scrnw),
+    y=ymod+rnd(scrnh),
+    w=0.75*w+rnd(0.5*w),
+    h=0.75*h+rnd(0.5*h),
+    c=8,
+    update=update_screenglitch,
+    regs={"to_update","screen_glitch"}
+  }
+  
+  s.ox=s.x
+  s.oy=s.y
+  
+  register_object(s)
+  
+  return s
 end
 
 function create_explosion(x,y,r,c)
- local e={
-  x=x,
-  y=y,
-  r=r,
-  p=0,
-  c=c,
-  draw=draw_explosion,
-  regs={"to_draw3"}
- }
- 
- register_object(e)
- 
- return e
+  local e={
+    x=x,
+    y=y,
+    r=r,
+    p=0,
+    c=c,
+    draw=draw_explosion,
+    regs={"to_draw3"}
+  }
+  
+  register_object(e)
+  
+  return e
 end
 
 function create_smoke(x,y,spd,r,c,a)
- local a=a or rnd(1)
- local spd=0.75*spd+rnd(0.5*spd)
- 
- local s={
-  x=x,
-  y=y,
-  vx=spd*cos(a),
-  vy=spd*sin(a),
-  r=r or 1+rnd(3),
-  c=c or 6,
-  update=update_smoke,
-  draw=draw_smoke,
-  regs={"to_update","to_draw1"}
- }
- 
- if rnd(2)<1 then s.c=drk[s.c] end
- 
- register_object(s)
- 
- return s
+  local a=a or rnd(1)
+  local spd=0.75*spd+rnd(0.5*spd)
+  
+  local s={
+    x=x,
+    y=y,
+    vx=spd*cos(a),
+    vy=spd*sin(a),
+    r=r or 1+rnd(3),
+    c=c or 6,
+    update=update_smoke,
+    draw=draw_smoke,
+    regs={"to_update","to_draw1"}
+  }
+  
+  if rnd(2)<1 then s.c=drk[s.c] end
+  
+  register_object(s)
+  
+  return s
 end
 
 

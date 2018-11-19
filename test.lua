@@ -35,15 +35,15 @@ function love.update(dt)
 end
 
 function love.draw()
- love.graphics.setCanvas(render_canvas)
- --love.graphics.origin()
- if _draw then _draw() end
-
- love.graphics.setCanvas()
- love.graphics.setColor(255,255,255,255)
- love.graphics.origin()
- love.graphics.draw(render_canvas,0,0,0,graphics.scrn_scalex,graphics.scrn_scaley)
- love.graphics.present()
+  love.graphics.setCanvas(render_canvas)
+  --love.graphics.origin()
+  if _draw then _draw() end
+ 
+  love.graphics.setCanvas()
+  love.graphics.setColor(255,255,255,255)
+  love.graphics.origin()
+  love.graphics.draw(render_canvas,0,0,0,graphics.scrn_scalex,graphics.scrn_scaley)
+  love.graphics.present()
 end
 
 function _draw()
