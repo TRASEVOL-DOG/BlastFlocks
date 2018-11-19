@@ -208,8 +208,6 @@ function draw_game()
   else
     draw_score()
   end
-  
-  font("pico")
 end
 
 function define_menus()
