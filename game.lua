@@ -64,6 +64,7 @@ end
 function _update(dt)
   if mainmenu then
     update_mainmenu()
+    if btnr(7) then love.event.push("quit") end
   else
     update_game(dt)
   end
@@ -107,8 +108,8 @@ function init_game()
   music("game")
 end
 
-function update_game(dt)
-  t=t+0.01
+function update_game()
+  t=t+0.01*dt30f
   
   update_shake()
   
@@ -116,9 +117,9 @@ function update_game(dt)
     return
   end
   
-  levelt=max(levelt-0.01,0)
+  levelt=max(levelt-0.01*dt30f,0)
   if dangerlvl<flr(flr(level)/24*100) then
-    dangerlvl=dangerlvl+0.3
+    dangerlvl=dangerlvl+0.3*dt30f
   end
   
   for o in group("to_wrap") do
@@ -126,7 +127,7 @@ function update_game(dt)
   end
   
   shootshake=0
-  update_objects(dt)
+  update_objects()
   shootshake=min(shootshake,2)
   add_shake(shootshake)
   
@@ -173,9 +174,9 @@ function update_game(dt)
   massvx=massx-omx
   massvy=massy-omy
   
-  scoredisp=round(lerp(scoredisp,score,0.51))
-  fshipdisp=fshipdisp+sgn(group_size("friend_ship")-fshipdisp)
-  eshipdisp=eshipdisp+sgn(group_size("enemy_ship")-eshipdisp)
+  scoredisp=round(lerp(scoredisp,score,0.51*dt30f))
+--  fshipdisp=fshipdisp+sgn(group_size("friend_ship")-fshipdisp)
+--  eshipdisp=eshipdisp+sgn(group_size("enemy_ship")-eshipdisp)
 end
 
 function draw_game()
@@ -214,8 +215,8 @@ function define_menus()
   local menus={
     mainmenu={
       {"play", function() menu_back() init_game() end},
-      {"settings", function() menu("settings") end},
-      {"quit", function() love.event.push("quit") end}
+      {"settings", function() menu("settings") end}--,
+      --{"quit", function() love.event.push("quit") end}
     },
     settings={
       {"fullscreen", fullscreen},
@@ -256,7 +257,7 @@ function main_menu()
 end
 
 function update_mainmenu()
-  t=t+0.01
+  t=t+0.01*dt30f
   
   update_shake()
   
@@ -315,14 +316,14 @@ end
 
 
 --updates
-function update_player(s,dt)
+function update_player(s)
   s.x,s.y=mouse_pos()
   
   local camx,camy=cam:screen_pos()
   s.x=s.x+camx
   s.y=s.y+camy
   
-  s.t=s.t+0.033
+  s.t=s.t+delta_time
    
   if mouse_btnp(0) then
     add_shake(8)
@@ -335,9 +336,9 @@ function update_player(s,dt)
 end
 
 function update_spawner(s)
-  s.t=s.t+0.01
+  s.t=s.t+0.01*dt30f
   
-  if s.t%0.5<0.01 then
+  if s.t%0.5<0.01*dt30f then
     local lvlk=1
     for i=1,flr(level) do
       lvlk=lvlk+i/2
@@ -378,8 +379,8 @@ function update_spawner(s)
 end
 
 function update_hole(s)
-  s.t=s.t+0.01
-  s.r=min(s.r+0.5,(1+0.1*sin(s.t*2))*0.5*s.wid,0.5*s.wid)
+  s.t=s.t+0.01*dt30f
+  s.r=min(s.r+0.5*dt30f,(1+0.1*sin(s.t*2))*0.5*s.wid,0.5*s.wid)
   
   if dist(s.x,s.y,massx,massy)<200 then
     s.x=s.x+0.5*massvx
@@ -519,8 +520,8 @@ function update_camera(c)
     end
   end 
   
-  c.x=lerp(c.x,camxto,0.05)
-  c.y=lerp(c.y,camyto,0.05)
+  c.x=lerp(c.x,camxto,0.05*dt30f)
+  c.y=lerp(c.y,camyto,0.05*dt30f)
 end
 
 function update_ui_controls()

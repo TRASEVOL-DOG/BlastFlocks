@@ -10,14 +10,14 @@ require("sprite")
 
 
 function update_convertring(s)
-  s.t=s.t+1
+  s.t=s.t+1*dt30f
   if s.t>=64 then
     deregister_object(s)
   end
 end
 
 function update_skull(s)
-  s.t=s.t+0.01
+  s.t=s.t+0.01*dt30f
   
   if s.t>0.32 then
     deregister_object(s)
@@ -25,14 +25,14 @@ function update_skull(s)
 end
 
 function update_scoretxt(s)
-  s.t=s.t+1
+  s.t=s.t+1*dt30f
   if s.t>=48 then
     deregister_object(s)
   end
 end
 
 function update_dgrpointer(s)
-  s.t=s.t+1
+  s.t=s.t+1*dt30f
   
   if s.t>=64 then
     deregister_object(s)
@@ -40,38 +40,42 @@ function update_dgrpointer(s)
 end
 
 function update_screenglitch(s)
-  if rnd(30)<1 then
-    s.x=s.x+rnd(64)-32
-    s.y=s.y+rnd(64)-32
-    s.c=8+flr(rnd(8))
+  s.t = s.t - delta_time
+  if s.t<=0 then
+    if rnd(30)<1 then
+      s.x=s.x+rnd(64)-32
+      s.y=s.y+rnd(64)-32
+      s.c=8+flr(rnd(8))
+    end
+    
+    if rnd(10)<1 then
+      s.x=s.ox
+      s.y=s.oy
+    end
+    delta_time = 0.033
   end
- 
-  if rnd(10)<1 then
-    s.x=s.ox
-    s.y=s.oy
-  end
- 
-  s.w=s.w+2
-  s.h=s.h-6
+  
+  s.w=s.w+2*dt30f
+  s.h=s.h-6*dt30f
   
   if s.h<0 or s.w<0 then
     deregister_object(s)
   end
+  
 end
 
 function update_smoke(s)
-  s.x=s.x+s.vx
-  s.y=s.y+s.vy
+  s.x=s.x+s.vx*dt30f
+  s.y=s.y+s.vy*dt30f
   
-  s.vx=lerp(s.vx,0,0.1)
-  s.vy=lerp(s.vy,-1,0.1)
+  s.vx=lerp(s.vx, 0,0.1*dt30f)
+  s.vy=lerp(s.vy,-1,0.1*dt30f)
   
-  s.r=s.r-0.05
+  s.r=s.r-0.05*dt30f
   if s.r<0 then
     deregister_object(s)
   end
 end
-
 
 function add_shake(p)
   local a=rnd(1)
@@ -79,13 +83,18 @@ function add_shake(p)
   shky=shky+p*sin(a)
 end
 
+shkt = 0
 function update_shake()
-  if abs(shkx)<0.5 and abs(shky)<0.5 then
-    shkx,shky=0,0
+  shkt = shkt - love.timer.getDelta()
+  if shkt < 0 then
+    if abs(shkx)<0.5 and abs(shky)<0.5 then
+      shkx,shky=0,0
+    end
+    
+    shkx=-(0.5+rnd(0.2))*shkx
+    shky=-(0.5+rnd(0.2))*shky
+    shkt = 0.033
   end
-  
-  shkx=-(0.5+rnd(0.2))*shkx
-  shky=-(0.5+rnd(0.2))*shky
 end
 
 
@@ -116,6 +125,7 @@ function draw_scoretxt(s)
   local plta={7,7,10,9, 9,9,10,7}
   local pltb={7,10,9,4, 4,4,9,10}
   local k=flr(s.t/6)+1
+  font("pico")
   draw_text(s.txt,s.x,s.y-s.t,1,0,plta[k],pltb[k])
 end
 
@@ -235,6 +245,7 @@ function create_screenglitch(w,h)
     w=0.75*w+rnd(0.5*w),
     h=0.75*h+rnd(0.5*h),
     c=8,
+    t=0,
     update=update_screenglitch,
     regs={"to_update","screen_glitch"}
   }

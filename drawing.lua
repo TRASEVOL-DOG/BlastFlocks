@@ -4,13 +4,15 @@
 require("maths")
 require("shader")
 
-function init_graphics(w,h,scx,scy,title)
+function init_graphics(scx,scy)
   local fonts={
     pico={"PICO-8.ttf",4},
     pico2={"PICO-8.ttf",8},
     pico16={"PICO16.ttf",16}
   }
  
+  local w,h = love.graphics.getDimensions();
+  w,h = w/scx, h/scy
   love.window.setMode(w*scx,h*scy,{resizable=true})
   render_canvas=love.graphics.newCanvas(w,h)
   render_canvas:setFilter("nearest","nearest")

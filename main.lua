@@ -11,7 +11,7 @@ require("audio")
 
 
 function love.load()
-  init_graphics(400,300,2,2)
+  init_graphics(2,2)
   init_audio()
   init_sprite_mgr()
   init_shader_mgr()
@@ -26,11 +26,15 @@ function love.draw()
   afterdraw()
 end
 
+delta_time = 0
+dt30f = 0
 function love.update(dt)
-  if dt < 1/30 then
-    love.timer.sleep(1/30 - dt)
-  end
-  dt=max(dt,1/30)
+--  if dt < 1/30 then
+--    love.timer.sleep(1/30 - dt)
+--  end
+--  dt=max(dt,1/30)
+  delta_time = love.timer.getDelta()
+  dt30f = dt*33
  
   _update(dt)
   update_input_mgr()

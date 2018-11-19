@@ -83,7 +83,7 @@ end
 
 
 function update_ship(s,dt)
-  s.t=s.t+0.01
+  s.t=s.t+0.01*dt30f
   
   if mouse_btn(1) and s.friend then
     s.boost=6
@@ -97,20 +97,24 @@ function update_ship(s,dt)
     update_ship_shooting(s,adif)
   end
   
-  if s.dead then
-    if rnd(3)<1 then
-      create_smoke(s.x,s.y,1,1+rnd(3))
-    elseif rnd(2)<1 then
-      create_smoke(s.x,s.y,1,1+rnd(3),0)
+  s.fxt = s.fxt - delta_time
+  if s.fxt <= 0 then
+    if s.dead then
+      if rnd(3)<1 then
+        create_smoke(s.x,s.y,1,1+rnd(3))
+      elseif rnd(2)<1 then
+        create_smoke(s.x,s.y,1,1+rnd(3),0)
+      end
+    else
+      if (s.friend and rnd(64)>group_size("friend_ship")) or ((not s.friend) and rnd(64)>group_size("enemy_ship")) then
+        create_smoke(s.x,s.y,2,rnd(3),7,s.aim+0.5)
+      end
+      
+      if s.hp<s.stats.maxhp/3 and rnd(2)<1 then
+        create_smoke(s.x,s.y,1,rnd(3),0,rnd(1))
+      end
     end
-  else
-    if (s.friend and rnd(64)>group_size("friend_ship")) or ((not s.friend) and rnd(64)>group_size("enemy_ship")) then
-      create_smoke(s.x,s.y,2,rnd(3),7,s.aim+0.5)
-    end
-    
-    if s.hp<s.stats.maxhp/3 and rnd(2)<1 then
-      create_smoke(s.x,s.y,1,rnd(3),0,rnd(1))
-    end
+    s.fxt = 0.033
   end
   
   if not s.dead then
@@ -143,7 +147,7 @@ function update_ship_movement(s)
   if s.dead then
     s.aim=s.aim+s.va
     
-    s.t=s.t-0.02
+    s.t=s.t-0.02*dt30f
     if s.t<-2 then
       destroy_ship(s)
       return
@@ -151,38 +155,38 @@ function update_ship_movement(s)
     
   else
     local targ
-    if s.friend then targ=player
-    else targ={x=massx-32*massvx,y=massy-32*massvy} end
+    if s.friend then targ = player
+    else targ = {x=massx-32*massvx,y=massy-32*massvy} end
     
-    local taim=atan2(targ.x-s.x,targ.y-s.y)
-    adif=angle_diff(s.aim,taim)
+    local taim = atan2(targ.x-s.x,targ.y-s.y)
+    adif = angle_diff(s.aim,taim)
     
-    s.va=s.va+sgn(adif)*min(abs(adif),stt.acca)+rnd(0.008)-0.004
-    s.va=sgn(s.va)*min(abs(s.va),stt.vacap)
-    s.aim=s.aim+s.va
-    s.va=s.va*stt.deca
+    s.va  = s.va+sgn(adif)*min(abs(adif),stt.acca)+rnd(0.008)-0.004
+    s.va  = sgn(s.va)*min(abs(s.va),stt.vacap)
+    s.aim = s.aim + s.va*dt30f
+    s.va  = lerp(s.va, 0, (1-stt.deca)*dt30f)
     
-    local acc=stt.acc+s.boost*0.05
+    local acc = stt.acc+s.boost*0.05
     
-    s.vx=s.vx+acc*cos(s.aim)
-    s.vy=s.vy+acc*sin(s.aim)
+    s.vx = s.vx+acc*cos(s.aim)*dt30f
+    s.vy = s.vy+acc*sin(s.aim)*dt30f
   end
   
-  s.vy=s.vy+stt.grv
+  s.vy = s.vy+stt.grv*dt30f
   
   local spd=dist(s.vx,s.vy)
   local dir=atan2(s.vx,s.vy)
   
   spd=min(spd,stt.spdcap+s.boost)
   
-  s.vx=spd*cos(dir)
-  s.vy=spd*sin(dir)
+  s.vx = spd*cos(dir)
+  s.vy = spd*sin(dir)
   
-  s.x=s.x+s.vx
-  s.y=s.y+s.vy
+  s.x = s.x+s.vx*dt30f
+  s.y = s.y+s.vy*dt30f
   
-  s.vx=s.vx*stt.dec
-  s.vy=s.vy*stt.dec
+  s.vx = lerp(s.vx, 0, (1-stt.dec)*dt30f)
+  s.vy = lerp(s.vy, 0, (1-stt.dec)*dt30f)
   
   return adif
 end
@@ -191,7 +195,7 @@ function update_ship_shooting(s,adif)
   local stt=s.stats
   local inf=s.info
   
-  s.curcld=max(s.curcld-0.01,0)
+  s.curcld=max(s.curcld-0.01*dt30f,0)
   
   if s.dead then return end
   
@@ -249,61 +253,68 @@ function update_ship_shooting(s,adif)
 end
 
 function update_helixship(s)
-  s.t=s.t+0.01
+  s.t=s.t+0.01*dt30f
   
   --sfx("helix",s.x,s.y)
   --^sounds terrible
   
+  s.fxt = s.fxt - delta_time
+  
   if s.dead then
-    s.vy=s.vy+0.02
+    s.vy=s.vy+0.02*dt30f
     local k=sgn(s.vx)*0.0002
-    s.tilt=s.tilt+k
+    s.tilt=s.tilt+k*dt30f
     for i=1,3 do
-      s.aim[i]=s.aim[i]+k
+      s.aim[i]=s.aim[i]+k*dt30f
     end
     
-    s.x=s.x+s.vx
-    s.y=s.y+s.vy
+    s.x=s.x+s.vx*dt30f
+    s.y=s.y+s.vy*dt30f
     
-    if t%0.02<0.01 then
+    if t%0.02<0.01*dt30f then
       create_explosion(s.x+rnd(64)-32,s.y+rnd(64)-32,16,7+flr(rnd(2)))
       add_shake(4)
     end
     
-    s.t=s.t-0.02
+    s.t=s.t-0.02*dt30f
     
-    if s.t<=0.5 then
-      create_explosion(s.x+rnd(48)-24,s.y+rnd(48)-24,56,8)
-      boomsfx()
-      for i=1,32 do
-        create_smoke(s.x+rnd(64)-32,s.y+rnd(64)-32,2+rnd(6),nil,5)
-        create_smoke(s.x+rnd(64)-32,s.y+rnd(64)-32,2+rnd(6),nil,8)
+    if s.fxt <= 0 then
+      if s.t<=0.5 then
+        create_explosion(s.x+rnd(48)-24,s.y+rnd(48)-24,56,8)
+        boomsfx()
+        for i=1,32 do
+          create_smoke(s.x+rnd(64)-32,s.y+rnd(64)-32,2+rnd(6),nil,5)
+          create_smoke(s.x+rnd(64)-32,s.y+rnd(64)-32,2+rnd(6),nil,8)
+        end
+        deregister_object(s)
+        add_shake(64)
+        love.timer.sleep(0.1)
       end
-      deregister_object(s)
-      add_shake(64)
-      love.timer.sleep(0.1)
-    end
     
-    if rnd(2)<1 then
-      create_smoke(s.x,s.y,6,6)
-    else
-      create_smoke(s.x,s.y,6,6,0)
+      if rnd(2)<1 then
+        create_smoke(s.x,s.y,6,6)
+      else
+        create_smoke(s.x,s.y,6,6,0)
+      end
     end
     return
   end
   
-  if s.hp<200 and rnd(2)<1 then
-    create_smoke(s.x+rnd(96)-48,s.y,1,4+rnd(3),0)
+  if s.fxt <= 0 then
+    if s.hp<200 and rnd(2)<1 then
+      create_smoke(s.x+rnd(96)-48,s.y,1,4+rnd(3),0)
+    end
+    s.fxt = 0.33
   end
   
   local dir=atan2(massx-s.x,massy-s.y)
   
   if gameover then
-    s.vx=s.vx*0.98
-    s.vy=s.vy*0.98
+    s.vx=s.vx*0.02*dt30f
+    s.vy=s.vy*0.02*dt30f
   else
-    s.vx=s.vx+s.acc*cos(dir)
-    s.vy=s.vy+s.acc*sin(dir)
+    s.vx=s.vx+s.acc*cos(dir)*dt30f
+    s.vy=s.vy+s.acc*sin(dir)*dt30f
   end
   
   local a=atan2(s.vx,s.vy)
@@ -314,18 +325,18 @@ function update_helixship(s)
   s.vx=l*cos(a)
   s.vy=l*sin(a)
   
-  s.x=s.x+s.vx
-  s.y=s.y+s.vy
+  s.x=s.x+s.vx*dt30f
+  s.y=s.y+s.vy*dt30f
   
   s.tilt=(s.vx/s.spdcap)*0.03
   
-  s.curcld=max(s.curcld-0.01,0)
+  s.curcld=max(s.curcld-0.01*dt30f,0)
   
   if s.shootin==0 then
     local aimed=true
     for i=1,3 do
       local adif=angle_diff(s.aim[i],dir)
-      s.aim[i]=s.aim[i]+sgn(adif)*0.008
+      s.aim[i]=s.aim[i]+sgn(adif)*0.008*dt30f
       
       aimed=aimed and (abs(adif)<0.05)
     end
@@ -334,9 +345,9 @@ function update_helixship(s)
       s.shootin=1
     end
   else
-    s.shootin=max(s.shootin-0.01,0)
+    s.shootin=max(s.shootin-0.01*dt30f,0)
     
-    if s.shootin%0.02<0.01 and not gameover then
+    if s.shootin%0.02<0.01*dt30f and not gameover then
       local k=flr(s.shootin*50)%3-1
       local a=s.aim[k+2]
       local x=s.x+k*32*cos(s.tilt)+24*cos(a)
@@ -355,8 +366,8 @@ function update_helixship(s)
 end
 
 function update_bullet(s,dt)
-  s.x=s.x+s.vx
-  s.y=s.y+s.vy
+  s.x=s.x+s.vx*dt30f
+  s.y=s.y+s.vy*dt30f
   
   local enm
   if s.friend then enm="enemy_ship"
@@ -381,7 +392,7 @@ function update_bullet(s,dt)
     return
   end
   
-  s.t=s.t-0.01
+  s.t=s.t-0.01*dt30f
   if s.t<0 then
     deregister_object(s)
   end
@@ -643,6 +654,7 @@ function create_ship(x,y,typ,friend)
     gothit    = 0,
     justfired = 0,
     t         = rnd(1),
+    fxt       = 0,
     boost     = 0,
     shots     = 0,
     dead      = false,
@@ -729,6 +741,7 @@ function create_helixship(x,y)
     friend  = false,
     lives   = 9,
     t       = 0,
+    fxt     = 0,
     update  = update_helixship,
     draw    = draw_helixship,
     regs    = {"to_update","to_draw2","to_wrap","ship","enemy_ship","helix"}
