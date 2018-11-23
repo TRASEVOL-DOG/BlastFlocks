@@ -7,7 +7,7 @@ require("table")
 require("object")
 require("sprite")
 require("audio")
-require("network")
+require("nnetwork")
 
 require("menu")
 
