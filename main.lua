@@ -9,11 +9,6 @@ require("shader")
 require("maths")
 require("audio")
 
-sync = require("sync")
-
-
-server, client = nil,nil
-
 
 function love.load()
   init_graphics(2,2)
