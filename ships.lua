@@ -10,6 +10,8 @@ require("sprite")
 require("fx")
 
 
+ship_types = {"smol", "biggie", "helix"}
+
 function init_ship_stats()
   ship_infos={
     smol={
@@ -50,12 +52,12 @@ function init_ship_stats()
       deca   = {0.9, 0, 0}, 
       vacap  = {0.002, 0.01, 0.008}, 
       grv    = {0.05, 0.02, 0.02}, 
-               
+
       cldwn  = {1.5, 0, -1.3}, 
       attack = {0, 0.2, 0}, 
       kick   = {1, 0, 0}, 
       bltspd = {3, 1, 7}, 
-               
+
       maxhp  = {2, 0, 2}
     }, 
     biggie={
@@ -66,12 +68,12 @@ function init_ship_stats()
       deca   = {0.95, 0, 0}, 
       vacap  = {0.003, 0.002, 0.004}, 
       grv    = {0.05, 0.02, 0.02}, 
-               
+      
       cldwn  = {0.1, 0, -0.025}, 
       attack = {0, 0.05, 0}, 
       kick   = {1, 0, 0}, 
       bltspd = {3, 1, 7}, 
-               
+
       maxhp  = {6, 0, 6}
     },
     helix={
@@ -85,7 +87,15 @@ end
 function update_ship(s,dt)
   s.t=s.t+0.01*dt30f
   
-  if mouse_btn(1) and s.friend then
+  load_shipinfo(s,ship_types[s.typ_id], true)
+  
+  local p = players[s.player]
+  if not p then
+    print("WARNING: Playerless ships!!")
+    return
+  end
+  
+  if p.boosting then
     s.boost=6
   else
     s.boost=max(s.boost-0.5,0)
@@ -152,11 +162,10 @@ function update_ship_movement(s)
       destroy_ship(s)
       return
     end
-    
   else
-    local targ
-    if s.friend then targ = player
-    else targ = {x=massx-32*massvx,y=massy-32*massvy} end
+    local targ = players[s.player]
+    --if s.friend then targ = player
+    --else targ = {x=massx-32*massvx,y=massy-32*massvy} end
     
     local taim = atan2(targ.x-s.x,targ.y-s.y)
     adif = angle_diff(s.aim,taim)
@@ -199,16 +208,18 @@ function update_ship_shooting(s,adif)
   
   if s.dead then return end
   
+  local p = players[s.player]
+  
   local shootdir
-  if s.friend then
-    if mouse_btnp(0) then
+  if p then
+    if p.shooting and not s.shootin then
       s.shootin=true
       s.curcld=max(stt.attack,s.curcld)
     end
     
-    if mouse_btn(0) then
+    if p.shooting then
       local dir=s.aim
-      local cur=atan2(player.x-s.x,player.y-s.y)
+      local cur=atan2(p.x-s.x,p.y-s.y)
       shootdir=dir+0.5*angle_diff(dir,cur)
     else
       s.shootin=false
@@ -228,13 +239,15 @@ function update_ship_shooting(s,adif)
   if s.shootin and s.curcld<=0 then
     local d=inf.hlen+8
     local x,y=s.x+d*cos(shootdir),s.y+d*sin(shootdir)
-    create_bullet(x,y,shootdir+rnd(0.01)-0.005,stt.bltspd,s.friend)
+    create_bullet(x, y, shootdir+rnd(0.01)-0.005, stt.bltspd, s.player)
     s.shots=s.shots+1
-    if s.shots%3==0 and s.typ=="biggie" and not s.friend then
+    
+    if s.shots%3==0 and s.typ=="biggie" and not p then
       s.curcld=2*stt.cldwn
     else
       s.curcld=stt.cldwn
     end
+    
     shootshake=shootshake+1
     s.justfired=2
     
@@ -244,7 +257,7 @@ function update_ship_shooting(s,adif)
     s.vx=s.vx-stt.kick*cos(shootdir)
     s.vy=s.vy-stt.kick*sin(shootdir)
     
-    if s.friend then
+    if s.player_id == my_id then
       sfx("shoot",s.x,s.y)
     else
       sfx("enemyshoot",s.x,s.y)
@@ -616,7 +629,7 @@ function draw_bullet(s)
   end
   
   local map
-  if s.friend then
+  if s.player == my_id then
     map=friendpal
   else
     map=enemypal
@@ -624,7 +637,7 @@ function draw_bullet(s)
   
   apply_pal_map(map)
   
-  if s.friend then
+  if s.player == my_id then
     spr(6,0,s.x,s.y,2,2,s.a)
   else
     spr(8,0,s.x,s.y,2,2,s.a)
@@ -635,21 +648,35 @@ end
 
 
 
-function create_ship(x,y,typ,friend)
-  local typ=typ or "smol"
+function create_ship(x,y,vx,vy,typ_id,player_id)
+  local typ
+  if typ_id then
+    typ=ship_types[typ_id]
+  else
+    typ = "smol"
+    typ_id = 1
+  end
   
   if typ=="helix" then
     create_helixship(x,y)
     return
   end
   
+  local p = players[player_id]
+  
   local s={
     x         = x,
     y         = y,
-    vx        = 0,
-    vy        = 0,
-    aim       = rnd(1),
+    vx        = vx,
+    vy        = vy,
+    typ_id    = typ_id,
+    player    = player_id,
+    
+    color     = p.colors[irnd(2)+1],
+    aim       = atan2(x-p.x, y-p.y),
+    
     va        = 0,
+    
     curcld    = 0,
     gothit    = 0,
     justfired = 0,
@@ -658,26 +685,26 @@ function create_ship(x,y,typ,friend)
     boost     = 0,
     shots     = 0,
     dead      = false,
-    friend    = friend,
     lives     = 3,
     k         = rnd(1),
     update    = update_ship,
     draw      = draw_ship,
-    regs      = {"to_update","to_draw2","to_wrap","ship",friend and "friend_ship" or "enemy_ship"}
+    --regs      = {"to_draw2","to_wrap","ship",friend and "friend_ship" or "enemy_ship"}
+    regs      = {"to_draw2","to_wrap","ship", "ship_player"..player_id}
   }
   
-  load_shipinfo(s,typ)
+  load_shipinfo(s, typ, true)
   
-  s.w,s.h=s.info.w,s.info.w
+  s.w, s.h = s.info.w, s.info.w
   
-  if friend then upgrade_ship(s) end
+--  if friend then upgrade_ship(s) end
   
-  if friend then
-    s.c=pick({9,10})
-    s.plt=friendpal
+  if player_id == my_id then
+    s.c   = pick({9,10})
+    s.plt = friendpal
   else
-    s.c=pick({8,14})
-    s.plt=enemypal
+    s.c   = pick({8,14})
+    s.plt = enemypal
   end
   
   register_object(s)
@@ -685,17 +712,17 @@ function create_ship(x,y,typ,friend)
   return s
 end
 
-function load_shipinfo(s,typ)
-  local info=ship_infos[typ]
+function load_shipinfo(s,typ, upgraded)
+  local info=ship_infos[typ]-- or ship_infos.smol
   s.info={}
   for inf,val in pairs(info) do
     s.info[inf]=val
   end
   
-  local stats=ship_stats[typ]
+  local stats=ship_stats[typ]-- or ship_stats.smol
   s.stats={}
   for stat,val in pairs(stats) do
-    s.stats[stat]=val[1]+rnd(val[2])
+    s.stats[stat]=val[1]+lrnd(val[2])+(upgraded and val[3] or 0)
   end
   
   s.hp=s.stats.maxhp
@@ -755,29 +782,23 @@ function create_helixship(x,y)
   register_object(s)
 end
 
-function create_bullet(x,y,dir,spd,friend)
+function create_bullet(x,y,dir,spd,player_id)
   local b={
     x      = x,
     y      = y,
     w      = 8,
     h      = 8,
+    player = player_id,
     vx     = spd*cos(dir),
     vy     = spd*sin(dir),
     a      = dir,
     spd    = spd,
-    friend = friend,
     t      = 2,
     s      = 5,
     update = update_bullet,
     draw   = draw_bullet,
-    regs   = {"to_update","to_draw3","to_wrap"}
+    regs   = {"to_update","to_draw3","to_wrap", "bullet_player"..player_id}
   }
-  
-  local reg
-  if friend then reg="friend_bullet" b.t=1
-  else reg="enemy_bullet" end
-  
-  add(b.regs,reg)
   
   register_object(b)
   

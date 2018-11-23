@@ -38,9 +38,13 @@ function init_audio()
     sfxs[n]=love.audio.newSource("assets/sfx/"..f,"static")
   end
  
-  sfx_vol=100
-  music_vol=100
-  master_vol=100
+  --sfx_vol=100
+  --music_vol=0--100
+  --master_vol=100
+  
+  sfx_volume(100)
+  music_volume(0)
+  master_volume(100)
   
   curmusic=nil
 end

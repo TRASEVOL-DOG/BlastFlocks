@@ -7,11 +7,16 @@ require("table")
 require("object")
 require("sprite")
 require("audio")
+require("network")
 
 require("menu")
 
 require("ships")
 require("fx")
+
+player = nil
+my_id = nil
+players = {}
 
 function _init()
 --  fullscreen()
@@ -46,9 +51,9 @@ function _init()
   shkx,shky=0,0
   cam=create_camera(0,areah/2)
   
-  splash_screen()
+--  splash_screen()
   
-  player=create_player(64+32*cos(0.1),64+32*sin(0.1))
+  player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, nil, false, false, true)
   
   massx,massy=0,0
   massvx,massvy=0,0
@@ -62,20 +67,103 @@ function _init()
 end
 
 function _update(dt)
+  if client then client.preupdate() end
+  if server then server.preupdate() end
+
+  read_server()
+
   if mainmenu then
     update_mainmenu()
     if btnr(7) then love.event.push("quit") end
   else
+    --if not server then
+    read_client()
+    --end
+  
+    xmod,ymod=0,0
     update_game(dt)
+    xmod,ymod=0,0
+    
+    update_client()
   end
+  
+  update_server()
+  
+  if client then client.postupdate() end
+  if server then server.postupdate() end
 end
 
+debuggg = ""
 function _draw()
   if mainmenu then
     draw_mainmenu()
   else
     draw_game()
   end
+  
+  
+  font("pico")
+  
+  camera(0,0)
+  draw_text(""..#players, 2,2,0, 0,7,13)
+  
+  local x=12
+  for id,p in pairs(players) do
+    draw_text(""..id, x,2,0, 0,11,3)
+    x = x+10
+  end
+  
+  draw_text(""..(server and 1 or 0), 2,12,0, 0,7,13)
+  local x=12
+  if server then
+    draw_text(""..#server.homes, x,12,0, 0,12,1) x = x+10
+    for id,p in pairs(server.homes) do
+      draw_text(""..id, x,12,0, 0,11,3)
+      x = x+10
+    end
+  end
+  
+  draw_text(""..(client and 1 or 0), 2,22,0, 0,7,13)
+  local x=12
+  if client then
+    draw_text(""..#client.share, x,22,0, 0,12,1) x = x+10
+    for id,p in pairs(client.share) do
+      draw_text(""..id, x,22,0, 0,11,3)
+      x = x+10
+    end
+  end
+  draw_text(""..(client and client.connected and 1 or 0), 2,32,0, 0,7,13)
+  
+  
+  local scrnw, scrnh = screen_size()
+  local x,y = 4, scrnh-12
+  draw_text("ping: "..(client and client.connected and client.getPing() or "NaN"), x,y,0, 0,7,13)
+  y = y-12
+  draw_text(client and client.connected and "Connected to server" or "Not connected", x, y, 0, 0,7,13)
+  
+  x,y = scrnw-4, scrnh-12
+  draw_text(server and "Hosting server" or "Not hosting", x, y, 2, 0,7,13)
+  y= y-12
+  draw_text("Seeing "..#players.." players", x, y, 2, 0,7,13)
+  y= y-12
+  draw_text(player.shooting and "Shooting" or "Not shooting", x, y, 2, 0,7,13)
+  
+  
+--  local x,y = 4, scrnh/2
+--  draw_text("My ID: "..(my_id or "not connected"), x, y, 0,  0, 7, 13) y = y+12  
+--  draw_text("1 - "..(client and client.connected and client.home[1] or "not connected"), x, y, 0,  0, 7, 13)  y = y+12
+--  draw_text("2 - "..(client and client.connected and client.home[2] or "not connected"), x, y, 0,  0, 7, 13)  y = y+12
+--  draw_text("3 - "..(client and client.connected and client.home[3] and "true" or "false"), x, y, 0,  0, 7, 13)  y = y+12
+--  draw_text("4 - "..(client and client.connected and client.home[4] and "true" or "false"), x, y, 0,  0, 7, 13)  y = y+12
+--
+--  
+--  local x,y = scrnw-4, scrnh/2
+--  --draw_text("My ID: "..(client and client.connected and my_id or "not connected"), x, y, 0,  0, 7, 13) y = y+12  
+--  draw_text("1 - "..(server and server.homes[2] and server.homes[2][1] or "not connected"), x, y, 2,  0, 7, 13)  y = y+12
+--  draw_text("2 - "..(server and server.homes[2] and server.homes[2][2] or "not connected"), x, y, 2,  0, 7, 13)  y = y+12
+--  draw_text("3 - "..(server and server.homes[2] and server.homes[2][3] and "true" or "false"), x, y, 2,  0, 7, 13)  y = y+12
+--  draw_text("4 - "..(server and server.homes[2] and server.homes[2][4] and "true" or "false"), x, y, 2,  0, 7, 13)  y = y+12
+  draw_text(debuggg, x, y, 2,  0, 7, 13)  y = y+12
 end
 
 
@@ -88,9 +176,9 @@ function init_game()
   paused=false
   gameover=false
   
-  for i=1,8 do
-    create_ship(rnd(32)-16,rnd(32),"smol",true)
-  end
+--  for i=1,8 do
+--    create_ship(rnd(32)-16,rnd(32),"smol",true)
+--  end
   
   spawner=create_spawner()
   
@@ -117,45 +205,47 @@ function update_game()
     return
   end
   
-  levelt=max(levelt-0.01*dt30f,0)
-  if dangerlvl<flr(flr(level)/24*100) then
-    dangerlvl=dangerlvl+0.3*dt30f
-  end
+--  levelt=max(levelt-0.01*dt30f,0)
+--  if dangerlvl<flr(flr(level)/24*100) then
+--    dangerlvl=dangerlvl+0.3*dt30f
+--  end
   
   for o in group("to_wrap") do
     wrap_around(o)
   end
   
   shootshake=0
+  
   update_objects()
+  
   shootshake=min(shootshake,2)
   add_shake(shootshake)
   
-  if lastlevel~=flr(level) then
-    for i=1,8 do
-      create_screenglitch(256,min(level*16,256))
-    end
-    sfx("levelup")
-    levelt=1
-  end
-  lastlevel=flr(level)
+--  if lastlevel~=flr(level) then
+--    for i=1,8 do
+--      create_screenglitch(256,min(level*16,256))
+--    end
+--    sfx("levelup")
+--    levelt=1
+--  end
+--  lastlevel=flr(level)
   
-  local armyk=group_size("friend_ship")
-  if armyk<12 and level>=8 and group_size("hole")==0 and rnd(100)<1 then
-    local a
-    local x,y
-    
-    for i=0,2 do
-      a=atan2(massvx,massvy)+i*0.25+rnd(0.2)-0.1
-      x,y=massx+600*cos(a),massy+600*sin(a)
-      
-      if y>50 and y<areah-50 then
-        break
-      end
-    end
-    
-    create_hole(x,y,level)
-  end
+--  local armyk=group_size("friend_ship")
+--  if armyk<12 and level>=8 and group_size("hole")==0 and rnd(100)<1 then
+--    local a
+--    local x,y
+--    
+--    for i=0,2 do
+--      a=atan2(massvx,massvy)+i*0.25+rnd(0.2)-0.1
+--      x,y=massx+600*cos(a),massy+600*sin(a)
+--      
+--      if y>50 and y<areah-50 then
+--        break
+--      end
+--    end
+--    
+--    create_hole(x,y,level)
+--  end
   
   local omx=massx
   local omy=massy
@@ -163,13 +253,13 @@ function update_game()
   if group_size("friend_ship")>0 then
     massx,massy=get_mass_pos("friend_ship")
   elseif not gameover then
-    boomsfx()
-    create_explosion(massx,massy,32,10)
-    add_shake(64)
-    menu("gameover")
-    gameover=true
-    music()
-    sfx("gameover")
+--    boomsfx()
+--    create_explosion(massx,massy,32,10)
+--    add_shake(64)
+--    menu("gameover")
+--    gameover=true
+--    music()
+--    sfx("gameover")
   end
   massvx=massx-omx
   massvy=massy-omy
@@ -193,8 +283,32 @@ function draw_game()
   camera(xmod,ymod)
   draw_objects()
   
+--  font("pico")
+--  for i,p in pairs(players) do
+--    camera(0,0)
+--    local y = 20 +i*30
+--    local x = 10
+--    --for j,d in pairs(client.share[i]) do
+--    --  draw_text(j.." : "..d, x, y, 0, 0, 8, 2)
+--    --  x = x+10
+--    --  y = y+10
+--    --end
+--    local x = 10
+--    for j,d in pairs(p) do
+--      draw_text(j.." : "..d, x, y, 0, 0, 8, 2)
+--      x = x+10
+--      y = y+10
+--    end
+--    x = 10
+--    
+--    camera(xmod,ymod)
+--    if p.x and p.y then
+--      draw_player(p)
+--    end
+--  end
+  
   camera(0,0)
-  draw_levelup()
+--  draw_levelup()
   
   local scrnw,scrnh=screen_size()
   
@@ -212,11 +326,23 @@ function draw_game()
 end
 
 function define_menus()
+  function start_game()
+    menu_back()
+    init_game()
+    if server then
+      deregister_object(player)
+      my_id = 0
+      player = server_new_player(0)
+    else
+      connect_to_server()
+    end
+  end
+
   local menus={
     mainmenu={
-      {"play", function() menu_back() init_game() end},
-      {"settings", function() menu("settings") end}--,
-      --{"quit", function() love.event.push("quit") end}
+      {"play", start_game},
+      {"Start Server", function() start_server() end},
+      {"settings", function() menu("settings") end}
     },
     settings={
       {"fullscreen", fullscreen},
@@ -236,6 +362,10 @@ function define_menus()
       {"back to main menu", main_menu}
     }
   }
+  
+  if not castle then
+    add(menus.mainmenu, {"quit", function() love.event.push("quit") end})
+  end
   
   return menus
 end
@@ -266,6 +396,10 @@ function update_mainmenu()
   update_menu(scrnw/2,y-16)
   
   update_player(player)
+  
+  if btnp(8) then
+    server_address = love.system.getClipboardText()
+  end
 end
 
 function draw_mainmenu()
@@ -310,6 +444,11 @@ function draw_mainmenu()
   local y=min(scrnh/2+48,scrnh-menu_height()+96)
   draw_menu(scrnw/2,y,t)
   
+  
+  local x,y = scrnw/2, scrnh-10
+  draw_text("Server address: "..server_address, x, y, 1, 0, 13, 1)
+  
+  
   camera(xmod,ymod)
   player:draw()
 end
@@ -317,21 +456,35 @@ end
 
 --updates
 function update_player(s)
-  s.x,s.y=mouse_pos()
-  
-  local camx,camy=cam:screen_pos()
-  s.x=s.x+camx
-  s.y=s.y+camy
-  
-  s.t=s.t+delta_time
-   
-  if mouse_btnp(0) then
-    add_shake(8)
-    sfx("shootorder")
+  if s.it_me then
+    s.x,s.y=mouse_pos()
+    
+    local camx,camy=cam:screen_pos()
+    s.x=s.x+camx
+    s.y=s.y+camy
+    
+    s.shooting = mouse_btn(0)
+    s.boosting = mouse_btn(1)
+    
+    --if s.shooting then
+    --  create_bullet(s.x, s.y, rnd(1), rnd(2), my_id or 0)
+    --end
+    
+    s.t=s.t+delta_time
+    
+    if mouse_btnp(0) then -- maybe make it so you hear other players do it too??
+      add_shake(8)
+      sfx("shootorder")
+    end
+    
+    if mouse_btnp(1) then
+      sfx("boost")
+    end
   end
   
-  if mouse_btnp(1) then
-    sfx("boost")
+  lsrand(s.seed or 0)
+  for _,ship in pairs(s.ships) do
+    ship:update()
   end
 end
 
@@ -371,9 +524,9 @@ function update_spawner(s)
         x,y=cam.x+800*cos(a),cam.y+800*sin(a)
       until y>0 and y<areah
       
-      for i=1,num do
-        create_ship(x+rnd(32)-16,y+rnd(32)-16,typ)
-      end
+--      for i=1,num do
+--        create_ship(x+rnd(32)-16,y+rnd(32)-16,typ)
+--      end
     end
   end
 end
@@ -416,11 +569,11 @@ function update_hole(s)
         local a=rnd(1)
         local l=2+rnd(s.r+8)
         local sh
-        if i<=bk then
-          sh=create_ship(s.x+l*cos(a),s.y+l*sin(a),"biggie",true)
-        else
-          sh=create_ship(s.x+l*cos(a),s.y+l*sin(a),"smol",true)
-        end
+--        if i<=bk then
+--          sh=create_ship(s.x+l*cos(a),s.y+l*sin(a),"biggie",true)
+--        else
+--          sh=create_ship(s.x+l*cos(a),s.y+l*sin(a),"smol",true)
+--        end
         sfx("save")
         
         local acur=atan2(player.x-sh.x,player.y-sh.y)
@@ -520,8 +673,10 @@ function update_camera(c)
     end
   end 
   
-  c.x=lerp(c.x,camxto,0.05*dt30f)
-  c.y=lerp(c.y,camyto,0.05*dt30f)
+  --c.x=lerp(c.x,camxto,0.05*dt30f)
+  --c.y=lerp(c.y,camyto,0.05*dt30f)
+  c.x=lerp(c.x,0,0.05*dt30f)
+  c.y=lerp(c.y,0,0.05*dt30f)
 end
 
 function update_ui_controls()
@@ -607,6 +762,8 @@ function draw_hole(s)
 end
 
 function draw_background()
+  if not draw_gridbackground() then return end
+
   if group_size("screen_glitch")==0 then
     if level>=30 then
       draw_gridbackground()
@@ -874,13 +1031,21 @@ end
 
 
 --creates
-function create_player(x,y)
+function create_player(x, y, colors, seed, shooting, boosting, it_me)
   local p={
-    x=x,
-    y=y,
-    w=8,
-    h=8,
-    t=0,
+    x = x or 0,
+    y = y or 0,
+    w = 8,
+    h = 8,
+    t = 0,
+    colors   = colors,
+    seed     = seed,
+    shooting = shooting,
+    boosting = boost,
+    ships    = {},
+    it_me    = it_me,
+    inited = true,
+    
     update=update_player,
     draw=draw_player,
     regs={"to_update","to_draw4"}

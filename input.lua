@@ -35,7 +35,8 @@ function init_input_mgr()
     z=4,
     x=5,
     p=6,
-    escape=7
+    escape=7,
+    v=8
   }
   
   input.mosx,input.mosy=love.mouse.getPosition()

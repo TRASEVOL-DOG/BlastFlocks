@@ -61,8 +61,12 @@ end
 
 function register_object(o)
   for reg in all(o.regs) do
+    if not objs[reg] then
+      objs[reg] = {}
+    end
     add(objs[reg],o)
   end
+  o.registered = (o.registered or 0) + 1
 end
 
 function deregister_object(o)

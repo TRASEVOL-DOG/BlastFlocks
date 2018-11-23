@@ -10,8 +10,13 @@ function init_graphics(scx,scy)
     pico2={"PICO-8.ttf",8},
     pico16={"PICO16.ttf",16}
   }
- 
-  local w,h = love.graphics.getDimensions();
+  
+  local w,h
+  if castle then
+    w,h = love.graphics.getDimensions()
+  else
+    w,h = 800, 600
+  end
   w,h = w/scx, h/scy
   love.window.setMode(w*scx,h*scy,{resizable=true})
   render_canvas=love.graphics.newCanvas(w,h)
@@ -364,17 +369,16 @@ function fullscreen()
   love.window.setFullscreen(not love.window.getFullscreen(),"desktop")
 end
 
-function love.resize(w,h)
-  render_canvas=love.graphics.newCanvas(w,h)
-  render_canvas:setFilter("nearest","nearest")
- 
-  local scx,scy=screen_scale()
-  
-  graphics.wind_w=w
-  graphics.wind_h=h
-  graphics.scrn_w=flr(w/scy)
-  graphics.scrn_h=flr(h/scx)
-end
+--function love.resize(w,h)
+--  render_canvas=love.graphics.newCanvas(w,h)
+--  render_canvas:setFilter("nearest","nearest")
+--  local scx,scy=screen_scale()
+--  
+--  graphics.wind_w=w
+--  graphics.wind_h=h
+--  graphics.scrn_w=flr(w/scy)
+--  graphics.scrn_h=flr(h/scx)
+--end
 
 
 function splash_screen()

@@ -31,6 +31,12 @@ function rsrand(rng,k) rng:setSeed(k) end
 function rrnd(rng,k) return rng:random()*k end
 function rirnd(rng,k) return rng:random(k) end
 
+local rng = love.math.newRandomGenerator()
+--function lrng() return love.math.newRandomGenerator() end
+function lsrand(k) rng:setSeed(k) end
+function lrnd(k) return rng:random()*k end
+function lirnd(k) return rng:random(k) end
+
 
 function round(a) return flr(a+0.5) end
 function sgn(a) return a>0 and 1 or a<0 and -1 or 0 end
