@@ -70,14 +70,14 @@ function _update(dt)
   if client then client.preupdate() end
   if server then server.preupdate() end
 
-  read_server()
+--  read_server()
 
   if mainmenu then
     update_mainmenu()
     if btnr(7) then love.event.push("quit") end
   else
     --if not server then
-    read_client()
+--    read_client()
     --end
   
     xmod,ymod=0,0
@@ -136,14 +136,16 @@ function _draw()
   
   
   local scrnw, scrnh = screen_size()
-  local x,y = 4, scrnh-12
+  local x,y = 4, scrnh-16
+  font("pico16")
   draw_text("ping: "..(client and client.connected and client.getPing() or "NaN"), x,y,0, 0,7,13)
-  y = y-12
+  y = y-20
   draw_text(client and client.connected and "Connected to server" or "Not connected", x, y, 0, 0,7,13)
   
-  x,y = scrnw-4, scrnh-12
+  x,y = scrnw-4, scrnh-16
   draw_text(server and "Hosting server" or "Not hosting", x, y, 2, 0,7,13)
   y= y-12
+  font("pico")
   draw_text("Seeing "..#players.." players", x, y, 2, 0,7,13)
   y= y-12
   draw_text(player.shooting and "Shooting" or "Not shooting", x, y, 2, 0,7,13)
@@ -445,8 +447,9 @@ function draw_mainmenu()
   draw_menu(scrnw/2,y,t)
   
   
-  local x,y = scrnw/2, scrnh-10
-  draw_text("Server address: "..server_address, x, y, 1, 0, 13, 1)
+  local x,y = scrnw/2, scrnh-16
+  font("pico16")
+  draw_text("Server address: "..server_address, x, y, 1, 0, 12, 1)
   
   
   camera(xmod,ymod)

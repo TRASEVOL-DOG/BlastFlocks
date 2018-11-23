@@ -15,6 +15,7 @@ function start_server()
     server = cs.server
     server.enabled = true
     server.start('22122')
+    server.changed = read_server
     print("Starting local server.")
   else
     print("Local server already exists.")
@@ -27,6 +28,7 @@ function connect_to_server()
     client = cs.client
     client.enabled = true
     client.start(address)
+    client.changed = read_client
     print("Connecting to server at "..address)
   else
     print("Already connected or connecting.")
