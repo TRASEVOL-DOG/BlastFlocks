@@ -16,7 +16,14 @@ function start_server()
     server.enabled = true
     server.start('22122')
     server.changed = read_server
+    server.disconnect = server_client_disconnected
     print("Starting local server.")
+    
+    --deregister_object(player)
+    --my_id = 0
+    --player = server_new_player(0)
+    
+    --server_define_non_players()
   else
     print("Local server already exists.")
   end  
@@ -30,6 +37,8 @@ function connect_to_server()
     client.start(address)
     client.changed = read_client
     print("Connecting to server at "..address)
+    
+    client_define_non_players()
   else
     print("Already connected or connecting.")
   end
@@ -49,6 +58,11 @@ function read_client()
     if not client.share[id] and id~=my_id then
       print("Player #"..id.." either disconnected or is no longer relevant")
       -- remove player
+      for s in all(p.ships) do
+        deregister_object(s)
+      end
+      deregister_object(p)
+      del(players, p)
     end
   end
   
@@ -77,7 +91,7 @@ function read_client()
         )
         players[id] = p
       end
-    else
+    elseif id >= 0 then
       if id ~= my_id then
         p.x = p_d[1]-- or p.x
         p.y = p_d[2]-- or p.y
@@ -87,28 +101,63 @@ function read_client()
     end
     
     local sh = p.ships
-    local sh_d = p_d[8]
+    local sh_d = (id == -2) and p_d[1] or p_d[8]
     
     --debuggg = #sh.." / "..#sh_d
-    
-    for i=1,#sh_d do
-      local s = sh[i]
-      local d = sh_d[i]
-
-      if s then
-        s.x      = d[1]
-        s.y      = d[2]
-        s.vx     = d[3]
-        s.vy     = d[4]
-        s.typ_id = d[5]
-        s.type   = ship_types[d[5]]
-      else
-        sh[i] = create_ship(
-          d[1], d[2],
-          d[3], d[4],
-          d[5], id
-        )
+    if id == -2 then
+      for i=1,#sh_d do
+        local s = sh[i]
+        local d = sh_d[i]
+      
+        if s then
+          s.x      = d[1]
+          s.y      = d[2]
+          s.vx     = d[3]
+          s.vy     = d[4]
+          s.hp     = d[5]
+          s.typ_id = d[6]
+          s.type   = ship_types[d[6]]
+          s.t = min(s.t, 1)
+        else
+          s = create_ship(
+            d[1], d[2],
+            d[3], d[4],
+            d[6], id
+          )
+          s.t  = 1
+          s.hp = d[5]
+          sh[i] = s
+        end
       end
+    else
+      for i=1,#sh_d do
+        local s = sh[i]
+        local d = sh_d[i]
+      
+        if s then
+          s.x      = d[1]
+          s.y      = d[2]
+          s.vx     = d[3]
+          s.vy     = d[4]
+          s.hp     = d[5]
+          s.typ_id = d[6]
+          s.type   = ship_types[d[6]]
+        else
+          s = create_ship(
+            d[1], d[2],
+            d[3], d[4],
+            d[6], id
+          )
+          s.hp = d[5]
+          sh[i] = s
+        end
+      end
+    end
+    
+    while #sh > #sh_d do
+      deregister_object(sh[#sh])
+      sh[#sh] = nil
+      --del(sh, sh[#sh])
     end
   end
 end
@@ -119,13 +168,6 @@ function read_server()
   end
   
   my_id = 0
-
-  for id, p in pairs(players) do
-    if id ~= 0 and not server.homes[id] then
-      print("Client #"..id.." disconnected from the server.")
-      -- delete player and convert all their planes to AI?
-    end
-  end
   
   for id, ho in pairs(server.homes) do
     if players[id] then
@@ -173,29 +215,52 @@ function update_server()
   --local ps = {}
   for id, p in pairs(players) do
     local p_d = server.share[id]
-    
-    p_d[1] = flr(p.x)
-    p_d[2] = flr(p.y)
-    p_d[3] = p.shooting
-    p_d[4] = p.boosting
-    
-    local sh = p.ships
-    local sh_d = p_d[8]
-    
-    --debuggg = #sh.." / "..#sh_d
-    
-    for i=1,#sh do
-      local s = sh[i]
-      sh_d[i] = {
-        flr(s.x),
-        flr(s.y),
-        s.vx,
-        s.vy,
-        s.typ_id
-      }
+    if p_d then
+      if id >= 0 then
+        p_d[1] = flr(p.x)
+        p_d[2] = flr(p.y)
+        p_d[3] = p.shooting
+        p_d[4] = p.boosting
+      end
+      
+      local sh = p.ships
+      local sh_d = (id == -2) and p_d[1] or p_d[8]
+      
+      --debuggg = #sh.." / "..#sh_d
+      
+      for i=1,#sh do
+        local s = sh[i]
+        sh_d[i] = {
+          flr(s.x),
+          flr(s.y),
+          s.vx,
+          s.vy,
+          s.hp,
+          s.typ_id
+        }
+      end
+      
+      while #sh_d > #sh do
+        sh_d[#sh_d] = nil
+      end
     end
   end
   --server.share = ps
+end
+
+
+function server_client_disconnected(id)
+  print("Client #"..id.." disconnected from the server.")
+  -- delete player and convert all their planes to AI?
+  -- currently: simply delete player and all their ships
+  local p = players[id]
+  for s in all(p.ships) do
+    deregister_object(s)
+  end
+  deregister_object(p)
+  del(players, p)
+  
+  server.share[id] = nil
 end
 
 
@@ -204,7 +269,7 @@ function server_new_player(player_id)
   local colors = {}
   local seed = irnd(32000)
   
-  local p = create_player(x, y, colors, seed, false, false, player_id == (client and client.id or my_id))
+  local p = create_player(x, y, colors, seed, false, false, player_id)
   players[player_id] = p
 
   -- create starter ships
@@ -225,5 +290,28 @@ function server_new_player(player_id)
   server.share[player_id] = p_d
   
   return p
+end
+
+function server_define_non_players()
+  client_define_non_players()
+  
+  local p_d = {
+    [1] = {}, -- planes, filled up in server_update
+  }
+  server.share[-2] = p_d
+end
+
+function client_define_non_players()
+  local p = {  -- Neutralized / Falling ships
+    t      = 0,
+    colors = {},
+    seed   = 0,
+    ships  = {},
+    id     = -2,
+    update = update_player,
+    regs   = {"to_update"}
+  }
+  register_object(p)
+  players[-2] = p
 end
 

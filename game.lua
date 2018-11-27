@@ -27,6 +27,8 @@ function _init()
   init_object_mgr(
     "to_wrap",
     "ship",
+    "ship_player-2",
+    
     "friend_bullet",
     "enemy_bullet",
     "friend_ship",
@@ -53,10 +55,12 @@ function _init()
   
 --  splash_screen()
   
-  player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, nil, false, false, true)
+  player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, nil, false, false, nil)
   
   massx,massy=0,0
   massvx,massvy=0,0
+  
+  shootshake=0
   
   t=0
   
@@ -331,11 +335,16 @@ function define_menus()
   function start_game()
     menu_back()
     init_game()
+    
     if server then
       deregister_object(player)
       my_id = 0
       player = server_new_player(0)
-    else
+      
+      server_define_non_players()
+    end
+    
+    if not server then
       connect_to_server()
     end
   end
@@ -459,6 +468,8 @@ end
 
 --updates
 function update_player(s)
+  s.t=s.t+delta_time
+  
   if s.it_me then
     s.x,s.y=mouse_pos()
     
@@ -473,8 +484,6 @@ function update_player(s)
     --  create_bullet(s.x, s.y, rnd(1), rnd(2), my_id or 0)
     --end
     
-    s.t=s.t+delta_time
-    
     if mouse_btnp(0) then -- maybe make it so you hear other players do it too??
       add_shake(8)
       sfx("shootorder")
@@ -485,9 +494,16 @@ function update_player(s)
     end
   end
   
+  
   lsrand(s.seed or 0)
-  for _,ship in pairs(s.ships) do
-    ship:update()
+  if s.id == -2 then
+    for _,ship in pairs(s.ships) do
+      update_falling_ship(ship)
+    end
+  else
+    for _,ship in pairs(s.ships) do
+      ship:update()
+    end
   end
 end
 
@@ -722,19 +738,31 @@ end
 
 --draws
 function draw_player(s)
-  local a=s.t*0.5
-  local foo=function(a)
-    circ(s.x,s.y,8+4*cos(a),7)
+  local a=s.t*0.25
+  local foo
+  
+  if s.it_me then
+    foo=function(a)
+      circ(s.x,s.y,8+4*cos(a),7)
+
+      for i=a,a+0.75,0.25 do
+        local x1,y1=s.x+2*cos(i),s.y+2*sin(i)
+        local x2,y2=s.x+14*cos(i),s.y+14*sin(i)
+        line(x1,y1,x2,y2, 7)
+      end
+    end
     
-    a=a*0.5
-    for i=a,a+0.75,0.25 do
-      local x1,y1=s.x+2*cos(i),s.y+2*sin(i)
-      local x2,y2=s.x+14*cos(i),s.y+14*sin(i)
-      line(x1,y1,x2,y2)
+    draw_outline(foo,0,a)
+  else
+    foo=function(a)
+      for i=a,a+0.75,0.25 do
+        local x1,y1=s.x+2*cos(i),s.y+2*sin(i)
+        local x2,y2=s.x+6*cos(i),s.y+6*sin(i)
+        line(x1,y1,x2,y2, 7)
+      end
     end
   end
-  
-  draw_outline(foo,0,a)
+
   foo(a)
 end
 
@@ -1034,7 +1062,7 @@ end
 
 
 --creates
-function create_player(x, y, colors, seed, shooting, boosting, it_me)
+function create_player(x, y, colors, seed, shooting, boosting, player_id)
   local p={
     x = x or 0,
     y = y or 0,
@@ -1046,12 +1074,11 @@ function create_player(x, y, colors, seed, shooting, boosting, it_me)
     shooting = shooting,
     boosting = boost,
     ships    = {},
-    it_me    = it_me,
-    inited = true,
-    
-    update=update_player,
-    draw=draw_player,
-    regs={"to_update","to_draw4"}
+    id       = player_id,
+    it_me    = (player_id == (client and client.id or my_id)),
+    update   = update_player,
+    draw     = draw_player,
+    regs     = {"to_update","to_draw4"}
   }
   
   register_object(p)

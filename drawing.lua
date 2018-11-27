@@ -12,11 +12,11 @@ function init_graphics(scx,scy)
   }
   
   local w,h
-  if castle then
+  --if castle then
     w,h = love.graphics.getDimensions()
-  else
-    w,h = 800, 600
-  end
+  --else
+  --  w,h = 800, 600
+  --end
   w,h = w/scx, h/scy
   love.window.setMode(w*scx,h*scy,{resizable=true})
   render_canvas=love.graphics.newCanvas(w,h)

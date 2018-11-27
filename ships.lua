@@ -58,7 +58,7 @@ function init_ship_stats()
       kick   = {1, 0, 0}, 
       bltspd = {3, 1, 7}, 
 
-      maxhp  = {2, 0, 2}
+      maxhp  = {3.5, 0, 0.5}
     }, 
     biggie={
       acc    = {0.2, 0.2, 0.2}, 
@@ -74,7 +74,7 @@ function init_ship_stats()
       kick   = {1, 0, 0}, 
       bltspd = {3, 1, 7}, 
 
-      maxhp  = {6, 0, 6}
+      maxhp  = {6, 0, 2}
     },
     helix={
       --handled  in  helix  update
@@ -84,18 +84,18 @@ end
 
 
 
-function update_ship(s,dt)
+function update_ship(s)
   s.t=s.t+0.01*dt30f
   
   load_shipinfo(s,ship_types[s.typ_id], true)
   
   local p = players[s.player]
-  if not p then
-    print("WARNING: Playerless ships!!")
-    return
-  end
+--  if not p then
+--    print("WARNING: Playerless ships!!")
+--    return
+--  end
   
-  if p.boosting then
+  if p and p.boosting then
     s.boost=6
   else
     s.boost=max(s.boost-0.5,0)
@@ -116,7 +116,7 @@ function update_ship(s,dt)
         create_smoke(s.x,s.y,1,1+rnd(3),0)
       end
     else
-      if (s.friend and rnd(64)>group_size("friend_ship")) or ((not s.friend) and rnd(64)>group_size("enemy_ship")) then
+      if (rnd(64)>group_size("ship_player"..s.player)) then
         create_smoke(s.x,s.y,2,rnd(3),7,s.aim+0.5)
       end
       
@@ -128,25 +128,58 @@ function update_ship(s,dt)
   end
   
   if not s.dead then
-    local enm
-    if s.friend then enm="enemy_ship"
-    else enm="friend_ship" end
+--    local col
+--    for id,p in pairs(players) do
+--      if id ~= s.player then
+--        col = col or collide_objgroup(s, "ship_player"..id)
+--      end
+--    end
+--    
+--    if col then
+--      damage_ship(col,0.1,s)
+--      damage_ship(s,0.1,col)
+--      
+--      sfx("scrap")
+--      create_smoke((s.x+col.x)/2,(s.y+col.y)/2,0.5,3,0)
+--    end
     
-    local col=collide_objgroup(s,enm)
-    if col then
-      damage_ship(col,0.1,s)
-      damage_ship(s,0.1,col)
-      
-      sfx("scrap")
-      create_smoke((s.x+col.x)/2,(s.y+col.y)/2,0.5,3,0)
-    end
-    
-    if s.friend and not mouse_btn(0) then
-      local col=collide_objgroup(s,"neutral_ship")
+    if p and not p.shooting then
+      local col=collide_objgroup(s,"ship_player-2")
       if col and not (col.dead and col.t>0.5) then
-        befriend_ship(col)
+        befriend_ship(col, s.player)
       end
     end
+  end
+end
+
+function update_falling_ship(s)
+  s.t=s.t-0.01*dt30f
+  
+  if s.t<-2 then
+    destroy_ship(s)
+    return
+  end
+  
+--  load_shipinfo(s,ship_types[s.typ_id], true)
+
+  s.aim=s.aim+s.va
+  
+  s.dead = true
+  
+  --s.stats.spdcap = 6
+  s.boost = 6
+  local adif=update_ship_movement(s)
+  
+  
+  s.fxt = s.fxt - delta_time
+  if s.fxt <= 0 then
+    if rnd(3)<1 then
+      create_smoke(s.x,s.y,1,1+rnd(3))
+    elseif rnd(2)<1 then
+      create_smoke(s.x,s.y,1,1+rnd(3),0)
+    end
+
+    s.fxt = 0.033
   end
 end
 
@@ -154,19 +187,14 @@ function update_ship_movement(s)
   local stt=s.stats
   
   local adif=0
-  if s.dead then
-    s.aim=s.aim+s.va
-    
-    s.t=s.t-0.02*dt30f
-    if s.t<-2 then
-      destroy_ship(s)
-      return
-    end
-  else
+  if not s.dead then
     local targ = players[s.player]
     --if s.friend then targ = player
     --else targ = {x=massx-32*massvx,y=massy-32*massvy} end
     
+    if not targ.x then
+      error("id: "..s.player.." | "..players[s.player].id)
+    end
     local taim = atan2(targ.x-s.x,targ.y-s.y)
     adif = angle_diff(s.aim,taim)
     
@@ -382,10 +410,12 @@ function update_bullet(s,dt)
   s.x=s.x+s.vx*dt30f
   s.y=s.y+s.vy*dt30f
   
-  local enm
-  if s.friend then enm="enemy_ship"
-  else enm="friend_ship" end
-  local col=collide_objgroup(s,enm)
+  local col = nil
+  for id,p in pairs(players) do
+    if id ~= s.player then
+      col = col or collide_objgroup(s, "ship_player"..id)
+    end
+  end
   if col and not (col.dead and col.t>0.5) then
     damage_ship(col,2,s)
     
@@ -395,17 +425,7 @@ function update_bullet(s,dt)
     return
   end
   
-  local col=collide_objgroup(s,"neutral_ship")
-  if col and not (col.dead and col.t>0.5) then
-    damage_ship(col,1,s)
-    
-    create_explosion(s.x,s.y,8)
-    
-    deregister_object(s)
-    return
-  end
-  
-  s.t=s.t-0.01*dt30f
+  s.t=s.t-delta_time
   if s.t<0 then
     deregister_object(s)
   end
@@ -418,16 +438,6 @@ function damage_ship(s,dmg,o)
   s.gothit=2
   
   if s.hp<=0 then
-    if not s.friend and not s.dead then
-      local val=s.info.value
-      score=score+val
-      create_scoretxt(s.x,s.y,val)
-      
-      if level>0 then
-        level=level+1/(level*5)
-      end
-    end
-    
     if s.dead then
       destroy_ship(s)
     else
@@ -441,7 +451,7 @@ function damage_ship(s,dmg,o)
         group_del("enemy_ship",s)
         s.friend=false
         s.t=3
-      elseif s.lives>0 and rnd(4)<3 and rnd(group_size("friend_ship")/32)<1 then
+      elseif s.lives>0 and s.retrievable then
         neutralize_ship(s,o)
         boomsfx(s.x,s.y)
       else
@@ -456,24 +466,8 @@ function neutralize_ship(s,o)
   create_explosion(s.x,s.y,16,s.c)
   
   s.dead=true
-  s.c=pick({6,7})
-  s.plt=neutralpal
   
-  if s.friend then
-    downgrade_ship(s)
-    group_del("friend_ship",s)
-  else
-    group_del("enemy_ship",s)
-  end
-  group_add("neutral_ship",s)
-  s.friend=false
-  
-  s.hp=3
-  s.w=s.w+8
-  s.h=s.h+8
-  
-  s.shootin=false
-  s.va=sgn(irnd(2)-1.5)*(0.005+rnd(0.02))
+  pass_to_player(s, -2)
   
   local a
   if o then
@@ -486,28 +480,54 @@ function neutralize_ship(s,o)
   s.vx=spd*cos(a)
   s.vy=spd*sin(a)
   
-  s.stats.spdcap=s.stats.spdcap*3
-  
   s.t=1
 end
 
-function befriend_ship(s)
-  s.dead=false
-  s.friend=true
-  s.plt=friendpal
-  
-  s.stats.spdcap=s.stats.spdcap/3
-  
-  upgrade_ship(s)
-  create_convertring(s)
-  
+function befriend_ship(s, player)
+--  s.stats.spdcap=s.stats.spdcap/3
+
   sfx("save")
   
-  group_del("neutral_ship",s)
-  group_add("friend_ship",s)
+  pass_to_player(s, player)
   
-  local acur=atan2(player.x-s.x,player.y-s.y)
-  s.aim=s.aim+0.2*angle_diff(s.aim,acur)
+--  local acur=rnd(1)--atan2(player.x-s.x,player.y-s.y)
+--  s.aim=s.aim+0.2*angle_diff(s.aim,acur)
+end
+
+function pass_to_player(s, player)
+  group_del("ship_player"..s.player, s)
+  del(players[s.player].ships, s)
+  
+  group_add("ship_player"..player,s)
+  add(players[player].ships, s)
+  s.player = player
+  
+  if s.player == -2 then
+    s.dead = true
+    --s.stats.spdcap=s.stats.spdcap*3
+    s.hp=3
+    s.w=s.w+8
+    s.h=s.h+8
+    s.shootin=false
+    s.va=sgn(irnd(2)-1.5)*(0.005+rnd(0.02))
+  else
+    s.dead = false
+    load_shipinfo(s,ship_types[s.typ_id], true)
+    s.hp=s.stats.maxhp
+    create_convertring(s)
+  end
+  
+  -- temporary, should just take player color
+  if player == -2 then
+    s.c   = pick({6,7})
+    s.plt = neutralpal
+  elseif player == my_id then
+    s.c   = pick({9,10})
+    s.plt = friendpal
+  else
+    s.c   = pick({8,14})
+    s.plt = enemypal
+  end
 end
 
 
@@ -673,7 +693,7 @@ function create_ship(x,y,vx,vy,typ_id,player_id)
     player    = player_id,
     
     color     = p.colors[irnd(2)+1],
-    aim       = atan2(x-p.x, y-p.y),
+    aim       = rnd(1), -- atan2(x-p.x, y-p.y),
     
     va        = 0,
     
@@ -694,6 +714,7 @@ function create_ship(x,y,vx,vy,typ_id,player_id)
   }
   
   load_shipinfo(s, typ, true)
+  s.hp=s.stats.maxhp
   
   s.w, s.h = s.info.w, s.info.w
   
@@ -725,8 +746,10 @@ function load_shipinfo(s,typ, upgraded)
     s.stats[stat]=val[1]+lrnd(val[2])+(upgraded and val[3] or 0)
   end
   
-  s.hp=s.stats.maxhp
+  --s.hp=s.stats.maxhp
   s.typ=typ
+  
+  s.retrievable = (lrnd(2) < 1)
 end
 
 function upgrade_ship(s)
@@ -793,7 +816,7 @@ function create_bullet(x,y,dir,spd,player_id)
     vy     = spd*sin(dir),
     a      = dir,
     spd    = spd,
-    t      = 2,
+    t      = 0.75,
     s      = 5,
     update = update_bullet,
     draw   = draw_bullet,
@@ -812,6 +835,10 @@ function destroy_ship(s)
   boomsfx(s.x,s.y)
   create_explosion(s.x,s.y,s.info.hlen*2,s.c)
   create_skull(s.x,s.y)
+
   deregister_object(s)
+  if (players[s.player]) then
+    del(players[s.player].ships, s)
+  end
 end
 
