@@ -3,28 +3,28 @@
 
 function init_audio()
   local music_list={
-    title= "order.mp3",
-    game=  "steelandorder.mp3"
+    title= "order.ogg",
+    game=  "steelandorder.ogg"
   }
  
   local sfx_list={
-    shootorder= "shootorder.wav",
-    shoot=      "shoot.wav",
-    enemyshoot= "enemshoot.wav",
-    boost=      "boost.wav",
-    helix=      "helix.wav",
-    hole=       "hole.wav",
-    levelup=    "levelup.wav",
-    boom1=      "boom1.wav",
-    boom2=      "boom2.wav",
-    boom3=      "boom3.wav",
-    scrap=      "scrap.wav",
-    save=       "save.wav",
-    gameover=   "gameover.wav",
-    select=     "select.wav",
-    confirm=    "confirm.wav",
-    slider=     "sliderset.wav",
-    dog=        "dog.wav"
+    shootorder= "shootorder.ogg",
+    shoot=           "shoot.ogg",
+    enemyshoot=  "enemshoot.ogg",
+    boost=           "boost.ogg",
+    helix=           "helix.ogg",
+    hole=             "hole.ogg",
+    levelup=       "levelup.ogg",
+    boom1=           "boom1.ogg",
+    boom2=           "boom2.ogg",
+    boom3=           "boom3.ogg",
+    scrap=           "scrap.ogg",
+    save=             "save.ogg",
+    gameover=     "gameover.ogg",
+    select=         "select.ogg",
+    confirm=       "confirm.ogg",
+    slider=      "sliderset.ogg",
+    dog=               "dog.ogg"
   }
   
   musics={}
