@@ -3,7 +3,7 @@ local state = require 'state'
 
 local enet = require 'enet' -- Network
 local marshal
-if castle then
+if castle or network then
   marshal = require 'marshal' -- Serialization
 else
   local bitser = require("bitser")
@@ -15,7 +15,7 @@ else
 end
 
 local serpent
-if castle then
+if castle or network then
   serpent = require 'https://raw.githubusercontent.com/pkulchenko/serpent/522a6239f25997b101c585c0daf6a15b7e37fad9/src/serpent.lua'
 else
   serpent = require('serpent')
