@@ -122,20 +122,21 @@ function draw_menu(x,y)
       draw_text(o.name,x+ofx,y+o.h*0.25-1)
       
       local x1,x2,y=x-o.slidw/2,x+o.slidw/2,y+o.h*0.95
-      rect(x1-1,y-2.5,x2+1,y+1,0)
-      line(x1,y-1,x2,y-1,7)
-      line(x1,y,x2,y,13)
+      rect(x1-1,y-2.5,x2+1,y+1,25)
+      line(x1,y-1,x2,y-1,21)
+      line(x1,y,x2,y,22)
       
       local x=x1+(o.slidv/(o.slidmax-o.slidmin))*o.slidw
       local r=4
-      circfill(x,y-2,r,0)
-      circfill(x,y+1,r,0)
-      circfill(x-1,y-1,r,0)
-      circfill(x+1,y-1,r,0)
-      circfill(x-1,y,r,0)
-      circfill(x+1,y,r,0)
-      circfill(x,y,r,13)
-      circfill(x,y-1,r,7)
+      color(25)
+      circfill(x,y-2,r)
+      circfill(x,y+1,r)
+      circfill(x-1,y-1,r)
+      circfill(x+1,y-1,r)
+      circfill(x-1,y,r)
+      circfill(x+1,y,r)
+      circfill(x,y,r,22)
+      circfill(x,y-1,r,21)
       
       font("pico")
       draw_text(o.slidv,x,y-13)
@@ -144,10 +145,10 @@ function draw_menu(x,y)
     
     if o==m.chosen then
       local x1,y1,x2,y2=x-m.w/2-1,y,x+m.w/2,y+o.h+6
-      rect(x1,y1+1,x2,y2+1,13)
-      rect(x1,y1,x2,y2,7)
-      rect(x1-1,y1-1,x2+1,y2+2,0)
-      rect(x1+1,y1+2,x2-1,y2-1,0)
+      rect(x1,y1+1,x2,y2+1,22)
+      rect(x1,y1,x2,y2,21)
+      rect(x1-1,y1-1,x2+1,y2+2,25)
+      rect(x1+1,y1+2,x2-1,y2-1,25)
     end
     
     y=y+o.h+m.linespace

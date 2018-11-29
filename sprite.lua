@@ -70,12 +70,12 @@ function init_sprite_mgr()
     skull={
       only={
         sheet=0,
-        dt=0.04,
+        dt=0.025,
         w=2,
         h=2,
         cx=8,
         cy=8,
-        sprites={96,104,96,104,96,98,100,102}
+        sprites={96,110,96,96,96,98,100,102,104,106,108,110,110}
       }
     }
   }
@@ -89,6 +89,12 @@ function init_sprite_mgr()
     sprite.paltrsp[i]=false
   end
   sprite.paltrsp[0]=true
+  
+  sprite.rev_pal={}
+  for i=0,#palette-1 do
+    local c = palette_norm[i]
+    sprite.rev_pal[""..c[1]..c[2]..c[3]] = i
+  end
 end
 
 
@@ -96,6 +102,12 @@ function palt(c,trsp)
   sprite.paltrsp[c]=trsp
 end
 
+
+function sget(x, y, sheet) -- pretty slow, don't use too much
+  sheet = sheet or 0
+  local r,g,b = sprite.sheet_data[sheet]:getPixel(x,y)
+  return sprite.rev_pal[""..r..g..b]
+end
 
 function spr(s,sheet,x,y,w,h,r,flipx,flipy,cx,cy)
   local sheet=sheet or 0
@@ -136,9 +148,12 @@ end
 
 function init_spritesheets(files)
   sprite.sheets={}
+  sprite.sheet_data={}
   
   for i,file in ipairs(files) do
-    sprite.sheets[i-1]=love.graphics.newImage(file)
+    local sheet_data = love.image.newImageData(file)
+    sprite.sheets[i-1]     = love.graphics.newImage(sheet_data)
+    sprite.sheet_data[i-1] = sheet_data
   end
 end
 

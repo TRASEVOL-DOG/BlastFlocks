@@ -4,6 +4,9 @@
 require("maths")
 require("shader")
 
+c_drk = {}
+c_lit = {}
+
 function init_graphics(scx,scy)
   local fonts={
     pico={"PICO-8.ttf",4},
@@ -12,11 +15,11 @@ function init_graphics(scx,scy)
   }
   
   local w,h
-  --if castle then
+  if castle or network then
     w,h = love.graphics.getDimensions()
-  --else
-  --  w,h = 800, 600
-  --end
+  else
+    w,h = 800, 600
+  end
   w,h = w/scx, h/scy
   love.window.setMode(w*scx,h*scy,{resizable=true})
   render_canvas=love.graphics.newCanvas(w,h)
@@ -53,7 +56,15 @@ function init_graphics(scx,scy)
   end
   graphics.fonts=fts
   
-  graphics.textdrk={[0]=1,0,1,1,2,1,5,13,2,4,9,3,1,1,2,5}
+  init_sprite_mgr()
+  
+  --graphics.textdrk={[0]=1,0,1,1,2,1,5,13,2,4,9,3,1,1,2,5}
+  graphics.textdrk={}
+  for i=0,28 do
+    graphics.textdrk[i] = sget(i, 0)
+    c_drk[i] = sget(i, 0)
+    c_lit[i] = sget(i, 2)
+  end
 end
 
 function drawstep()
@@ -90,6 +101,7 @@ function camera(x,y)
   graphics.camy=y
 end
 
+
 function color(c)
   if graphics.collock then return end
  
@@ -109,15 +121,15 @@ function pal(c1,c2)
   else
     local k=#palette
     
-    for i=0,k do
+    for i=0,k-1 do
       palswaps[i]=i
     end
     
     if sprite then
-      for i=1,k do
+      for i=0,k-1 do
         sprite.paltrsp[i]=false
       end
-      sprite.paltrsp[0]=true
+      sprite.paltrsp[25]=true
     end
     
     color(graphics.curcol)
@@ -188,21 +200,21 @@ function print(str,x,y,c)
 end
 
 function super_print(str,x,y,c0,c1,c2)
-  local c0=c0 or 0
-  local c1=c1 or 7
+  local c0=c0 or 25
+  local c1=c1 or 21
   local c2=c2 or graphics.textdrk[c1]
   
-  print(str,x,y-2,0)
-  print(str,x-1,y-1,0)
-  print(str,x+1,y-1,0)
-  print(str,x-2,y,0)
-  print(str,x+2,y,0)
-  
-  print(str,x,y+3,0)
-  print(str,x-1,y+2,0)
-  print(str,x+1,y+2,0)
-  print(str,x-2,y+1,0)
-  print(str,x+2,y+1,0)
+  print(str,x,y-2,25)
+  print(str,x-1,y-1,25)
+  print(str,x+1,y-1,25)
+  print(str,x-2,y,25)
+  print(str,x+2,y,25)
+
+  print(str,x,y+3,25)
+  print(str,x-1,y+2,25)
+  print(str,x+1,y+2,25)
+  print(str,x-2,y+1,25)
+  print(str,x+2,y+1,25)
   
   print(str,x-1,y+1,c2)
   print(str,x+1,y+1,c2)
@@ -227,7 +239,7 @@ end
 
 
 function draw_outline(draw,c,arg)
-  local c=c or 0
+  local c=c or 25
   local camx,camy=graphics.camx,graphics.camy
   
   all_colors_to(c)
@@ -249,11 +261,11 @@ end
 
 function all_colors_to(c)
   if c then
-    for i=0,15 do
+    for i=0,#palette-1 do
       pal(i,c)
     end
   else
-    for i=0,15 do
+    for i=0,#palette-1 do
       pal(i,i)
     end
   end
@@ -263,6 +275,30 @@ function apply_pal_map(map)
   for c1,c2 in pairs(map) do
     pal(c1,c2)
   end
+end
+
+function darker(c, n)
+  if n<0 then
+    return lighter(c, -n)
+  end
+  
+  for i=1,n do
+    c = c_drk[c]
+  end
+  
+  return c
+end
+
+function lighter(c, n)
+  if n<0 then
+    return darker(c, -n)
+  end
+
+  for i=1,n do
+    c = c_lit[c]
+  end
+  
+  return c
 end
 
 
@@ -302,12 +338,12 @@ end
 
 function plt_shader()
   set_shader("palswap")
-  local ar={palette_norm[0],unpack(palette_norm)} add(ar,0)
+  local ar={palette_norm[0],unpack(palette_norm)}-- add(ar,0)
   shader_send("opal",ar)
   ar={palswaps[0],unpack(palswaps)} add(ar,0)
   shader_send("swaps",ar)
   ar={}
-  for i=0,15 do if sprite.paltrsp[i] then ar[i+1]=1 else ar[i+1]=0 end end
+  for i=0,#palette-1 do if sprite.paltrsp[i] then ar[i+1]=1 else ar[i+1]=0 end end
   add(ar,0)
 -- ar={sprite.paltrsp[0],unpack(sprite.paltrsp)} add(ar,0)
   shader_send("trsps",ar)
@@ -315,16 +351,16 @@ end
 
 
 function init_palette()
-  palette=pico8_palette()
+  palette = arcade29_palette()
   
-  palette_norm={}
-  for i=0,#palette do
-    local c=palette[i]
-    local col={}
+  palette_norm = {}
+  for i = 0,#palette-1 do
+    local c = palette[i]
+    local col = {}
     for j,v in ipairs(c) do
-      col[j]=v/255
+      col[j] = v/255
     end
-    palette_norm[i]=col
+    palette_norm[i] = col
   end
   
   palswaps={}
@@ -343,7 +379,7 @@ end
 
 function pico8_palette()
   local p8pal={
-    [0]={0,0,0},
+[0]={0,0,0},
     {29,43,83},
     {126,37,83},
     {0,135,81},
@@ -362,6 +398,40 @@ function pico8_palette()
   }
   
   return p8pal
+end
+
+function arcade29_palette()
+  return {
+[0]={255,77,77},
+    {159,30,49},
+    {255,196,56},
+    {240,108,0},
+    {241,194,132},
+    {201,126,79},
+    {151,63,63},
+    {87,20,46},
+    {114,203,37},
+    {35,133,49},
+    {10,75,77},
+    {48,197,173},
+    {47,126,131},
+    {105,222,255},
+    {51,165,255},
+    {50,89,226},
+    {40,35,123},
+    {201,92,209},
+    {108,52,157},
+    {255,170,188},
+    {229,93,172},
+    {241,240,238},
+    {150,165,171},
+    {88,108,121},
+    {42,55,71},
+    {23,25,27},
+    {185,165,136},
+    {126,99,82},
+    {65,47,47}
+  }
 end
 
 

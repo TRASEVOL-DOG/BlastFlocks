@@ -113,15 +113,15 @@ function update_ship(s)
       if rnd(3)<1 then
         create_smoke(s.x,s.y,1,1+rnd(3))
       elseif rnd(2)<1 then
-        create_smoke(s.x,s.y,1,1+rnd(3),0)
+        create_smoke(s.x,s.y,1,1+rnd(3),25)
       end
     else
       if (rnd(64)>group_size("ship_player"..s.player)) then
-        create_smoke(s.x,s.y,2,rnd(3),7,s.aim+0.5)
+        create_smoke(s.x,s.y,2,rnd(3),21,s.aim+0.5)
       end
       
       if s.hp<s.stats.maxhp/3 and rnd(2)<1 then
-        create_smoke(s.x,s.y,1,rnd(3),0,rnd(1))
+        create_smoke(s.x,s.y,1,rnd(3),25,rnd(1))
       end
     end
     s.fxt = 0.033
@@ -174,9 +174,9 @@ function update_falling_ship(s)
   s.fxt = s.fxt - delta_time
   if s.fxt <= 0 then
     if rnd(3)<1 then
-      create_smoke(s.x,s.y,1,1+rnd(3))
+      create_smoke(s.x,s.y,1,1+rnd(3),23)
     elseif rnd(2)<1 then
-      create_smoke(s.x,s.y,1,1+rnd(3),0)
+      create_smoke(s.x,s.y,1,1+rnd(3),25)
     end
 
     s.fxt = 0.033
@@ -267,7 +267,7 @@ function update_ship_shooting(s,adif)
   if s.shootin and s.curcld<=0 then
     local d=inf.hlen+8
     local x,y=s.x+d*cos(shootdir),s.y+d*sin(shootdir)
-    create_bullet(x, y, shootdir+rnd(0.01)-0.005, stt.bltspd, s.player)
+    create_bullet(x, y, shootdir+rnd(0.01)-0.005, stt.bltspd, s.color, s.player)
     s.shots=s.shots+1
     
     if s.shots%3==0 and s.typ=="biggie" and not p then
@@ -313,7 +313,7 @@ function update_helixship(s)
     s.y=s.y+s.vy*dt30f
     
     if t%0.02<0.01*dt30f then
-      create_explosion(s.x+rnd(64)-32,s.y+rnd(64)-32,16,7+flr(rnd(2)))
+      create_explosion(s.x+rnd(64)-32,s.y+rnd(64)-32,16,21)
       add_shake(4)
     end
     
@@ -321,11 +321,11 @@ function update_helixship(s)
     
     if s.fxt <= 0 then
       if s.t<=0.5 then
-        create_explosion(s.x+rnd(48)-24,s.y+rnd(48)-24,56,8)
+        create_explosion(s.x+rnd(48)-24,s.y+rnd(48)-24,56,22)
         boomsfx()
         for i=1,32 do
-          create_smoke(s.x+rnd(64)-32,s.y+rnd(64)-32,2+rnd(6),nil,5)
-          create_smoke(s.x+rnd(64)-32,s.y+rnd(64)-32,2+rnd(6),nil,8)
+          create_smoke(s.x+rnd(64)-32,s.y+rnd(64)-32,2+rnd(6),nil,23)
+          create_smoke(s.x+rnd(64)-32,s.y+rnd(64)-32,2+rnd(6),nil,24)
         end
         deregister_object(s)
         add_shake(64)
@@ -419,7 +419,7 @@ function update_bullet(s,dt)
   if col and not (col.dead and col.t>0.5) then
     damage_ship(col,2,s)
     
-    create_explosion(s.x,s.y,8)
+    create_explosion(s.x,s.y,4,s.color)
     
     deregister_object(s)
     return
@@ -518,16 +518,8 @@ function pass_to_player(s, player)
   end
   
   -- temporary, should just take player color
-  if player == -2 then
-    s.c   = pick({6,7})
-    s.plt = neutralpal
-  elseif player == my_id then
-    s.c   = pick({9,10})
-    s.plt = friendpal
-  else
-    s.c   = pick({8,14})
-    s.plt = enemypal
-  end
+  s.color = pick(players[player].colors)
+  s.plt   = ship_plts[s.color]
 end
 
 
@@ -546,10 +538,10 @@ function draw_ship(s)
     draw_anim(s.x+ofx,s.y+ofy,inf.anim,"rotate",s.aim,s.aim,false,(s.aim+0.25)%1>0.5)
   end
   
-  draw_outline(foo,0)
+  draw_outline(foo,25)
   
   if s.gothit>0 or (s.dead and s.t>0.5) then
-    all_colors_to(7)
+    all_colors_to(21)
     s.gothit=max(s.gothit-1,0)
   else
     apply_pal_map(s.plt)
@@ -580,10 +572,10 @@ function draw_ship(s)
       local x2,y2=s.x+d*cos(a),s.y+d*sin(a)
       
       local foo=function()
-        line(x1,y1,x2,y2,7)
+        line(x1,y1,x2,y2,21)
       end
       
-      draw_outline(foo,0)
+      draw_outline(foo,25)
       foo()
     end
   end
@@ -607,10 +599,10 @@ function draw_helixship(s)
     spr(160,0,s.x,s.y,16,3,s.tilt,false,false,64,13)
   end
   
-  draw_outline(foo,0)
+  draw_outline(foo,25)
   
   if s.gothit>0 or (s.dead and s.t>1.5) then
-    all_colors_to(7)
+    all_colors_to(21)
     s.gothit=max(s.gothit-1,0)
   elseif s.dead and s.t%0.2<0.12 then
     apply_pal_map(neutralpal)
@@ -627,10 +619,10 @@ function draw_helixship(s)
     end
   end
   
-  draw_outline(foo,0)
+  draw_outline(foo,25)
   
   if s.gothit>0 or (s.dead and s.t>1.5) then
-    all_colors_to(7)
+    all_colors_to(21)
     s.gothit=max(s.gothit-1,0)
   elseif s.dead and s.t%0.2<0.12 then
     apply_pal_map(neutralpal)
@@ -648,20 +640,13 @@ function draw_bullet(s)
     return
   end
   
-  local map
-  if s.player == my_id then
-    map=friendpal
-  else
-    map=enemypal
-  end
+  apply_pal_map(s.plt)
   
-  apply_pal_map(map)
-  
-  if s.player == my_id then
+--  if s.player == my_id then
     spr(6,0,s.x,s.y,2,2,s.a)
-  else
-    spr(8,0,s.x,s.y,2,2,s.a)
-  end
+--  else
+--    spr(8,0,s.x,s.y,2,2,s.a)
+--  end
   
   all_colors_to()
 end
@@ -692,7 +677,7 @@ function create_ship(x,y,vx,vy,typ_id,player_id)
     typ_id    = typ_id,
     player    = player_id,
     
-    color     = p.colors[irnd(2)+1],
+    color     = pick(p.colors),
     aim       = rnd(1), -- atan2(x-p.x, y-p.y),
     
     va        = 0,
@@ -720,13 +705,14 @@ function create_ship(x,y,vx,vy,typ_id,player_id)
   
 --  if friend then upgrade_ship(s) end
   
-  if player_id == my_id then
-    s.c   = pick({9,10})
-    s.plt = friendpal
-  else
-    s.c   = pick({8,14})
-    s.plt = enemypal
-  end
+--  if player_id == my_id then
+--    s.c   = pick({9,10})
+--    s.plt = friendpal
+--  else
+--    s.c   = pick({8,14})
+--    s.plt = enemypal
+--  end
+  s.plt = ship_plts[s.color]
   
   register_object(s)
   
@@ -805,7 +791,7 @@ function create_helixship(x,y)
   register_object(s)
 end
 
-function create_bullet(x,y,dir,spd,player_id)
+function create_bullet(x,y,dir,spd,c,player_id)
   local b={
     x      = x,
     y      = y,
@@ -818,6 +804,8 @@ function create_bullet(x,y,dir,spd,player_id)
     spd    = spd,
     t      = 0.75,
     s      = 5,
+    color  = c,
+    plt    = ship_plts[c],
     update = update_bullet,
     draw   = draw_bullet,
     regs   = {"to_update","to_draw3","to_wrap", "bullet_player"..player_id}

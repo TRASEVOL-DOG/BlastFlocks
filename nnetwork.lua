@@ -266,8 +266,10 @@ end
 
 function server_new_player(player_id)
   local x,y = 0,0 --rnd(areaw), rnd(areah)
-  local colors = {}
   local seed = irnd(32000)
+  local colors = new_player_color()
+  
+  debuggg = ""..colors[1].." | "..colors[2].." - "..#ship_poss
   
   local p = create_player(x, y, colors, seed, false, false, player_id)
   players[player_id] = p
@@ -304,7 +306,7 @@ end
 function client_define_non_players()
   local p = {  -- Neutralized / Falling ships
     t      = 0,
-    colors = {},
+    colors = {22,22},
     seed   = 0,
     ships  = {},
     id     = -2,
@@ -315,3 +317,15 @@ function client_define_non_players()
   players[-2] = p
 end
 
+
+function new_player_color()
+  local cols = pick(ship_poss)
+  del(ship_poss, cols)
+  add(ship_nposs, cols)
+  if #ship_poss == 0 then
+    ship_poss = ship_nposs
+    ship_nposs = {}
+  end
+  
+  return cols
+end

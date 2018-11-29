@@ -19,7 +19,7 @@ end
 function update_skull(s)
   s.t=s.t+0.01*dt30f
   
-  if s.t>0.32 then
+  if s.t>=0.3 then
     deregister_object(s)
   end
 end
@@ -102,19 +102,19 @@ end
 function draw_convertring(s)
   local ship=s.s
   
-  local plta={7,7,10,9, 9,9,10,7}
-  local pltb={7,10,9,4, 4,4,9,10}
-  local k=flr(s.t/8)+1
+  local k=abs(flr(s.t/8)-5)
+  local ca, cb = lighter(s.color, k), lighter(s.color, k-1)
+  
   
   local foo=function()
-    circ(ship.x,ship.y,ship.info.hlen+3+2*cos(s.t/8),pltb[k])
+    circ(ship.x,ship.y,ship.info.hlen+3+2*cos(s.t/8),cb)
   end
   
   draw_outline(foo,7)
   foo()
   
   font("pico")
-  draw_text("^ SAVED ^",ship.x,ship.y-ship.info.hlen-6-k,1,0,plta[k],pltb[k])
+  draw_text("^ SAVED ^",ship.x,ship.y-ship.info.hlen-6-k,1, 25,ca, cb)
 end
 
 function draw_skull(s)
@@ -122,11 +122,12 @@ function draw_skull(s)
 end
 
 function draw_scoretxt(s)
-  local plta={7,7,10,9, 9,9,10,7}
-  local pltb={7,10,9,4, 4,4,9,10}
-  local k=flr(s.t/6)+1
+  local c = s.c
+  local k=abs(flr(s.t/6)-5)
+  local ca, cb = lighter(c, k), lighter(c, k-1)
+  
   font("pico")
-  draw_text(s.txt,s.x,s.y-s.t,1,0,plta[k],pltb[k])
+  draw_text(s.txt,s.x,s.y-s.t,1, 25,ca, cb)
 end
 
 function draw_dgrpointer(s) -- not displayed atm
@@ -141,7 +142,7 @@ function draw_dgrpointer(s) -- not displayed atm
 end
 
 function draw_explosion(s)
-  local c=({0,7,s.c,s.c,s.c})[s.p+1]
+  local c=({25,21,s.c,s.c,s.c})[s.p+1]
   local r=s.r+max(s.p-2,0)
   local foo
   if s.p<3 then foo=circfill
@@ -205,12 +206,13 @@ function create_skull(x,y)
   register_object(s)
 end
 
-function create_scoretxt(x,y,amount)
+function create_scoretxt(x,y,amount,c)
   local s={
     x=x,
     y=y,
     txt="+"..amount,
     t=t,
+    c=c,
     update=update_scoretxt,
     draw=draw_scoretxt,
     regs={"to_update","to_draw3"}
@@ -284,7 +286,7 @@ function create_smoke(x,y,spd,r,c,a)
     vx=spd*cos(a),
     vy=spd*sin(a),
     r=r or 1+rnd(3),
-    c=c or 6,
+    c=c or 22,
     update=update_smoke,
     draw=draw_smoke,
     regs={"to_update","to_draw1"}

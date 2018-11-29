@@ -41,11 +41,27 @@ function _init()
   
   init_ship_stats()
   
-  friendpal={  [6]=10, [13]=9,  [5]=4}
-  enemypal={   [6]=14, [13]=8,  [5]=2}
-  neutralpal={ [6]=6,  [13]=13, [5]=5}
+  friendpal={  [22]=8,  [23]=9,  [24]=10}
+  enemypal={   [22]=19, [23]=0,  [24]=1}
+  neutralpal={ [22]=22, [23]=23, [24]=24}
   
-  drk={[0]=0,0,1,1,2,1,5,6,2,4,9,3,1,1,2,5}
+  ship_cols = {}
+  ship_poss = {}
+  ship_plts = {}
+  for i=0,31 do
+    local c = sget(i,4)
+    if c == 25 then break end
+    
+    add(ship_cols, c)
+    for cb in all(ship_cols) do
+      add(ship_poss, {c,cb})
+    end
+    ship_plts[c] = {[22]=c_lit[c], [23]=c, [24]=c_drk[c]}
+  end
+  ship_plts[22] = {[22]=21, [23]=22, [24]=23}
+  ship_nposs = {}
+  
+  drk=c_drk
   
   areaw=2400
   areah=1600
@@ -109,50 +125,50 @@ function _draw()
   font("pico")
   
   camera(0,0)
-  draw_text(""..#players, 2,2,0, 0,7,13)
+  draw_text(""..#players, 2,2,0)
   
   local x=12
   for id,p in pairs(players) do
-    draw_text(""..id, x,2,0, 0,11,3)
+    draw_text(""..id, x,2,0, 25,8)
     x = x+10
   end
   
-  draw_text(""..(server and 1 or 0), 2,12,0, 0,7,13)
+  draw_text(""..(server and 1 or 0), 2,12,0)
   local x=12
   if server then
-    draw_text(""..#server.homes, x,12,0, 0,12,1) x = x+10
+    draw_text(""..#server.homes, x,12,0, 25,14) x = x+10
     for id,p in pairs(server.homes) do
-      draw_text(""..id, x,12,0, 0,11,3)
+      draw_text(""..id, x,12,0, 25,8)
       x = x+10
     end
   end
   
-  draw_text(""..(client and 1 or 0), 2,22,0, 0,7,13)
+  draw_text(""..(client and 1 or 0), 2,22,0)
   local x=12
   if client then
-    draw_text(""..#client.share, x,22,0, 0,12,1) x = x+10
+    draw_text(""..#client.share, x,22,0, 25,14) x = x+10
     for id,p in pairs(client.share) do
-      draw_text(""..id, x,22,0, 0,11,3)
+      draw_text(""..id, x,22,0, 25,8)
       x = x+10
     end
   end
-  draw_text(""..(client and client.connected and 1 or 0), 2,32,0, 0,7,13)
+  draw_text(""..(client and client.connected and 1 or 0), 2,32,0)
   
   
   local scrnw, scrnh = screen_size()
   local x,y = 4, scrnh-16
   font("pico16")
-  draw_text("ping: "..(client and client.connected and client.getPing() or "NaN"), x,y,0, 0,7,13)
+  draw_text("ping: "..(client and client.connected and client.getPing() or "NaN"), x,y,0)
   y = y-20
-  draw_text(client and client.connected and "Connected to server" or "Not connected", x, y, 0, 0,7,13)
+  draw_text(client and client.connected and "Connected to server" or "Not connected", x, y, 0)
   
   x,y = scrnw-4, scrnh-16
-  draw_text(server and "Hosting server" or "Not hosting", x, y, 2, 0,7,13)
+  draw_text(server and "Hosting server" or "Not hosting", x, y, 2)
   y= y-12
   font("pico")
-  draw_text("Seeing "..#players.." players", x, y, 2, 0,7,13)
+  draw_text("Seeing "..#players.." players", x, y, 2)
   y= y-12
-  draw_text(player.shooting and "Shooting" or "Not shooting", x, y, 2, 0,7,13)
+  draw_text(player.shooting and "Shooting" or "Not shooting", x, y, 2)
   
   
 --  local x,y = 4, scrnh/2
@@ -169,7 +185,7 @@ function _draw()
 --  draw_text("2 - "..(server and server.homes[2] and server.homes[2][2] or "not connected"), x, y, 2,  0, 7, 13)  y = y+12
 --  draw_text("3 - "..(server and server.homes[2] and server.homes[2][3] and "true" or "false"), x, y, 2,  0, 7, 13)  y = y+12
 --  draw_text("4 - "..(server and server.homes[2] and server.homes[2][4] and "true" or "false"), x, y, 2,  0, 7, 13)  y = y+12
-  draw_text(debuggg, x, y, 2,  0, 7, 13)  y = y+12
+  draw_text(debuggg, x, y, 2)  y = y+12
 end
 
 
@@ -276,6 +292,8 @@ function update_game()
 end
 
 function draw_game()
+  
+
   xmod,ymod=cam:screen_pos()
   xmod=xmod+shkx
   ymod=ymod+shky
@@ -374,7 +392,7 @@ function define_menus()
     }
   }
   
-  if not castle then
+  if not (castle or network) then
     add(menus.mainmenu, {"quit", function() love.event.push("quit") end})
   end
   
@@ -425,31 +443,31 @@ function draw_mainmenu()
   
   if curmenu=="mainmenu" then
     font("pico16")
-    
+    pal()
     local foo=function(x,y)
-      spr(0,1,scrnw/2+x,scrnh*0.2-40+y,19,4)
-      spr(64,1,scrnw/2+x,scrnh*0.2+y,19,4)
+      spr(0,1,scrnw/2+x,scrnh*0.2-40+y,20,4)
+      spr(64,1,scrnw/2+x,scrnh*0.2+y,20,4)
     end
     
     do
-      all_colors_to(0)
+      all_colors_to(25)
       foo(0,-3) foo(-1,-2) foo(1,-2) foo(-2,-1) foo(2,-1)
       foo(-3,0) foo(3,0)
       foo(-3,1) foo(3,1)
       foo(0,4) foo(-1,3) foo(1,3) foo(-2,2) foo(2,2)
-      all_colors_to(13)
+      all_colors_to(22)
       foo(-2,1) foo(-1,2) foo(0,3) foo(1,2) foo(2,1)
-      all_colors_to(7)
+      all_colors_to(21)
       foo(-2,0) foo(2,0) foo(0,-2) foo(0,2)
       foo(-1,-1) foo(-1,1) foo(1,-1) foo(1,1)
-      all_colors_to(0)
+      all_colors_to(25)
       foo(-1,0) foo(1,0) foo(0,-1) foo(0,1)
       all_colors_to()
       foo(0,0)
     end
     
-    draw_text("left click to fire, right click to boost",scrnw/2,scrnh*0.2+48,1,0,10,4)
-    draw_text("you can't rescue ships while firing",scrnw/2,scrnh*0.2+64,1,0,10,4)
+    draw_text("left click to fire, right click to boost",scrnw/2,scrnh*0.2+48,1,25,19,0)
+    draw_text("you can't rescue ships while firing",scrnw/2,scrnh*0.2+64,1,25,19,0)
   end
   
   local y=min(scrnh/2+48,scrnh-menu_height()+96)
@@ -458,7 +476,7 @@ function draw_mainmenu()
   
   local x,y = scrnw/2, scrnh-16
   font("pico16")
-  draw_text("Server address: "..server_address, x, y, 1, 0, 12, 1)
+  draw_text("Server address: "..server_address, x, y, 1, 25, 17)
   
   
   camera(xmod,ymod)
@@ -743,26 +761,34 @@ function draw_player(s)
   
   if s.it_me then
     foo=function(a)
-      circ(s.x,s.y,8+4*cos(a),7)
+      circ(s.x,s.y,8+4*cos(a),21)
 
       for i=a,a+0.75,0.25 do
         local x1,y1=s.x+2*cos(i),s.y+2*sin(i)
         local x2,y2=s.x+14*cos(i),s.y+14*sin(i)
-        line(x1,y1,x2,y2, 7)
+        line(x1,y1,x2,y2, 21)
       end
     end
     
-    draw_outline(foo,0,a)
+    camera(xmod, ymod-1)
+    draw_outline(foo,25,a)
+    camera(xmod, ymod)
+    draw_outline(foo,25,a)
   else
     foo=function(a)
       for i=a,a+0.75,0.25 do
         local x1,y1=s.x+2*cos(i),s.y+2*sin(i)
         local x2,y2=s.x+6*cos(i),s.y+6*sin(i)
-        line(x1,y1,x2,y2, 7)
+        line(x1,y1,x2,y2, 21)
       end
     end
   end
-
+  
+  camera(xmod, ymod-1)
+  pal(21,22)
+  foo(a)
+  camera(xmod, ymod)
+  pal(21,21)
   foo(a)
 end
 
@@ -843,11 +869,11 @@ function draw_background()
 end
 
 function draw_gridbackground()
-  local ca,cb=1,13
+  local ca,cb=16,15
   
-  cls(0)
-  draw_grid(0.25*xmod,0.25*ymod,32,1)
-  draw_grid(0.75*xmod,0.75*ymod,64,13)
+  cls(25)
+  draw_grid(0.25*xmod,0.25*ymod,32,ca)
+  draw_grid(0.75*xmod,0.75*ymod,64,cb)
   
   if level>=30 and mainmenu then
     draw_cloudlayer(0.25*xmod,0.25*ymod,150,0.4,6,13) 
@@ -995,7 +1021,7 @@ end
 function draw_pause()
   local scrnw,scrnh=screen_size()
 
-  color(7)
+  color(25)
   for i=0,scrnh,2 do
     line(0,i,scrnw,i)
   end
