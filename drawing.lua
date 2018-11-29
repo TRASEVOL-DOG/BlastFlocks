@@ -111,6 +111,10 @@ function color(c)
   return col
 end
 
+function clip(x, y, w, h)
+  love.graphics.setScissor(x, y, w, h)
+end
+
 function pal(c1,c2)
   if c1 then
     palswaps[c1]=c2

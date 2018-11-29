@@ -110,7 +110,7 @@ function draw_convertring(s)
     circ(ship.x,ship.y,ship.info.hlen+3+2*cos(s.t/8),cb)
   end
   
-  draw_outline(foo,7)
+  draw_outline(foo,21)
   foo()
   
   font("pico")

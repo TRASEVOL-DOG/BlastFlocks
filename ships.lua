@@ -95,7 +95,7 @@ function update_ship(s)
   end
   
   if p and p.boosting then
-    s.boost=6
+    s.boost=4
   else
     s.boost=max(s.boost-0.5,0)
   end
@@ -161,7 +161,7 @@ function update_falling_ship(s)
   
 --  load_shipinfo(s,ship_types[s.typ_id], true)
 
-  s.aim=s.aim+s.va
+  s.aim=s.aim+delta_time --s.va
   
   s.dead = true
   

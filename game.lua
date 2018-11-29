@@ -86,6 +86,7 @@ function _init()
   main_menu()
 end
 
+network_t = 0
 function _update(dt)
   if client then client.preupdate() end
   if server then server.preupdate() end
@@ -96,18 +97,17 @@ function _update(dt)
     update_mainmenu()
     if btnr(7) then love.event.push("quit") end
   else
-    --if not server then
---    read_client()
-    --end
-  
     xmod,ymod=0,0
     update_game(dt)
     xmod,ymod=0,0
-    
-    update_client()
   end
   
-  update_server()
+  network_t = network_t - delta_time
+  if network_t < 0 then
+    update_client()
+    update_server()
+    network_t = 0.033
+  end
   
   if client then client.postupdate() end
   if server then server.postupdate() end
@@ -193,7 +193,7 @@ function init_game()
   clear_all_groups()
   register_object(player)
   register_object(cam)
- 
+
   mainmenu=false
   paused=false
   gameover=false
@@ -245,7 +245,9 @@ function update_game()
 --  end
   
   for o in group("to_wrap") do
-    wrap_around(o)
+    if o.x then
+      wrap_around(o)
+    end
   end
   
   shootshake=0
@@ -1035,6 +1037,8 @@ end
 
 
 function draw_minimap()
+  if not my_id then return end
+
   local w = 96
   local h = 64
   
@@ -1042,7 +1046,25 @@ function draw_minimap()
   local x = scrnw - 4 - w
   local y = 4
   
+  local dx,dy = get_mass_pos("ship_player"..my_id)
+  dx = dx % areaw
+  dy = mid(dy, 0, areah)
+  dx = dx / areaw * w + 48
+  dy = dy / areah * h
+  
   rectfill(x, y, x+w-1, y+h-1, 25)
+  
+  color(16)
+  for i=0,95,16 do
+    local xx = x+((i-dx)%96)
+    line(xx, y, xx, y+h)
+  end
+  
+  for i=0,63,16 do
+    line(x, y+i, x+w, y+i)
+  end
+  
+  clip (x, y, w, h)
   
   pal(0,25)
   for id,p in pairs(players) do
@@ -1054,13 +1076,19 @@ function draw_minimap()
       mx = mx / areaw * w
       my = my / areah * h
       
-      apply_pal_map(ship_plts[p.colors[1]])
-      spr(4, 0, x+mx, y+my)
-      apply_pal_map(ship_plts[p.colors[2]])
-      spr(5, 0, x+mx, y+my)
+      mx = (mx-dx)%96
+      
+      double_pal_map(p.colors[1], p.colors[2])
+      if id == my_id then
+        spr(208, 0, x+mx, y+my, 2, 2)
+      else
+        spr(210, 0, x+mx, y+my, 2, 2)
+      end
     end
   end
   all_colors_to()
+  
+  clip()
   
   rect(x-1, y-2, x+w, y+h+1, 25)
   rect(x, y, x+w-1, y+h, 23)
@@ -1085,8 +1113,10 @@ end
 function draw_score()
   local scrnw,scrnh=screen_size()
   font("pico16")
-  local str=bignumstr(scoredisp,',')
-  draw_text("SCORE: "..str,scrnw/2,scrnh-12)
+--  local str=bignumstr(scoredisp,',')
+--  draw_text("SCORE: "..str,scrnw/2,scrnh-14)
+  local str=my_id and group_size("ship_player"..my_id) or 0 --bignumstr(scoredisp,',')
+  draw_text("SHIPS: "..str,scrnw/2,scrnh-14)
 end
 
 function draw_pause()
@@ -1157,6 +1187,19 @@ function draw_gameover()
   draw_menu(scrnw/2,scrnh/2+48,t)
 end
 
+function double_pal_map(col_a, col_b)
+  local pala = ship_plts[col_a]
+  local palb = ship_plts[col_b]
+  
+  pal(8,  pala[22])
+  pal(9,  pala[23])
+  pal(10, pala[24])
+  
+  pal(13, palb[22])
+  pal(14, palb[23])
+  pal(15, palb[24])
+end
+
 
 --creates
 function create_player(x, y, colors, seed, shooting, boosting, player_id)
@@ -1175,7 +1218,7 @@ function create_player(x, y, colors, seed, shooting, boosting, player_id)
     it_me    = (player_id == (client and client.id or my_id)),
     update   = update_player,
     draw     = draw_player,
-    regs     = {"to_update","to_draw4"}
+    regs     = {"to_update","to_draw4","to_wrap"}
   }
   
   register_object(p)
