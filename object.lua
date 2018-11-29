@@ -95,6 +95,9 @@ function clear_all_groups()
   end
 end
 
+function new_group(name) objs[name] = {} end
+function group_exists(name) return objs[name] ~= nil end
+
 function group(name) return all(objs[name]) end
 function group_size(name) return #objs[name] end
 function group_member(grp,pos) return objs[grp][pos] end

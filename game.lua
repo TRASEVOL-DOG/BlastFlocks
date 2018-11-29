@@ -169,7 +169,7 @@ function _draw()
   draw_text("Seeing "..#players.." players", x, y, 2)
   y= y-12
   draw_text(player.shooting and "Shooting" or "Not shooting", x, y, 2)
-  
+  y= y-12
   
 --  local x,y = 4, scrnh/2
 --  draw_text("My ID: "..(my_id or "not connected"), x, y, 0,  0, 7, 13) y = y+12  
@@ -220,6 +220,18 @@ end
 
 function update_game()
   t=t+0.01*dt30f
+  
+  
+  -- TESTING: SERVER - ADD 5 PLANES TO EVERYONE
+  if server and btnp(5) then
+    for id,p in pairs(players) do
+      if id>=0 then
+        add(p.ships, create_ship(p.x, p.y, 0, 0, 1, id))
+      end
+    end
+  end
+  
+  
   
   update_shake()
   
@@ -272,16 +284,19 @@ function update_game()
   local omx=massx
   local omy=massy
   
-  if group_size("friend_ship")>0 then
-    massx,massy=get_mass_pos("friend_ship")
-  elseif not gameover then
---    boomsfx()
---    create_explosion(massx,massy,32,10)
---    add_shake(64)
---    menu("gameover")
---    gameover=true
---    music()
---    sfx("gameover")
+  if my_id then
+    local group = "ship_player"..my_id
+    if group_exists(group) and group_size(group)>0 then
+      massx,massy=get_mass_pos(group)
+    elseif not gameover then
+  --    boomsfx()
+  --    create_explosion(massx,massy,32,10)
+  --    add_shake(64)
+  --    menu("gameover")
+  --    gameover=true
+  --    music()
+  --    sfx("gameover")
+    end
   end
   massvx=massx-omx
   massvy=massy-omy
@@ -333,6 +348,8 @@ function draw_game()
   
   camera(0,0)
 --  draw_levelup()
+
+  draw_minimap()
   
   local scrnw,scrnh=screen_size()
   
@@ -659,10 +676,16 @@ end
 function get_mass_pos(grp)
   local mx,my=0,0
   
+  if (group_size(grp) == 0) then return 0,0 end
+  
+  local s = group_member(grp, 1)
+  local ax = s.x
+  local ay = s.y
+  
   local k=0
   for o in group(grp) do
-    mx=mx+o.info.value*o.x
-    my=my+o.info.value*o.y
+    mx=mx+o.info.value*rel_wrap(o.x, ax)
+    my=my+o.info.value*rel_wrap(o.y, ay)
     k=k+o.info.value
   end
   
@@ -710,10 +733,10 @@ function update_camera(c)
     end
   end 
   
-  --c.x=lerp(c.x,camxto,0.05*dt30f)
-  --c.y=lerp(c.y,camyto,0.05*dt30f)
-  c.x=lerp(c.x,0,0.05*dt30f)
-  c.y=lerp(c.y,0,0.05*dt30f)
+  c.x=lerp(c.x,camxto,0.05*dt30f)
+  c.y=lerp(c.y,camyto,0.05*dt30f)
+  --c.x=lerp(c.x,0,0.05*dt30f)
+  --c.y=lerp(c.y,0,0.05*dt30f)
 end
 
 function update_ui_controls()
@@ -751,6 +774,19 @@ function wrap_around(s)
     d=d-areaw/2
     s.x=cam.x+d
   end
+end
+
+function rel_wrap(x, ax)
+  local d=x-ax
+  
+  if abs(d)>areaw/2 then
+    d=d+areaw/2
+    d=d%areaw
+    d=d-areaw/2
+    x=ax+d
+  end
+  
+  return x
 end
 
 
@@ -996,6 +1032,41 @@ function draw_grid(ancx,ancy,d,c)
     line(ancx,y,ancx+scrnw,y)
   end
 end
+
+
+function draw_minimap()
+  local w = 96
+  local h = 64
+  
+  local scrnw, scrnh = screen_size()
+  local x = scrnw - 4 - w
+  local y = 4
+  
+  rectfill(x, y, x+w-1, y+h-1, 25)
+  
+  pal(0,25)
+  for id,p in pairs(players) do
+    if id >= 0 then
+      local mx,my = get_mass_pos("ship_player"..id)
+      mx = mx % areaw
+      my = mid(my, 0, areah)
+      
+      mx = mx / areaw * w
+      my = my / areah * h
+      
+      apply_pal_map(ship_plts[p.colors[1]])
+      spr(4, 0, x+mx, y+my)
+      apply_pal_map(ship_plts[p.colors[2]])
+      spr(5, 0, x+mx, y+my)
+    end
+  end
+  all_colors_to()
+  
+  rect(x-1, y-2, x+w, y+h+1, 25)
+  rect(x, y, x+w-1, y+h, 23)
+  rect(x, y-1, x+w-1, y+h-1, 21)
+end
+
 
 function draw_levelup()
   if levelt>0 then

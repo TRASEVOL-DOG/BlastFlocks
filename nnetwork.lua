@@ -91,6 +91,7 @@ function read_client()
         )
         players[id] = p
       end
+      new_group("ship_player"..id)
     elseif id >= 0 then
       if id ~= my_id then
         p.x = p_d[1]-- or p.x
@@ -268,9 +269,7 @@ function server_new_player(player_id)
   local x,y = 0,0 --rnd(areaw), rnd(areah)
   local seed = irnd(32000)
   local colors = new_player_color()
-  
-  debuggg = ""..colors[1].." | "..colors[2].." - "..#ship_poss
-  
+
   local p = create_player(x, y, colors, seed, false, false, player_id)
   players[player_id] = p
 
@@ -287,7 +286,7 @@ function server_new_player(player_id)
     [6] = colors[2],
     [7] = seed,
     [8] = {}, -- planes, filled up in server_update
-    [9] = {}  -- bullets, filled up in server_update
+    --[9] = {}  -- bullets, filled up in server_update
   }
   server.share[player_id] = p_d
   

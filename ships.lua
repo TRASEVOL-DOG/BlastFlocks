@@ -90,10 +90,9 @@ function update_ship(s)
   load_shipinfo(s,ship_types[s.typ_id], true)
   
   local p = players[s.player]
---  if not p then
---    print("WARNING: Playerless ships!!")
---    return
---  end
+  if not p then
+    print("WARNING: Playerless ships!!")
+  end
   
   if p and p.boosting then
     s.boost=6
@@ -117,7 +116,7 @@ function update_ship(s)
       end
     else
       if (rnd(64)>group_size("ship_player"..s.player)) then
-        create_smoke(s.x,s.y,2,rnd(3),21,s.aim+0.5)
+        create_smoke(s.x,s.y,2,rnd(3),pick{21, s.color},s.aim+0.5)
       end
       
       if s.hp<s.stats.maxhp/3 and rnd(2)<1 then
@@ -189,13 +188,9 @@ function update_ship_movement(s)
   local adif=0
   if not s.dead then
     local targ = players[s.player]
-    --if s.friend then targ = player
-    --else targ = {x=massx-32*massvx,y=massy-32*massvy} end
+    local tax = rel_wrap(targ.x, s.x)
     
-    if not targ.x then
-      error("id: "..s.player.." | "..players[s.player].id)
-    end
-    local taim = atan2(targ.x-s.x,targ.y-s.y)
+    local taim = atan2(tax-s.x,targ.y-s.y)
     adif = angle_diff(s.aim,taim)
     
     s.va  = s.va+sgn(adif)*min(abs(adif),stt.acca)+rnd(0.008)-0.004

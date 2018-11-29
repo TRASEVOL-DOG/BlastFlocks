@@ -63,3 +63,19 @@ abs=math.abs
 sqrt=math.sqrt
 min=math.min
 max=math.max
+
+function mid(a, b, c)
+  if a>b then
+    a,b = b,a
+  end
+  
+  if b>c then
+    b,c = c,b
+  end
+  
+  if a>b then
+    a,b = b,a
+  end
+  
+  return b
+end
