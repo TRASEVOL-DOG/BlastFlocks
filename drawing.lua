@@ -201,6 +201,7 @@ function font(name)
   graphics.curfont=font
 end
 
+castle_print = print
 function print(str,x,y,c)
   if c then color(c) end
   love.graphics.print(str,x,y)

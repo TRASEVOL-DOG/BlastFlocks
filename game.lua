@@ -333,6 +333,8 @@ end
 
 --main menu
 function main_menu()
+  if client then client_disconnect() end
+
   clear_all_groups()
   register_object(player)
   register_object(cam)
@@ -1032,8 +1034,11 @@ function draw_score()
   font("big")
 --  local str=bignumstr(scoredisp,',')
 --  draw_text("SCORE: "..str,scrnw/2,scrnh-14)
-  local str=my_id and group_size("ship_player"..my_id) or 0 --bignumstr(scoredisp,',')
-  draw_text("SHIPS: "..str,scrnw/2,scrnh-14)
+  local str = "0"
+  if my_id and group_exists("ship_player"..my_id) then
+    str=group_size("ship_player"..my_id)
+  end
+  draw_text("Ships: "..str,scrnw/2,scrnh-14)
 end
 
 function draw_pause()
@@ -1147,7 +1152,7 @@ function draw_network_state()
     list:sub(1, #list-2)
     
     _log("Seeing "..count.." players", false)
-    --_log(" "..list, false)
+    _log(" "..list, false)
     _log("Counting "..group_size("ship").." ships", false)
   end
   
@@ -1167,6 +1172,8 @@ function draw_network_state()
       end
       _log("Ping: "..ping, true, (ping<100) and 8 or (ping<300) and 3 or 0)
 
+      _log("My ID: "..(my_id or "missing"))
+
       local count = 0
       local list = ""
       for id,_ in pairs(players) do
@@ -1178,7 +1185,7 @@ function draw_network_state()
       list:sub(1, #list-2)
       
       _log("Seeing "..count.." players", false)
-      --_log(" "..list, false)
+      _log(" "..list, false)
       _log("Counting "..group_size("ship").." ships.", false)
     else
       _log("Client not connected", true, 23)

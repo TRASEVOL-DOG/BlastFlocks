@@ -17,7 +17,7 @@ function start_server()
     server.start('22122')
     server.changed = read_server
     server.disconnect = server_client_disconnected
-    print("Starting local server.")
+    castle_print("Starting local server.")
     
     --deregister_object(player)
     --my_id = 0
@@ -25,7 +25,7 @@ function start_server()
     
     --server_define_non_players()
   else
-    print("Local server already exists.")
+    castle_print("Local server already exists.")
   end  
 end
 
@@ -36,11 +36,11 @@ function connect_to_server()
     client.enabled = true
     client.start(address)
     client.changed = read_client
-    print("Connecting to server at "..address)
+    castle_print("Connecting to server at "..address)
     
     client_define_non_players()
   else
-    print("Already connected or connecting.")
+    castle_print("Already connected or connecting.")
   end
 end
 
@@ -55,14 +55,14 @@ function read_client()
   --if server then return end -- should client be read if it's also the server??
   
   for id, p in pairs(players) do
-    if not client.share[id] and id~=my_id then
-      print("Player #"..id.." either disconnected or is no longer relevant")
+    if id ~= my_id and not client.share[id] then
+      castle_print("Player #"..id.." either disconnected or is no longer relevant")
       -- remove player
       for s in all(p.ships) do
         deregister_object(s)
       end
       deregister_object(p)
-      del(players, p)
+      players[id] = nil
     end
   end
   
@@ -70,6 +70,7 @@ function read_client()
     local p = players[id]
     if not p then
       if id == my_id then
+        castle_print("Connected! I'm player #"..id)
         p = player
         p.x = p_d[1]
         p.y = p_d[2]
@@ -251,7 +252,7 @@ end
 
 
 function server_client_disconnected(id)
-  print("Client #"..id.." disconnected from the server.")
+  castle_print("Client #"..id.." disconnected from the server.")
   -- delete player and convert all their planes to AI?
   -- currently: simply delete player and all their ships
   local p = players[id]
@@ -259,9 +260,21 @@ function server_client_disconnected(id)
     deregister_object(s)
   end
   deregister_object(p)
-  del(players, p)
+  players[id] = nil
   
   server.share[id] = nil
+end
+
+function client_disconnect()
+  if not client then return end
+  
+  castle_print("Disconnecting as client #"..client.id)
+  
+  client.id, client.connected = nil, nil
+  client, my_id = nil, nil
+  
+  players = {}
+  player = create_player(64+32*cos(0.1),64+32*sin(0.1), nil, nil, false, false, nil)
 end
 
 

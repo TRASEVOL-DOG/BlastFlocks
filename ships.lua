@@ -92,6 +92,7 @@ function update_ship(s)
   local p = players[s.player]
   if not p then
     print("WARNING: Playerless ships!!")
+    p = {x = s.x, y = s.y}
   end
   
   if p and p.boosting then
@@ -188,6 +189,9 @@ function update_ship_movement(s)
   local adif=0
   if not s.dead then
     local targ = players[s.player]
+    
+    if not targ then targ = {x = s.x, y = s.y} end
+    
     local tax = rel_wrap(targ.x, s.x)
     
     local taim = atan2(tax-s.x,targ.y-s.y)
