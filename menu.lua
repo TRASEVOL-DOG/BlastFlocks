@@ -112,7 +112,7 @@ function draw_menu(x,y)
   
   y=y-m.h/2
   
-  font("pico16")
+  font("big")
   for i,o in ipairs(m) do
     ofx=16*cos(t*0.5+i*0.1)
     
@@ -138,9 +138,9 @@ function draw_menu(x,y)
       circfill(x,y,r,22)
       circfill(x,y-1,r,21)
       
-      font("pico")
+      font("small")
       draw_text(o.slidv,x,y-13)
-      font("pico16")
+      font("big")
     end
     
     if o==m.chosen then
@@ -153,7 +153,7 @@ function draw_menu(x,y)
     
     y=y+o.h+m.linespace
   end
-  font("pico")
+  font("small")
 end
 
 

@@ -31,13 +31,13 @@ function update_scoretxt(s)
   end
 end
 
-function update_dgrpointer(s)
-  s.t=s.t+1*dt30f
-  
-  if s.t>=64 then
-    deregister_object(s)
-  end
-end
+--function update_dgrpointer(s)
+--  s.t=s.t+1*dt30f
+--  
+--  if s.t>=64 then
+--    deregister_object(s)
+--  end
+--end
 
 function update_screenglitch(s)
   s.t = s.t - delta_time
@@ -113,7 +113,7 @@ function draw_convertring(s)
   draw_outline(foo,21)
   foo()
   
-  font("pico")
+  font("small")
   draw_text("^ SAVED ^",ship.x,ship.y-ship.info.hlen-6-k,1, 25,ca, cb)
 end
 
@@ -126,20 +126,20 @@ function draw_scoretxt(s)
   local k=abs(flr(s.t/6)-5)
   local ca, cb = lighter(c, k), lighter(c, k-1)
   
-  font("pico")
+  font("small")
   draw_text(s.txt,s.x,s.y-s.t,1, 25,ca, cb)
 end
 
-function draw_dgrpointer(s) -- not displayed atm
-  if s.t%4>0 then return end
-  
-  local scrnw,scrnh=screen_size()
-  local x=clamp(s.x,xmod+16,xmod+scrnw-16)
-  local y=clamp(s.y,ymod+16,ymod+scrnh-16)
-  
-  font("pico2")
-  draw_text("!",x,y,1,0,8,2)
-end
+--function draw_dgrpointer(s) -- not displayed atm
+--  if s.t%4>0 then return end
+--  
+--  local scrnw,scrnh=screen_size()
+--  local x=clamp(s.x,xmod+16,xmod+scrnw-16)
+--  local y=clamp(s.y,ymod+16,ymod+scrnh-16)
+--  
+--  font("pico2")
+--  draw_text("!",x,y,1,0,8,2)
+--end
 
 function draw_explosion(s)
   local c=({25,21,s.c,s.c,s.c})[s.p+1]
@@ -223,20 +223,20 @@ function create_scoretxt(x,y,amount,c)
   return s
 end
 
-function create_dgrpointer(x,y)
-  local s={
-    x=x,
-    y=y,
-    t=0,
-    update=update_dgrpointer,
-    draw=draw_dgrpointer,
-    regs={"to_update","to_draw3"}
-  }
-  
-  register_object(s)
-  
-  return s
-end
+--function create_dgrpointer(x,y)
+--  local s={
+--    x=x,
+--    y=y,
+--    t=0,
+--    update=update_dgrpointer,
+--    draw=draw_dgrpointer,
+--    regs={"to_update","to_draw3"}
+--  }
+--  
+--  register_object(s)
+--  
+--  return s
+--end
 
 function create_screenglitch(w,h)
   local scrnw,scrnh=screen_size()

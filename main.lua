@@ -15,7 +15,7 @@ function love.load()
   init_audio()
   init_shader_mgr()
   init_input_mgr()
-  font("pico")
+  font("small")
   _init()
 end
 

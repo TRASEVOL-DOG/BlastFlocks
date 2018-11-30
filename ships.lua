@@ -527,7 +527,7 @@ function draw_ship(s)
   end
   
   local ofx,ofy=0,0
-  if s.boost==6 then ofx,ofy=ofx+rnd(2)-1,ofy+rnd(2)-1 end
+  if s.boost==4 then ofx,ofy=ofx+rnd(2)-1,ofy+rnd(2)-1 end
   
   local foo=function()
     draw_anim(s.x+ofx,s.y+ofy,inf.anim,"rotate",s.aim,s.aim,false,(s.aim+0.25)%1>0.5)
@@ -548,7 +548,7 @@ function draw_ship(s)
   
   if not s.dead then
     local x,y=s.x-inf.hlen*cos(s.aim),s.y-inf.hlen*sin(s.aim)
-    local state=(s.boost==6) and "bfire" or "fire"
+    local state=(s.boost==4) and "bfire" or "fire"
     draw_anim(x,y,inf.anim,state,s.t,s.aim)
   end
   

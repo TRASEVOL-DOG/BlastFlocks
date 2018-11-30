@@ -121,71 +121,7 @@ function _draw()
     draw_game()
   end
   
-  
-  font("pico")
-  
-  camera(0,0)
-  draw_text(""..#players, 2,2,0)
-  
-  local x=12
-  for id,p in pairs(players) do
-    draw_text(""..id, x,2,0, 25,8)
-    x = x+10
-  end
-  
-  draw_text(""..(server and 1 or 0), 2,12,0)
-  local x=12
-  if server then
-    draw_text(""..#server.homes, x,12,0, 25,14) x = x+10
-    for id,p in pairs(server.homes) do
-      draw_text(""..id, x,12,0, 25,8)
-      x = x+10
-    end
-  end
-  
-  draw_text(""..(client and 1 or 0), 2,22,0)
-  local x=12
-  if client then
-    draw_text(""..#client.share, x,22,0, 25,14) x = x+10
-    for id,p in pairs(client.share) do
-      draw_text(""..id, x,22,0, 25,8)
-      x = x+10
-    end
-  end
-  draw_text(""..(client and client.connected and 1 or 0), 2,32,0)
-  
-  
-  local scrnw, scrnh = screen_size()
-  local x,y = 4, scrnh-16
-  font("pico16")
-  draw_text("ping: "..(client and client.connected and client.getPing() or "NaN"), x,y,0)
-  y = y-20
-  draw_text(client and client.connected and "Connected to server" or "Not connected", x, y, 0)
-  
-  x,y = scrnw-4, scrnh-16
-  draw_text(server and "Hosting server" or "Not hosting", x, y, 2)
-  y= y-12
-  font("pico")
-  draw_text("Seeing "..#players.." players", x, y, 2)
-  y= y-12
-  draw_text(player.shooting and "Shooting" or "Not shooting", x, y, 2)
-  y= y-12
-  
---  local x,y = 4, scrnh/2
---  draw_text("My ID: "..(my_id or "not connected"), x, y, 0,  0, 7, 13) y = y+12  
---  draw_text("1 - "..(client and client.connected and client.home[1] or "not connected"), x, y, 0,  0, 7, 13)  y = y+12
---  draw_text("2 - "..(client and client.connected and client.home[2] or "not connected"), x, y, 0,  0, 7, 13)  y = y+12
---  draw_text("3 - "..(client and client.connected and client.home[3] and "true" or "false"), x, y, 0,  0, 7, 13)  y = y+12
---  draw_text("4 - "..(client and client.connected and client.home[4] and "true" or "false"), x, y, 0,  0, 7, 13)  y = y+12
---
---  
---  local x,y = scrnw-4, scrnh/2
---  --draw_text("My ID: "..(client and client.connected and my_id or "not connected"), x, y, 0,  0, 7, 13) y = y+12  
---  draw_text("1 - "..(server and server.homes[2] and server.homes[2][1] or "not connected"), x, y, 2,  0, 7, 13)  y = y+12
---  draw_text("2 - "..(server and server.homes[2] and server.homes[2][2] or "not connected"), x, y, 2,  0, 7, 13)  y = y+12
---  draw_text("3 - "..(server and server.homes[2] and server.homes[2][3] and "true" or "false"), x, y, 2,  0, 7, 13)  y = y+12
---  draw_text("4 - "..(server and server.homes[2] and server.homes[2][4] and "true" or "false"), x, y, 2,  0, 7, 13)  y = y+12
-  draw_text(debuggg, x, y, 2)  y = y+12
+  draw_network_state()
 end
 
 
@@ -324,30 +260,6 @@ function draw_game()
   camera(xmod,ymod)
   draw_objects()
   
---  font("pico")
---  for i,p in pairs(players) do
---    camera(0,0)
---    local y = 20 +i*30
---    local x = 10
---    --for j,d in pairs(client.share[i]) do
---    --  draw_text(j.." : "..d, x, y, 0, 0, 8, 2)
---    --  x = x+10
---    --  y = y+10
---    --end
---    local x = 10
---    for j,d in pairs(p) do
---      draw_text(j.." : "..d, x, y, 0, 0, 8, 2)
---      x = x+10
---      y = y+10
---    end
---    x = 10
---    
---    camera(xmod,ymod)
---    if p.x and p.y then
---      draw_player(p)
---    end
---  end
-  
   camera(0,0)
 --  draw_levelup()
 
@@ -388,31 +300,31 @@ function define_menus()
 
   local menus={
     mainmenu={
-      {"play", start_game},
+      {"Play", start_game},
       {"Start Server", function() start_server() end},
-      {"settings", function() menu("settings") end}
+      {"Settings", function() menu("settings") end}
     },
     settings={
-      {"fullscreen", fullscreen},
-      {"master volume", master_volume,"slider",100},
-      {"music volume", music_volume,"slider",100},
-      {"sfx volume", sfx_volume,"slider",100},
-      {"back", menu_back}
+      {"Fullscreen", fullscreen},
+      {"Master Volume", master_volume,"slider",100},
+      {"Music Volume", music_volume,"slider",100},
+      {"Sfx Volume", sfx_volume,"slider",100},
+      {"Back", menu_back}
     },
     pause={
-      {"resume", function() menu_back() paused=false end},
-      {"restart", init_game},
-      {"settings", function() menu("settings") end},
-      {"back to main menu", main_menu},
+      {"Resume", function() menu_back() paused=false end},
+      {"Restart", init_game},
+      {"Settings", function() menu("settings") end},
+      {"Back to Main Menu", main_menu},
     },
     gameover={
-      {"restart", init_game},
-      {"back to main menu", main_menu}
+      {"Restart", init_game},
+      {"Back to Main Menu", main_menu}
     }
   }
   
   if not (castle or network) then
-    add(menus.mainmenu, {"quit", function() love.event.push("quit") end})
+    add(menus.mainmenu, {"Quit", function() love.event.push("quit") end})
   end
   
   return menus
@@ -461,7 +373,7 @@ function draw_mainmenu()
   local scrnw,scrnh=screen_size()
   
   if curmenu=="mainmenu" then
-    font("pico16")
+    font("big")
     pal()
     local foo=function(x,y)
       spr(0,1,scrnw/2+x,scrnh*0.2-40+y,20,4)
@@ -494,7 +406,7 @@ function draw_mainmenu()
   
   
   local x,y = scrnw/2, scrnh-16
-  font("pico16")
+  font("big")
   draw_text("Server address: "..server_address, x, y, 1, 25, 17)
   
   
@@ -514,16 +426,20 @@ function update_player(s)
     s.x=s.x+camx
     s.y=s.y+camy
     
-    s.shooting = mouse_btn(0)
     s.boosting = mouse_btn(1)
+    s.shooting = mouse_btn(0) and not s.boosting
     
     --if s.shooting then
     --  create_bullet(s.x, s.y, rnd(1), rnd(2), my_id or 0)
     --end
     
     if mouse_btnp(0) then -- maybe make it so you hear other players do it too??
-      add_shake(8)
-      sfx("shootorder")
+      if s.boosting then
+        add_shake(2)
+      else
+        add_shake(4)
+        sfx("shootorder")
+      end
     end
     
     if mouse_btnp(1) then
@@ -678,7 +594,7 @@ end
 function get_mass_pos(grp)
   local mx,my=0,0
   
-  if (group_size(grp) == 0) then return 0,0 end
+  if (not group_exists(grp) or group_size(grp) == 0) then return 0,0 end
   
   local s = group_member(grp, 1)
   local ax = s.x
@@ -929,7 +845,8 @@ function draw_skybackground()
   elseif level>=12 then
     plt={2,14,15,15,13,7,6}
   else
-    plt={1,12,15,15,13,7,6}
+    --plt={1,12,15,15,13,7,6}
+    plt={15,14,13,13,15,21,22}
   end
 
   local c=plt[1]
@@ -1100,7 +1017,7 @@ function draw_levelup()
   if levelt>0 then
     local scrnw,scrnh=screen_size()
     
-    font("pico16")
+    font("big")
     local str="danger:  "..flr(dangerlvl).."%"
     if levelt%0.2>0.05 then
       draw_text(str,scrnw/2,scrnh/2,1,0,14,2)
@@ -1112,7 +1029,7 @@ end
 
 function draw_score()
   local scrnw,scrnh=screen_size()
-  font("pico16")
+  font("big")
 --  local str=bignumstr(scoredisp,',')
 --  draw_text("SCORE: "..str,scrnw/2,scrnh-14)
   local str=my_id and group_size("ship_player"..my_id) or 0 --bignumstr(scoredisp,',')
@@ -1127,7 +1044,7 @@ function draw_pause()
     line(0,i,scrnw,i)
   end
   
-  font("pico16")
+  font("big")
   if t%0.4<0.3 then
     draw_text("PAUSE",scrnw/2,16)
   end
@@ -1136,7 +1053,7 @@ end
 
 function draw_gameover()
   local scrnw,scrnh=screen_size()
-  font("pico16")
+  font("big")
   
   if t%0.4<0.3 then
     draw_text("GAME_OVER",scrnw/2,16,1,0,14,2)
@@ -1185,6 +1102,92 @@ function draw_gameover()
   end
   
   draw_menu(scrnw/2,scrnh/2+48,t)
+end
+
+ping_t = 0
+ping = 0
+function draw_network_state()
+  local x,y,al = 0,0,0
+  function _log(str, big, c)
+    font(big and "big" or "small")
+    draw_text(str, x, y, al, nil, c or 14)
+    y = y + (big and 16 or 12)
+  end
+
+  --font("small")
+  
+  camera(0,0)
+--  draw_text(""..#players, 2,2,0)
+  
+  local scrnw, scrnh = screen_size()
+  x,y,al = 4, 4, 0
+  
+  local fps = love.timer.getFPS()
+  _log("FpS: "..fps, true, (fps>=60) and 8 or (fps>=30) and 3 or 0)
+  
+  if not (server or client) then
+    _log("Offline", true, 23)
+  end
+  
+  if server then
+    -- hosting
+    -- seeing # players
+    -- player list
+    
+    _log("Hosting Server", true, 13)
+    
+    local count = 0
+    local list = ""
+    for id,_ in pairs(players) do
+      if id >= 0 then
+        count = count + 1
+        list = list..id.." "
+      end
+    end
+    list:sub(1, #list-2)
+    
+    _log("Seeing "..count.." players", false)
+    --_log(" "..list, false)
+    _log("Counting "..group_size("ship").." ships", false)
+  end
+  
+  if client then
+    -- connected
+    -- ping
+    -- seeing # players
+    -- player list
+    
+    if client.connected then
+      _log("Connected to Server", true, 13)
+      
+      ping_t = ping_t - delta_time
+      if ping_t < 0 then
+        ping = client.getPing()
+        ping_t = 0.2
+      end
+      _log("Ping: "..ping, true, (ping<100) and 8 or (ping<300) and 3 or 0)
+
+      local count = 0
+      local list = ""
+      for id,_ in pairs(players) do
+        if id >= 0 then
+          count = count + 1
+          list = list..id.." "
+        end
+      end
+      list:sub(1, #list-2)
+      
+      _log("Seeing "..count.." players", false)
+      --_log(" "..list, false)
+      _log("Counting "..group_size("ship").." ships.", false)
+    else
+      _log("Client not connected", true, 23)
+    end
+  end
+
+  if #debuggg > 0 then
+    draw_text("debug: "..debuggg, x, y, 2)  y = y+12
+  end
 end
 
 function double_pal_map(col_a, col_b)

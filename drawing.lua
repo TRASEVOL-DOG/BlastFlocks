@@ -9,9 +9,12 @@ c_lit = {}
 
 function init_graphics(scx,scy)
   local fonts={
-    pico={"PICO-8.ttf",4},
-    pico2={"PICO-8.ttf",8},
-    pico16={"PICO16.ttf",16}
+    --pico={"PICO-8.ttf",4},
+    --pico2={"PICO-8.ttf",8},
+    --pico16={"PICO16.ttf",16}
+    small={"EffortsPro.ttf",16},
+    --pico2={"PICO-8.ttf",8},
+    big={"Marksman.ttf",16}
   }
   
   local w,h
@@ -210,17 +213,19 @@ function super_print(str,x,y,c0,c1,c2)
   
   print(str,x,y-2,25)
   print(str,x-1,y-1,25)
-  print(str,x+1,y-1,25)
+  print(str,x+1,y-2,25)
+  print(str,x+2,y-1,25)
   print(str,x-2,y,25)
   print(str,x+2,y,25)
 
   print(str,x,y+3,25)
-  print(str,x-1,y+2,25)
+  print(str,x-1,y+3,25)
+  print(str,x-2,y+2,25)
   print(str,x+1,y+2,25)
   print(str,x-2,y+1,25)
   print(str,x+2,y+1,25)
   
-  print(str,x-1,y+1,c2)
+  print(str,x-1,y+2,c2)
   print(str,x+1,y+1,c2)
   print(str,x,y+2,c2)
   
@@ -228,6 +233,9 @@ function super_print(str,x,y,c0,c1,c2)
   print(str,x+1,y,c1)
   print(str,x,y-1,c1)
   print(str,x,y+1,c1)
+  
+  print(str,x-1,y+1,c1)
+  print(str,x+1,y-1,c1)
   
   print(str,x,y,c0)
 end
@@ -237,6 +245,8 @@ function draw_text(str,x,y,al,c0,c1,c2)
  
   if al==1 then x=x-graphics.curfont:getWidth(str)/2
   elseif al==2 then x=x-graphics.curfont:getWidth(str) end
+  
+  y = y - 4
   
   super_print(str,x,y,c0,c1,c2)
 end
