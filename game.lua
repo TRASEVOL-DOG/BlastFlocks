@@ -17,6 +17,7 @@ require("fx")
 player = nil
 my_id = nil
 players = {}
+my_name = pick{"Governor", "Captain", "Jarl", "Commander", "President", "General", "Admiral", "Marshal", "Chancellor"}.." "..pick{"Addison", "Ainslie", "Alexis", "Alpha", "Angel", "Arden", "Ashley", "Ashton", "Aubrey", "Audie", "Avery", "Bailey", "Beverly", "Billie", "Blair", "Blake", "Braidy", "Brook", "Cameron", "Carey", "Carson", "Casey", "Charlie", "Corry", "Courtney", "Kree", "Dakota", "Dallas", "Darby", "Darian", "Delaney", "Dell", "Devin", "Drew", "Elliot", "Ellis", "Emerson", "Emery", "Erin", "Esme", "Evan", "Evelyn", "Finley", "Finn", "Freddie", "Flynn", "Gail", "Gerrie", "Gwynn", "Hadley", "Halsey", "Harley", "Haiden", "Hailey", "Hilary", "Hollis", "Hudson", "Ivy", "Jaime", "Jan", "Jean", "Jerry", "Jesse", "Jocelyn", "Jodi", "Joey", "Jonny", "Jordan", "Jude", "Justice", "Kai", "Kye", "Kary", "Kay", "Keegan", "Kelly", "Kenzie", "Kerry", "Kim", "Kirby", "Kit", "Kyrie", "Lane", "Laurel", "Laurence", "Lauren", "Lee", "Leighton", "Lesley", "Lindsey", "Logan", "Loren", "Lucky", "Madison", "Madox", "Marion", "Marley", "Marlowe", "Mason", "Meade", "Meredith", "Merle", "Micah", "Milo", "Morgan", "Murphy", "Nash", "Nova", "Odell", "Paige", "Palmer", "Parker", "Paris", "Paxton", "Peyton", "Quinn", "Randy", "Reagan", "Rennie", "Reed", "Reese", "Ricky", "Riley", "Ridley", "Robin", "Rory", "Rowan", "Royce", "Rudy", "Ryan", "Rylan", "Sasha", "Sawyer", "Skyler", "Scout", "Selby", "Shane", "Shannon", "Shay", "Shelby", "Shelley", "Sheridan", "Shirley", "Sidney", "Skeeter", "Spencer", "Stormy", "Tanner", "Taran", "Tatum", "Taylor", "Tegan", "Temple", "Terry", "Toby", "Tommie", "Toni", "Torrance", "Tori", "Tracy", "Tristan", "Tyler", "Valentine", "Vivian", "Wallis", "Willie", "Winnie", "Wyatt", "Zane"}
 
 function _init()
 --  fullscreen()
@@ -122,6 +123,10 @@ function _draw()
   end
   
   draw_network_state()
+  
+  local scrnw,scrnh = screen_size()
+  font("small")
+  draw_text("/!\\ You're playing a work-in-progress version the game.", 2, scrnh-10, 0)
 end
 
 
@@ -300,9 +305,20 @@ function define_menus()
 
   local menus={
     mainmenu={
-      {"Play", start_game},
-      {"Start Server", function() start_server() end},
+      {"Connect and Play", function() menu("connectplay") end},
+      {"Host and Play", function() menu("hostplay") end},
       {"Settings", function() menu("settings") end}
+    },
+    connectplay={
+      {"Server Address", function(str) server_address=str end, "text_field", 6, server_address},
+      {"Port", function(str) server_port=str end, "text_field", 6, server_port},
+      {"Player Name", set_player_name, "text_field", 16, my_name},
+      {"Play", start_game}
+    },
+    hostplay={
+      {"Port", function(str) server_port=str end, "text_field", 6, server_port},
+      {"Player Name", set_player_name, "text_field", 16, my_name},
+      {"Play", function() start_server() start_game() end}
     },
     settings={
       {"Fullscreen", fullscreen},
@@ -354,14 +370,14 @@ function update_mainmenu()
   update_shake()
   
   local scrnw,scrnh=screen_size()
-  local y=min(scrnh/2+48,scrnh-menu_height()+96)
+  local y = (curmenu == "mainmenu") and (scrnh/2+48) or (scrnh/2)
   update_menu(scrnw/2,y-16)
   
   update_player(player)
   
-  if btnp(8) then
-    server_address = love.system.getClipboardText()
-  end
+  --if btnp(9) then
+  --  server_address = love.system.getClipboardText()
+  --end
 end
 
 function draw_mainmenu()
@@ -374,6 +390,7 @@ function draw_mainmenu()
   camera(0,0)
   local scrnw,scrnh=screen_size()
   
+  local y=scrnh/2
   if curmenu=="mainmenu" then
     font("big")
     pal()
@@ -401,11 +418,11 @@ function draw_mainmenu()
     
     draw_text("left click to fire, right click to boost",scrnw/2,scrnh*0.2+48,1,25,19,0)
     draw_text("you can't rescue ships while firing",scrnw/2,scrnh*0.2+64,1,25,19,0)
+  
+    y = scrnh/2+48
   end
-  
-  local y=min(scrnh/2+48,scrnh-menu_height()+96)
+
   draw_menu(scrnw/2,y,t)
-  
   
   local x,y = scrnw/2, scrnh-16
   font("big")
@@ -1193,7 +1210,8 @@ function draw_network_state()
   end
 
   if #debuggg > 0 then
-    draw_text("debug: "..debuggg, x, y, 2)  y = y+12
+    --draw_text("debug: "..debuggg, x, y, 0)  y = y+12
+    _log("debug: "..debuggg, false, 21)
   end
 end
 
@@ -1308,6 +1326,10 @@ end
 
 
 --misc
+function set_player_name(str)
+  my_name = str
+end
+
 function bignumstr(n,sep)
   local str=""..n
   local l=#str
@@ -1328,3 +1350,4 @@ function boomsfx(x,y)
   local str="boom"..flr(rnd(3)+1)
   sfx(str,x,y)
 end
+

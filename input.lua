@@ -6,10 +6,27 @@ require("drawing")
 
 function init_input_mgr()
   input={}
-  input.btn_count=8
   input.btn_state={}
   input.btn_press={}
   input.btn_release={}
+  
+  input.layout={
+    left=0,
+    right=1,
+    up=2,
+    down=3,
+    z=4,
+    x=5,
+    p=6,
+    escape=7,
+    ["return"]=8,
+    v=9
+  }
+  
+  input.btn_count=0
+  for _,_ in pairs(input.layout) do
+    input.btn_count = input.btn_count + 1
+  end
   
   for i=0,input.btn_count-1 do
     input.btn_state[i]=false
@@ -26,18 +43,6 @@ function init_input_mgr()
     input.mosbtn_press[i]=false
     input.mosbtn_release[i]=false
   end
-  
-  input.layout={
-    left=0,
-    right=1,
-    up=2,
-    down=3,
-    z=4,
-    x=5,
-    p=6,
-    escape=7,
-    v=8
-  }
   
   input.mosx,input.mosy=love.mouse.getPosition()
 end
@@ -83,6 +88,8 @@ function love.keypressed(key)
     input.btn_state[k]=true
     input.btn_press[k]=true
   end
+  
+  menu_keypressed(key)
 end
 
 function love.keyreleased(key)

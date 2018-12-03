@@ -9,12 +9,13 @@ local cs = require("cs")
 
 client, server = nil, nil
 server_address = '127.0.0.1'
+server_port = '22122'
 
 function start_server()
   if not server then
     server = cs.server
     server.enabled = true
-    server.start('22122')
+    server.start(server_port)
     server.changed = read_server
     server.disconnect = server_client_disconnected
     castle_print("Starting local server.")
@@ -31,7 +32,7 @@ end
 
 function connect_to_server()
   if not client then
-    local address = server_address..':22122'
+    local address = server_address..':'..server_port
     client = cs.client
     client.enabled = true
     client.start(address)

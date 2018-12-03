@@ -17,6 +17,9 @@ function love.load()
   init_input_mgr()
   font("small")
   _init()
+  
+  love.keyboard.setKeyRepeat(true)
+  love.keyboard.setTextInput(false)
 end
 
 function love.draw()
@@ -72,6 +75,8 @@ function love.resize(w,h)
   graphics.scrn_w=flr(w/scy)
   graphics.scrn_h=flr(h/scx)
 end
+
+
 
 
 --function love.keypressed(key)

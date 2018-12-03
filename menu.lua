@@ -21,6 +21,7 @@ function init_menu_system()
   prevmenus={}
   
   menuchange=0
+  menulock = false
 end
 
 
@@ -38,14 +39,19 @@ function init_menu(l)
     
     if n.typ=="button" then
       n.w=#n.name*8+8
-      n.h=20
+      n.h=16
     elseif n.typ=="slider" then
       n.slidmax=o[4] or 1
       n.slidmin=o[5] or 0
       n.slidw=o[6] or 64
       n.slidv=n.call()
       n.w=max(#n.name*8+8,n.slidw+8)
-      n.h=44
+      n.h=32
+    elseif n.typ=="text_field" then
+      n.mlen = o[4] or 24
+      n.txt = o[5] or ""
+      n.w = max(#n.name*8, n.mlen*8)+8
+      n.h = 32
     end
     
     maxw=max(maxw,n.w+4)
@@ -70,16 +76,25 @@ function update_menu(x,y)
   
   local curx,cury=mouse_pos()
   
-  if curx>x-m.w/2 and curx<x+m.w/2 and cury>y-m.h/2 and cury<y+m.h/2+m.linespace then
+  if menulock or curx>x-m.w/2 and curx<x+m.w/2 and cury>y-m.h/2 and cury<y+m.h/2+m.linespace then
     local oy=y-m.h/2+8
-    for o in all(m) do
-      oy=oy+o.h+m.linespace
-      if cury<oy then
-        if m.chosen~=o then
-          sfx("select")
+    
+    if not menulock then
+      for o in all(m) do
+        oy=oy+o.h+m.linespace
+        if cury<oy then
+          if m.chosen~=o then
+            sfx("select")
+            
+            if o.typ == "text_field" then
+              love.keyboard.setTextInput(true)
+            elseif m.chosen and m.chosen.typ == "text_field" then
+              love.keyboard.setTextInput(false)
+            end
+          end
+          m.chosen=o
+          break
         end
-        m.chosen=o
-        break
       end
     end
     
@@ -101,7 +116,19 @@ function update_menu(x,y)
         
         o.call(v)
         o.slidv=v
-      end  
+      elseif o.typ=="text_field" and mouse_btnp(0) then
+        sfx("confirm")
+        menulock = true
+      end
+    end
+    
+    if m.chosen and m.chosen.typ == "text_field" then
+      if menulock then
+        if btnp(8) then
+          sfx("confirm")
+          menulock = false
+        end
+      end
     end
   end
 end
@@ -141,6 +168,17 @@ function draw_menu(x,y)
       font("small")
       draw_text(o.slidv,x,y-13)
       font("big")
+    elseif o.typ=="text_field" then
+      draw_text(o.name,x+ofx,y+o.h*0.25-1)
+      local txt = o.txt
+      if menulock then
+        txt = txt..(({"|","/","-","\\"})[flr(love.timer.getTime()*8)%4+1])
+      elseif o == m.chosen then
+        txt = "[ "..txt.." ]"
+      else
+        txt = "\""..txt.."\""
+      end
+      draw_text(txt,x,y+o.h*0.75-1)
     end
     
     if o==m.chosen then
@@ -172,6 +210,33 @@ function menu_back()
     del(prevmenus,curmenu)
   else
     curmenu=nil
+  end
+end
+
+
+function love.textinput(text)
+  local o = menus[curmenu].chosen
+  if not o.txt or not menulock then return end
+  
+  o.txt = o.txt..text
+  if #o.txt>o.mlen then o.txt=o.txt:sub(1,o.mlen) end
+  
+  o.call(o.txt)
+end
+
+function menu_keypressed(key)
+  if curmenu and menus[curmenu] and menus[curmenu].chosen then
+    local o = menus[curmenu].chosen
+    if o.txt and menulock then
+      if key == "backspace" then
+        o.txt = o.txt:sub(1, #o.txt-1)
+        o.call(o.txt)
+      elseif key == "v" and (love.keyboard.isDown("rctrl") or love.keyboard.isDown("lctrl")) then
+        o.txt = o.txt..love.system.getClipboardText()
+        if #o.txt>o.mlen then o.txt=o.txt:sub(1,o.mlen) end
+        o.call(o.txt)
+      end
+    end
   end
 end
 
