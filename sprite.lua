@@ -23,14 +23,14 @@ function init_sprite_mgr()
         dt=0.02,
         sprites={32,33,34,35},
         cx=7,
-        cy=3
+        cy=3.5
       },
       bfire={
         sheet=0,
         dt=0.02,
-        sprites={48,49,50,51},
+        sprites={36,37,38,39,40,41},
         cx=7,
-        cy=3
+        cy=3.5
       }
     },
     bigship={

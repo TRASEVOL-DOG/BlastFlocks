@@ -85,12 +85,6 @@ function update_menu(x,y)
         if cury<oy then
           if m.chosen~=o then
             sfx("select")
-            
-            if o.typ == "text_field" then
-              love.keyboard.setTextInput(true)
-            elseif m.chosen and m.chosen.typ == "text_field" then
-              love.keyboard.setTextInput(false)
-            end
           end
           m.chosen=o
           break
@@ -119,6 +113,7 @@ function update_menu(x,y)
       elseif o.typ=="text_field" and mouse_btnp(0) then
         sfx("confirm")
         menulock = true
+        love.keyboard.setTextInput(true)
       end
     end
     
@@ -127,6 +122,7 @@ function update_menu(x,y)
         if btnp(8) then
           sfx("confirm")
           menulock = false
+          love.keyboard.setTextInput(false)
         end
       end
     end
@@ -171,10 +167,12 @@ function draw_menu(x,y)
     elseif o.typ=="text_field" then
       draw_text(o.name,x+ofx,y+o.h*0.25-1)
       local txt = o.txt
-      if menulock then
-        txt = txt..(({"|","/","-","\\"})[flr(love.timer.getTime()*8)%4+1])
-      elseif o == m.chosen then
-        txt = "[ "..txt.." ]"
+      if o == m.chosen then
+        if menulock then
+          txt = txt..(({"|","/","-","\\"})[flr(love.timer.getTime()*8)%4+1])
+        else
+          txt = "[ "..txt.." ]"
+        end
       else
         txt = "\""..txt.."\""
       end

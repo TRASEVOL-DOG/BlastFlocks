@@ -18,7 +18,7 @@ function start_server()
     server.start(server_port)
     server.changed = read_server
     server.disconnect = server_client_disconnected
-    castle_print("Starting local server.")
+    castle_print("Starting local server on port "..server_port)
     
     --deregister_object(player)
     --my_id = 0
@@ -280,7 +280,7 @@ end
 
 
 function server_new_player(player_id)
-  local x,y = 0,0 --rnd(areaw), rnd(areah)
+  local x,y = rnd(areaw)-areaw/2, rnd(areah-80)+40
   local seed = irnd(32000)
   local colors = new_player_color()
 

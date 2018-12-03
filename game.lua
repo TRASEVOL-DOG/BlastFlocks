@@ -126,7 +126,9 @@ function _draw()
   
   local scrnw,scrnh = screen_size()
   font("small")
-  draw_text("/!\\ You're playing a work-in-progress version the game.", 2, scrnh-10, 0)
+  draw_text("/!\\ You're playing", 2, scrnh-36, 0, nil, 17)
+  draw_text("a work-in-progress", 2, scrnh-24, 0, nil, 17)
+  draw_text("version of the game.", 2, scrnh-12, 0, nil, 17)
 end
 
 
@@ -310,15 +312,17 @@ function define_menus()
       {"Settings", function() menu("settings") end}
     },
     connectplay={
+      {"Play", start_game},
+      {"Player Name", set_player_name, "text_field", 16, my_name},
       {"Server Address", function(str) server_address=str end, "text_field", 6, server_address},
       {"Port", function(str) server_port=str end, "text_field", 6, server_port},
-      {"Player Name", set_player_name, "text_field", 16, my_name},
-      {"Play", start_game}
+      {"Back", menu_back}
     },
     hostplay={
-      {"Port", function(str) server_port=str end, "text_field", 6, server_port},
+      {"Play", function() start_server() start_game() end},
       {"Player Name", set_player_name, "text_field", 16, my_name},
-      {"Play", function() start_server() start_game() end}
+      {"Port", function(str) server_port=str end, "text_field", 6, server_port},
+      {"Back", menu_back}
     },
     settings={
       {"Fullscreen", fullscreen},
@@ -1016,7 +1020,15 @@ function draw_minimap()
       
       double_pal_map(p.colors[1], p.colors[2])
       if id == my_id then
-        spr(208, 0, x+mx, y+my, 2, 2)
+        local xx = flr(x+mx+0.5)
+        local yy = flr(y+my+0.5)
+        spr(208, 0, xx, yy, 2, 2)
+        
+        local hw = scrnw/2*w/areaw
+        local hh = scrnh/2*h/areah
+        pal(15,15)
+        rect(xx-hw, yy-hh, xx+hw, yy+hh, 15)
+        point(xx+hw, yy+hh, 15)
       else
         spr(210, 0, x+mx, y+my, 2, 2)
       end
