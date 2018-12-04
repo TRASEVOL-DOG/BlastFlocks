@@ -162,10 +162,6 @@ function update_falling_ship(s)
     return
   end
   
---  debuggg = ""..s.t
-  
---  load_shipinfo(s,ship_types[s.typ_id], true)
-
   s.aim=s.aim+delta_time --s.va
   
   s.dead = true
@@ -731,8 +727,6 @@ function create_ship(x,y,vx,vy,typ_id,player_id,id)
   s.plt = ship_plts[s.color]
   
   register_object(s)
-  debuggg = ""..group_size("ship")
-  
   return s
 end
 
