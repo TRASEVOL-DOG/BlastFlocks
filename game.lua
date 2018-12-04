@@ -281,6 +281,7 @@ function define_menus()
       connect_to_server()
       init_game()
       menu("cancel")
+      client_define_non_players()
     end
   end
 
@@ -455,6 +456,7 @@ function update_player(s)
   
   lsrand(s.seed or 0)
   if s.id == -2 then
+    debuggg = ""..#s.ships
     for _,ship in pairs(s.ships) do
       update_falling_ship(ship)
     end

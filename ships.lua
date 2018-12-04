@@ -87,6 +87,8 @@ end
 function update_ship(s)
   s.t=s.t+0.01*dt30f
   
+  lsrand(s.id)
+  
   load_shipinfo(s,ship_types[s.typ_id], true)
   
   local p = players[s.player]
@@ -159,6 +161,8 @@ function update_falling_ship(s)
     destroy_ship(s)
     return
   end
+  
+--  debuggg = ""..s.t
   
 --  load_shipinfo(s,ship_types[s.typ_id], true)
 
@@ -513,7 +517,8 @@ function pass_to_player(s, player)
     s.dead = false
     load_shipinfo(s,ship_types[s.typ_id], true)
     s.hp=s.stats.maxhp
-    create_convertring(s)
+    --create_convertring(s)
+    s.t = 0
   end
   
   -- temporary, should just take player color
@@ -554,6 +559,10 @@ function draw_ship(s)
     local x,y=s.x-inf.hlen*cos(s.aim),s.y-inf.hlen*sin(s.aim)
     local state=(s.boost==4) and "bfire" or "fire"
     draw_anim(x,y,inf.anim,state,s.t,s.aim)
+    
+    if s.t<0.5 then
+      draw_convertring(s, s.t)
+    end
   end
   
   if s.justfired>0 then
@@ -651,8 +660,8 @@ function draw_bullet(s)
 end
 
 
-
-function create_ship(x,y,vx,vy,typ_id,player_id)
+plane_id = 0
+function create_ship(x,y,vx,vy,typ_id,player_id,id)
   local typ
   if typ_id then
     typ=ship_types[typ_id]
@@ -664,6 +673,11 @@ function create_ship(x,y,vx,vy,typ_id,player_id)
   if typ=="helix" then
     create_helixship(x,y)
     return
+  end
+  
+  if not id then
+    id = plane_id
+    plane_id = plane_id + 1
   end
   
   local p = players[player_id]
@@ -679,12 +693,15 @@ function create_ship(x,y,vx,vy,typ_id,player_id)
     color     = pick(p.colors),
     aim       = rnd(1), -- atan2(x-p.x, y-p.y),
     
+    id        = id,
+    update_id = 0,
+    
     va        = 0,
     
     curcld    = 0,
     gothit    = 0,
     justfired = 0,
-    t         = rnd(1),
+    t         = 1+rnd(1),
     fxt       = 0,
     boost     = 0,
     shots     = 0,
@@ -714,6 +731,7 @@ function create_ship(x,y,vx,vy,typ_id,player_id)
   s.plt = ship_plts[s.color]
   
   register_object(s)
+  debuggg = ""..group_size("ship")
   
   return s
 end
@@ -825,7 +843,11 @@ function destroy_ship(s)
 
   deregister_object(s)
   if (players[s.player]) then
-    del(players[s.player].ships, s)
+    if server then
+      del(players[s.player].ships, s)
+    else
+      players[s.player].ships[s.id] = nil
+    end
   end
 end
 

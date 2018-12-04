@@ -40,8 +40,6 @@ function connect_to_server()
     castle_print("Connecting to server at "..address)
     
     connecting = true
-    
-    client_define_non_players()
   else
     castle_print("Already connected or connecting.")
   end
@@ -108,62 +106,45 @@ function read_client()
     
     local sh = p.ships
     local sh_d = (id == -2) and p_d[1] or p_d[8]
+
+    local readids = {}
+
+    for s_id,d in pairs(sh_d) do
     
-    --debuggg = #sh.." / "..#sh_d
-    if id == -2 then
-      for i=1,#sh_d do
-        local s = sh[i]
-        local d = sh_d[i]
-      
-        if s then
+      local s = sh[s_id]
+    
+      if s then
+        if s.update_id < d[8] then
           s.x      = d[1]
           s.y      = d[2]
           s.vx     = d[3]
           s.vy     = d[4]
           s.hp     = d[5]
-          s.typ_id = d[6]
-          s.type   = ship_types[d[6]]
-          s.t = min(s.t, 1)
-        else
-          s = create_ship(
-            d[1], d[2],
-            d[3], d[4],
-            d[6], id
-          )
-          s.t  = 1
-          s.hp = d[5]
-          sh[i] = s
+          s.t      = d[6]
+          s.typ_id = d[7]
+          s.type   = ship_types[s.typ_id]
+          s.update_id = d[8]
         end
+      else
+        s = create_ship(
+          d[1], d[2],
+          d[3], d[4],
+          d[7], id, s_id
+        )
+        s.t  = d[6]
+        s.hp = d[5]
+        s.update_id = d[8]
+        sh[s_id] = s
       end
-    else
-      for i=1,#sh_d do
-        local s = sh[i]
-        local d = sh_d[i]
       
-        if s then
-          s.x      = d[1]
-          s.y      = d[2]
-          s.vx     = d[3]
-          s.vy     = d[4]
-          s.hp     = d[5]
-          s.typ_id = d[6]
-          s.type   = ship_types[d[6]]
-        else
-          s = create_ship(
-            d[1], d[2],
-            d[3], d[4],
-            d[6], id
-          )
-          s.hp = d[5]
-          sh[i] = s
-        end
-      end
+      readids[s.id] = true
     end
     
-    while #sh > #sh_d do
-      deregister_object(sh[#sh])
-      sh[#sh] = nil
-      --del(sh, sh[#sh])
+    for s_id,s in pairs(sh) do
+      if not readids[s_id] then
+        deregister_object(s)
+        sh[s_id] = nil
+      end
     end
   end
 end
@@ -215,10 +196,14 @@ function update_client()
   end
 end
 
+ship_up_i = 0
+ship_up_k = 2
 function update_server()
   if not server then
     return
   end
+  
+  ship_up_i = ship_up_i + ship_up_k
   
   --local ps = {}
   for id, p in pairs(players) do
@@ -237,21 +222,36 @@ function update_server()
       
       --debuggg = #sh.." / "..#sh_d
       
+      readids = {}
+      
       for i=1,#sh do
         local s = sh[i]
-        sh_d[i] = {
-          flr(s.x),
-          flr(s.y),
-          s.vx,
-          s.vy,
-          s.hp,
-          s.typ_id
-        }
+        
+        if (i-ship_up_i)%#sh < ship_up_k or not sh_d[s.id] then
+          s.update_id = s.update_id + 1
+          sh_d[s.id] = {
+            flr(s.x),
+            flr(s.y),
+            s.vx,
+            s.vy,
+            s.hp,
+            s.t,
+            s.typ_id,
+            s.update_id
+          }
+        end
+        readids[s.id] = true
       end
       
-      while #sh_d > #sh do
-        sh_d[#sh_d] = nil
+      for s_id,d in pairs(sh_d) do
+        if not readids[s_id] then
+          sh_d[s_id] = nil
+        end
       end
+      
+      --while #sh_d > #sh do
+      --  sh_d[#sh_d] = nil
+      --end
     end
   end
   --server.share = ps

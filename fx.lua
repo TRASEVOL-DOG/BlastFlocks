@@ -9,13 +9,6 @@ require("sprite")
 
 
 
-function update_convertring(s)
-  s.t=s.t+1*dt30f
-  if s.t>=64 then
-    deregister_object(s)
-  end
-end
-
 function update_skull(s)
   s.t=s.t+0.01*dt30f
   
@@ -99,22 +92,21 @@ end
 
 
 
-function draw_convertring(s)
-  local ship=s.s
-  
-  local k=abs(flr(s.t/8)-5)
+function draw_convertring(s, t)
+  local t = t*2
+  local k = 3-abs(flr(t*10)-5)
   local ca, cb = lighter(s.color, k), lighter(s.color, k-1)
   
-  
   local foo=function()
-    circ(ship.x,ship.y,ship.info.hlen+3+2*cos(s.t/8),cb)
+    circ(s.x,s.y+1,s.info.hlen+3+2*cos(t*8),cb)
+    circ(s.x,s.y,s.info.hlen+3+2*cos(t*8),ca)
   end
   
-  draw_outline(foo,21)
+  draw_outline(foo,25)
   foo()
   
   font("small")
-  draw_text("^ SAVED ^",ship.x,ship.y-ship.info.hlen-6-k,1, 25,ca, cb)
+  draw_text("^ SAVED ^",s.x,s.y-s.info.hlen-6-k,1, 25,ca, cb)
 end
 
 function draw_skull(s)
