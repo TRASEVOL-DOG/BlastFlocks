@@ -294,7 +294,7 @@ function define_menus()
     connectplay={
       {"Play", start_game},
       {"Player Name", set_player_name, "text_field", 16, my_name},
-      {"Server Address", function(str) server_address=str end, "text_field", 6, server_address},
+      {"Server Address", function(str) server_address=str end, "text_field", 16, server_address},
       {"Port", function(str) server_port=str end, "text_field", 6, server_port},
       {"Back", menu_back}
     },
