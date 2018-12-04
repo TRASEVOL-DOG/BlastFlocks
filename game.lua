@@ -18,6 +18,8 @@ player = nil
 my_id = nil
 players = {}
 my_name = pick{"Governor", "Captain", "Jarl", "Commander", "President", "General", "Admiral", "Marshal", "Chancellor"}.." "..pick{"Addison", "Ainslie", "Alexis", "Alpha", "Angel", "Arden", "Ashley", "Ashton", "Aubrey", "Audie", "Avery", "Bailey", "Beverly", "Billie", "Blair", "Blake", "Braidy", "Brook", "Cameron", "Carey", "Carson", "Casey", "Charlie", "Corry", "Courtney", "Kree", "Dakota", "Dallas", "Darby", "Darian", "Delaney", "Dell", "Devin", "Drew", "Elliot", "Ellis", "Emerson", "Emery", "Erin", "Esme", "Evan", "Evelyn", "Finley", "Finn", "Freddie", "Flynn", "Gail", "Gerrie", "Gwynn", "Hadley", "Halsey", "Harley", "Haiden", "Hailey", "Hilary", "Hollis", "Hudson", "Ivy", "Jaime", "Jan", "Jean", "Jerry", "Jesse", "Jocelyn", "Jodi", "Joey", "Jonny", "Jordan", "Jude", "Justice", "Kai", "Kye", "Kary", "Kay", "Keegan", "Kelly", "Kenzie", "Kerry", "Kim", "Kirby", "Kit", "Kyrie", "Lane", "Laurel", "Laurence", "Lauren", "Lee", "Leighton", "Lesley", "Lindsey", "Logan", "Loren", "Lucky", "Madison", "Madox", "Marion", "Marley", "Marlowe", "Mason", "Meade", "Meredith", "Merle", "Micah", "Milo", "Morgan", "Murphy", "Nash", "Nova", "Odell", "Paige", "Palmer", "Parker", "Paris", "Paxton", "Peyton", "Quinn", "Randy", "Reagan", "Rennie", "Reed", "Reese", "Ricky", "Riley", "Ridley", "Robin", "Rory", "Rowan", "Royce", "Rudy", "Ryan", "Rylan", "Sasha", "Sawyer", "Skyler", "Scout", "Selby", "Shane", "Shannon", "Shay", "Shelby", "Shelley", "Sheridan", "Shirley", "Sidney", "Skeeter", "Spencer", "Stormy", "Tanner", "Taran", "Tatum", "Taylor", "Tegan", "Temple", "Terry", "Toby", "Tommie", "Toni", "Torrance", "Tori", "Tracy", "Tristan", "Tyler", "Valentine", "Vivian", "Wallis", "Willie", "Winnie", "Wyatt", "Zane"}
+connecting = false
+connect_t = false
 
 function _init()
 --  fullscreen()
@@ -94,9 +96,11 @@ function _update(dt)
 
 --  read_server()
 
-  if mainmenu then
+  if connecting then
+    update_connection_screen()
+  elseif mainmenu then
     update_mainmenu()
-    if btnr(7) then love.event.push("quit") end
+    if btnr(7) and curmenu=="mainmenu" then love.event.push("quit") end
   else
     xmod,ymod=0,0
     update_game(dt)
@@ -116,7 +120,9 @@ end
 
 debuggg = ""
 function _draw()
-  if mainmenu then
+  if connecting then
+    draw_connection_screen()
+  elseif mainmenu then
     draw_mainmenu()
   else
     draw_game()
@@ -150,6 +156,8 @@ function init_game()
   level=1
   levelt=1
   score=0
+  
+  highest = 0
   
   dangerlvl=0
   
@@ -289,10 +297,10 @@ end
 
 function define_menus()
   function start_game()
-    menu_back()
-    init_game()
-    
     if server then
+      menu_back()
+      init_game()
+    
       deregister_object(player)
       my_id = 0
       player = server_new_player(0)
@@ -302,6 +310,8 @@ function define_menus()
     
     if not server then
       connect_to_server()
+      init_game()
+      menu("cancel")
     end
   end
 
@@ -318,11 +328,14 @@ function define_menus()
       {"Port", function(str) server_port=str end, "text_field", 6, server_port},
       {"Back", menu_back}
     },
+    cancel={
+      {"Go Back", function() connecting=false main_menu() end}
+    },
     hostplay={
       {"Play", function() start_server() start_game() end},
       {"Player Name", set_player_name, "text_field", 16, my_name},
       {"Port", function(str) server_port=str end, "text_field", 6, server_port},
-      {"Back", menu_back}
+      {"Back", function() menu("mainmenu") end}
     },
     settings={
       {"Fullscreen", fullscreen},
@@ -704,6 +717,31 @@ function update_ui_controls()
   end
   
   return false
+end
+
+function update_connection_screen()
+  if client and client.connected and client.id then
+    if client.share[client.id] and group_size("ship_player"..client.id)>0 then
+      my_id = client.id
+      connecting = false
+      menu_back()
+      menu_back()
+      
+      local mx,my = get_mass_pos("ship_player"..my_id)
+      local scrnw, scrnh = screen_size()
+      cam.x = mx
+      cam.y = my
+      
+      massx, massy = mx, my
+      massvx, massvy = 0, 0
+    end
+  end
+  
+  update_shake()
+  update_player(player)
+  
+  local scrnw, scrnh = screen_size()
+  update_menu(scrnw/2, 0.85*scrnh)
 end
 
 function wrap_around(s)
@@ -1136,6 +1174,74 @@ function draw_gameover()
   end
   
   draw_menu(scrnw/2,scrnh/2+48,t)
+end
+
+function draw_connection_screen()
+  xmod,ymod=cam:screen_pos()
+  xmod=xmod+shkx
+  ymod=ymod+shky
+
+  cls(25)
+  
+  local scrnw, scrnh = screen_size()
+  
+  font("big")
+  
+  local t = love.timer.getTime()
+  
+  local str = " Connecting... "
+  -- -\|/-*oOo*
+  local cha = {"-", "\\", "|", "/"}
+  local chb = {"-", "/", "|", "\\"}
+  for i=0,0 do
+    local ca = cha[flr(t*10) % #cha +1]
+    local cb = chb[flr(t*10) % #chb +1]
+    str = ca..str..cb
+  end
+  
+  --draw_text("Connecting...", scrnw/2, 0.15*scrnh)
+  draw_text(str, scrnw/2, 0.15*scrnh-16)
+  draw_text("to "..server_address..":"..server_port, scrnw/2, 0.15*scrnh)
+  
+  local x,y = scrnw/2, 0.5*scrnh
+  
+  local aa = t*0.2
+  local co = cos(aa)
+  local si = sin(aa)
+  
+  local ta = {}
+  
+  
+  local ki=5
+  for j=0,4 do
+    all_colors_to(25-j)
+    
+    for i=1,ki do
+    
+      local a=i/ki+t*0.4+j*0.01
+      
+      local xx = 96*cos(a)
+      local yy = 48*sin(a*2)
+      local xxx = xx*co-yy*si
+      local yyy = xx*si+yy*co
+      
+      if j>0 then
+        local aa = atan2(xxx-ta[i][1], yyy-ta[i][2])
+        
+
+        draw_anim(x+xxx, y+yyy, "bigship", "rotate", aa, aa, false, (aa+0.25)%1>0.5)
+      end
+      
+      ta[i]={xxx,yyy}
+    end
+  end
+  
+  all_colors_to()
+  
+  draw_menu(scrnw/2, 0.85*scrnh)
+  
+  camera(xmod, ymod)
+  player:draw()
 end
 
 ping_t = 0

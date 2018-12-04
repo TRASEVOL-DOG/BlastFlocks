@@ -119,7 +119,7 @@ function update_menu(x,y)
     
     if m.chosen and m.chosen.typ == "text_field" then
       if menulock then
-        if btnp(8) then
+        if btnp(8) or btnp(7) then
           sfx("confirm")
           menulock = false
           love.keyboard.setTextInput(false)

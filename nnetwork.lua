@@ -39,6 +39,8 @@ function connect_to_server()
     client.changed = read_client
     castle_print("Connecting to server at "..address)
     
+    connecting = true
+    
     client_define_non_players()
   else
     castle_print("Already connected or connecting.")
@@ -269,7 +271,11 @@ end
 function client_disconnect()
   if not client then return end
   
-  castle_print("Disconnecting as client #"..client.id)
+  if client.id then
+    castle_print("Disconnecting as client #"..client.id)
+  else
+    castle_print("Abandoning connection.")
+  end
   
   client.id, client.connected = nil, nil
   client, my_id = nil, nil
