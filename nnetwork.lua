@@ -104,6 +104,7 @@ function read_client()
         p.boosting = p_d[4]
       end
     end
+    p.name = p_d[9] or ""
     
     local sh = p.ships
     local sh_d = (id == -2) and p_d[1] or p_d[8]
@@ -181,6 +182,7 @@ function read_server()
       p.y = ho[2]  or 0
       p.shooting = ho[3]
       p.boosting = ho[4]
+      p.name = ho[5]
       
       --debuggg = (p.x).." ? "..(ho[1] or 0).." id : "..id.." - "
       --for i,k in pairs(ho) do
@@ -207,6 +209,7 @@ function update_client()
     client.home[2] = flr(player.y)
     client.home[3] = player.shooting
     client.home[4] = player.boosting
+    client.home[5] = my_name
     
     --error(type(player.x).."|"..type(player.y).."|"..type(player.shooting).."|"..type(player.boosting))
   end
@@ -226,6 +229,7 @@ function update_server()
         p_d[2] = flr(p.y)
         p_d[3] = p.shooting
         p_d[4] = p.boosting
+        p_d[9] = p.name
       end
       
       local sh = p.ships
@@ -306,7 +310,7 @@ function server_new_player(player_id)
     [6] = colors[2],
     [7] = seed,
     [8] = {}, -- planes, filled up in server_update
-    --[9] = {}  -- bullets, filled up in server_update
+    --[9] = {}  -- name
   }
   server.share[player_id] = p_d
   

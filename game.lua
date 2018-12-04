@@ -172,8 +172,7 @@ end
 function update_game()
   t=t+0.01*dt30f
   
-  
-  -- TESTING: SERVER - ADD 5 PLANES TO EVERYONE
+  -- TESTING: SERVER - ADD 1 PLANE TO EVERYONE
   if server and btnp(5) then
     for id,p in pairs(players) do
       if id>=0 then
@@ -182,18 +181,11 @@ function update_game()
     end
   end
   
-  
-  
   update_shake()
   
   if update_ui_controls() then
     return
   end
-  
---  levelt=max(levelt-0.01*dt30f,0)
---  if dangerlvl<flr(flr(level)/24*100) then
---    dangerlvl=dangerlvl+0.3*dt30f
---  end
   
   for o in group("to_wrap") do
     if o.x then
@@ -207,32 +199,6 @@ function update_game()
   
   shootshake=min(shootshake,2)
   add_shake(shootshake)
-  
---  if lastlevel~=flr(level) then
---    for i=1,8 do
---      create_screenglitch(256,min(level*16,256))
---    end
---    sfx("levelup")
---    levelt=1
---  end
---  lastlevel=flr(level)
-  
---  local armyk=group_size("friend_ship")
---  if armyk<12 and level>=8 and group_size("hole")==0 and rnd(100)<1 then
---    local a
---    local x,y
---    
---    for i=0,2 do
---      a=atan2(massvx,massvy)+i*0.25+rnd(0.2)-0.1
---      x,y=massx+600*cos(a),massy+600*sin(a)
---      
---      if y>50 and y<areah-50 then
---        break
---      end
---    end
---    
---    create_hole(x,y,level)
---  end
   
   local omx=massx
   local omy=massy
@@ -254,14 +220,16 @@ function update_game()
   massvx=massx-omx
   massvy=massy-omy
   
+  if my_id and group_exists("ship_player"..my_id) then
+    highest = max(highest, group_size("ship_player"..my_id))
+  end
+  
   scoredisp=round(lerp(scoredisp,score,0.51*dt30f))
 --  fshipdisp=fshipdisp+sgn(group_size("friend_ship")-fshipdisp)
 --  eshipdisp=eshipdisp+sgn(group_size("enemy_ship")-eshipdisp)
 end
 
 function draw_game()
-  
-
   xmod,ymod=cam:screen_pos()
   xmod=xmod+shkx
   ymod=ymod+shky
@@ -279,20 +247,20 @@ function draw_game()
 --  draw_levelup()
 
   draw_minimap()
+  draw_leaderboard()
   
   local scrnw,scrnh=screen_size()
   
   if paused then
     draw_pause()
-    camera(xmod,ymod)
-    player:draw()
   elseif gameover then
     draw_gameover()
-    camera(xmod,ymod)
-    player:draw()
   else
     draw_score()
   end
+  
+  camera(xmod,ymod)
+  player:draw()
 end
 
 function define_menus()
@@ -304,6 +272,7 @@ function define_menus()
       deregister_object(player)
       my_id = 0
       player = server_new_player(0)
+      player.name = my_name
       
       server_define_non_players()
     end
@@ -720,6 +689,8 @@ function update_ui_controls()
 end
 
 function update_connection_screen()
+  t=t+0.01*dt30f
+
   if client and client.connected and client.id then
     if client.share[client.id] and group_size("ship_player"..client.id)>0 then
       my_id = client.id
@@ -1022,7 +993,7 @@ function draw_minimap()
   
   local scrnw, scrnh = screen_size()
   local x = scrnw - 4 - w
-  local y = 4
+  local y = scrnh - h - 4
   
   local dx,dy = get_mass_pos("ship_player"..my_id)
   dx = dx % areaw
@@ -1081,6 +1052,36 @@ function draw_minimap()
   rect(x, y-1, x+w-1, y+h-1, 21)
 end
 
+leaderboard_w = 4
+function draw_leaderboard()
+  local l = gen_leaderboard()
+  
+  local scrnw, scrnh = screen_size()
+  local w = leaderboard_w
+  local x = scrnw - 4 - w
+  local y = 4
+  
+  local xb = scrnw - 4
+  
+  font("big")
+  draw_text("Leaderboard:", x+w/2-6, y)
+  y = y + 16
+  for i=1,#l do
+    local p,n = players[l[i][1]], l[i][2]
+    local c = 20+min(i, 3)
+    if l[i][1] == my_id then
+      draw_text("> "..i.." - ", x, y, 2, nil, c)
+    else
+      draw_text(i.." - ", x, y, 2, nil, c)
+    end
+    local str = (p.name or "").." ("..n..")"
+    draw_text(str, xb, y, 2, nil, c)
+    
+    leaderboard_w = max(leaderboard_w, str_width(str)+2)
+    y = y + 16
+  end
+end
+
 
 function draw_levelup()
   if levelt>0 then
@@ -1105,7 +1106,16 @@ function draw_score()
   if my_id and group_exists("ship_player"..my_id) then
     str=group_size("ship_player"..my_id)
   end
-  draw_text("Ships: "..str,scrnw/2,scrnh-14)
+  draw_text("Ships: "..str,scrnw/2,scrnh-30)
+  draw_text("Highest: "..highest,scrnw/2,scrnh-14, 1, nil, 13)
+
+--  clip(0,0,scrnw,10)
+--  draw_text("Playing as "..my_name, scrnw/2, 6, 1, nil, player.colors[1])
+--  clip(0,10,scrnw,1)
+--  draw_text("Playing as "..my_name, scrnw/2, 6, 1, nil, nil)
+--  clip(0,11,scrnw,12)
+--  draw_text("Playing as "..my_name, scrnw/2, 6, 1, nil, player.colors[2])
+--  clip()
 end
 
 function draw_pause()
@@ -1446,6 +1456,7 @@ end
 --misc
 function set_player_name(str)
   my_name = str
+  player.name = str
 end
 
 function bignumstr(n,sep)
@@ -1469,3 +1480,24 @@ function boomsfx(x,y)
   sfx(str,x,y)
 end
 
+function gen_leaderboard()
+  local t={}
+  for id,p in pairs(players) do
+    if id>=0 then
+      local n=group_size("ship_player"..id)
+      local pos
+      for i=1,#t do
+        if n>t[i][2] then
+          pos = i
+          break
+        end
+      end
+      if pos then
+        add(t, pos, {id, n})
+      else
+        add(t, {id, n})
+      end
+    end
+  end
+  return t
+end

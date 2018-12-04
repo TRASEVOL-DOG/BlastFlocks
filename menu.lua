@@ -38,19 +38,19 @@ function init_menu(l)
     }
     
     if n.typ=="button" then
-      n.w=#n.name*8+8
+      n.w=#n.name*6+8
       n.h=16
     elseif n.typ=="slider" then
       n.slidmax=o[4] or 1
       n.slidmin=o[5] or 0
       n.slidw=o[6] or 64
       n.slidv=n.call()
-      n.w=max(#n.name*8+8,n.slidw+8)
+      n.w=max(#n.name*6+8,n.slidw+8)
       n.h=32
     elseif n.typ=="text_field" then
       n.mlen = o[4] or 24
       n.txt = o[5] or ""
-      n.w = max(#n.name*8, n.mlen*8)+8
+      n.w = max(#n.name*6, n.mlen*6)+8
       n.h = 32
     end
     
@@ -119,7 +119,7 @@ function update_menu(x,y)
     
     if m.chosen and m.chosen.typ == "text_field" then
       if menulock then
-        if btnp(8) or btnp(7) then
+        if btnp(8) or btnp(7) or mouse_btnp(0) then
           sfx("confirm")
           menulock = false
           love.keyboard.setTextInput(false)

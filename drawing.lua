@@ -252,6 +252,16 @@ function draw_text(str,x,y,al,c0,c1,c2)
   super_print(str,x,y,c0,c1,c2)
 end
 
+function str_width(str, fnt)
+  if fnt then
+    fnt = graphics.fonts[name]
+  else
+    fnt = graphics.curfont
+  end
+  
+  return fnt:getWidth(str)
+end
+
 
 function draw_outline(draw,c,arg)
   local c=c or 25
