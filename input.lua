@@ -81,7 +81,7 @@ function update_input_mgr()
 end
 
 
-function love.keypressed(key)
+function input_keypressed(key)
   local k=input.layout[key]
   
   if k then
@@ -92,7 +92,7 @@ function love.keypressed(key)
   menu_keypressed(key)
 end
 
-function love.keyreleased(key)
+function input_keyreleased(key)
   local k=input.layout[key]
   
   if k then
@@ -101,12 +101,12 @@ function love.keyreleased(key)
   end
 end
 
-function love.mousepressed(x,y,k,istouch)
+function input_mousepressed(x,y,k,istouch)
   input.mosbtn_state[k-1]=true
   input.mosbtn_press[k-1]=true
 end
 
-function love.mousereleased(x,y,k,istouch)
+function input_mousereleased(x,y,k,istouch)
   input.mosbtn_state[k-1]=false
   input.mosbtn_release[k-1]=true
 end

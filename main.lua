@@ -19,7 +19,7 @@ function love.load()
   _init()
   
   love.keyboard.setKeyRepeat(true)
-  love.keyboard.setTextInput(false)
+--  love.keyboard.setTextInput(false)
 end
 
 function love.draw()
@@ -74,6 +74,26 @@ function love.resize(w,h)
   graphics.wind_h=h
   graphics.scrn_w=flr(w/scy)
   graphics.scrn_h=flr(h/scx)
+end
+
+function love.textinput(text)
+  menu_textinput(text)
+end
+
+function love.keypressed(key)
+  input_keypressed(key)
+end
+
+function love.keyreleased(key)
+  input_keyreleased(key)
+end
+
+function love.mousepressed(x,y,k,istouch)
+  input_mousepressed(x,y,k,istouch)
+end
+
+function love.mousereleased(x,y,k,istouch)
+  input_mousereleased(x,y,k,istouch)
 end
 
 

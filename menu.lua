@@ -113,7 +113,7 @@ function update_menu(x,y)
       elseif o.typ=="text_field" and mouse_btnp(0) then
         sfx("confirm")
         menulock = true
-        love.keyboard.setTextInput(true)
+        love.keyboard.setTextInput(true, x, oy, o.w, o.h)
       end
     end
     
@@ -122,7 +122,9 @@ function update_menu(x,y)
         if btnp(8) or btnp(7) then
           sfx("confirm")
           menulock = false
+          if (debug_mode == 1) then
           love.keyboard.setTextInput(false)
+          end
         end
       end
     end
@@ -212,7 +214,7 @@ function menu_back()
 end
 
 
-function love.textinput(text)
+function menu_textinput(text)
   local o = menus[curmenu].chosen
   if not o.txt or not menulock then return end
   
