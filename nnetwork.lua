@@ -115,6 +115,9 @@ function read_client()
     
       if s then
         if s.update_id < d[8] then
+          s.dx = s.dx+ (((s.x-d[1]+areaw/2)%areaw)-areaw/2)
+          s.dy = s.dy+ s.y-d[2]
+          
           s.x      = d[1]
           s.y      = d[2]
           s.vx     = d[3]
@@ -142,8 +145,12 @@ function read_client()
     
     for s_id,s in pairs(sh) do
       if not readids[s_id] then
-        deregister_object(s)
-        sh[s_id] = nil
+        if id > -2 or s.t < -1.8 then -- visible destroy
+          destroy_ship(s)
+        else                          -- discreet destroy
+          deregister_object(s)
+          sh[s_id] = nil
+        end
       end
     end
   end
@@ -164,13 +171,6 @@ function read_server()
       p.shooting = ho[3]
       p.boosting = ho[4]
       p.name = ho[5]
-      
-      --debuggg = (p.x).." ? "..(ho[1] or 0).." id : "..id.." - "
-      --for i,k in pairs(ho) do
-      --  debuggg = debuggg..i..":"..type(k).." | "
-      --end
-      
-      --error(type(p.x).."|"..type(p.y).."|"..type(p.shooting).."|"..type(p.boosting))
     else
       server_new_player(id)
     end
@@ -185,14 +185,11 @@ function update_client()
   end
   
   if players[my_id] then
-    --local p_d = client.home
     client.home[1] = flr(player.x)
     client.home[2] = flr(player.y)
     client.home[3] = player.shooting
     client.home[4] = player.boosting
     client.home[5] = my_name
-    
-    --error(type(player.x).."|"..type(player.y).."|"..type(player.shooting).."|"..type(player.boosting))
   end
 end
 
@@ -219,8 +216,6 @@ function update_server()
       
       local sh = p.ships
       local sh_d = (id == -2) and p_d[1] or p_d[8]
-      
-      --debuggg = #sh.." / "..#sh_d
       
       readids = {}
       

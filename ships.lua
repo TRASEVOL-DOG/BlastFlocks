@@ -109,21 +109,36 @@ function update_ship(s)
     update_ship_shooting(s,adif)
   end
   
+  local xx,yy
+  if client then
+    --s.dx = lerp(s.dx, 0, 0.075*dt30f)
+    --s.dy = lerp(s.dy, 0, 0.075*dt30f)
+    
+    s.dx = s.dx - sgn(s.dx)*min(abs(s.dx), dt30f)
+    s.dy = s.dy - sgn(s.dy)*min(abs(s.dy), dt30f)
+    
+    xx = s.x + s.dx
+    yy = s.y + s.dy
+  else
+    xx = s.x
+    yy = s.y
+  end
+  
   s.fxt = s.fxt - delta_time
   if s.fxt <= 0 then
     if s.dead then
       if rnd(3)<1 then
-        create_smoke(s.x,s.y,1,1+rnd(3))
+        create_smoke(xx,yy,1,1+rnd(3))
       elseif rnd(2)<1 then
-        create_smoke(s.x,s.y,1,1+rnd(3),25)
+        create_smoke(xx,yy,1,1+rnd(3),25)
       end
     else
       if (rnd(64)>group_size("ship_player"..s.player)) then
-        create_smoke(s.x,s.y,2,rnd(3),pick{21, s.color},s.aim+0.5)
+        create_smoke(xx,yy,2,rnd(3),pick{21, s.color},s.aim+0.5)
       end
       
       if s.hp<s.stats.maxhp/3 and rnd(2)<1 then
-        create_smoke(s.x,s.y,1,rnd(3),25,rnd(1))
+        create_smoke(xx,yy,1,rnd(3),25,rnd(1))
       end
     end
     s.fxt = 0.033
@@ -495,10 +510,16 @@ end
 
 function pass_to_player(s, player)
   group_del("ship_player"..s.player, s)
-  del(players[s.player].ships, s)
-  
   group_add("ship_player"..player,s)
-  add(players[player].ships, s)
+  
+  if server then
+    del(players[s.player].ships, s)
+    add(players[player].ships, s)
+  else
+    players[s.player].ships[s.id] = nil
+    players[player].ships[s.id] = s
+  end
+  
   s.player = player
   
   if s.player == -2 then
@@ -534,8 +555,20 @@ function draw_ship(s)
   local ofx,ofy=0,0
   if s.boost==4 then ofx,ofy=ofx+rnd(2)-1,ofy+rnd(2)-1 end
   
-  local foo=function()
+  local xx,yy
+  if client and debug_mode~=1 then
+    xx, yy = s.x+s.dx, s.y+s.dy
+  else
+    xx, yy = s.x, s.y
+  end
+  
+  if debug_mode==2 then
+    all_colors_to(21)
     draw_anim(s.x+ofx,s.y+ofy,inf.anim,"rotate",s.aim,s.aim,false,(s.aim+0.25)%1>0.5)
+  end
+  
+  local foo=function()
+    draw_anim(xx+ofx,yy+ofy,inf.anim,"rotate",s.aim,s.aim,false,(s.aim+0.25)%1>0.5)
   end
   
   draw_outline(foo,25)
@@ -552,7 +585,7 @@ function draw_ship(s)
   all_colors_to()
   
   if not s.dead then
-    local x,y=s.x-inf.hlen*cos(s.aim),s.y-inf.hlen*sin(s.aim)
+    local x,y=xx-inf.hlen*cos(s.aim),yy-inf.hlen*sin(s.aim)
     local state=(s.boost==4) and "bfire" or "fire"
     draw_anim(x,y,inf.anim,state,s.t,s.aim)
     
@@ -562,7 +595,7 @@ function draw_ship(s)
   end
   
   if s.justfired>0 then
-    local x,y=s.x+(inf.hlen+1)*cos(s.aim),s.y+(inf.hlen+1)*sin(s.aim)
+    local x,y=xx+(inf.hlen+1)*cos(s.aim),yy+(inf.hlen+1)*sin(s.aim)
     spr(20,0,x,y,1,1,s.aim,false,false,1,3)
     s.justfired=s.justfired-1
   end
@@ -571,9 +604,9 @@ function draw_ship(s)
     for i=0,0.75,0.25 do
       local a=i+s.t*1.5+s.k
       local d=inf.hlen+7+3*cos(s.t*8+s.k)
-      local x1,y1=s.x+d*cos(a),s.y+d*sin(a)
+      local x1,y1=xx+d*cos(a),yy+d*sin(a)
       d=d+6
-      local x2,y2=s.x+d*cos(a),s.y+d*sin(a)
+      local x2,y2=xx+d*cos(a),yy+d*sin(a)
       
       local foo=function()
         line(x1,y1,x2,y2,21)
@@ -715,15 +748,10 @@ function create_ship(x,y,vx,vy,typ_id,player_id,id)
   
   s.w, s.h = s.info.w, s.info.w
   
---  if friend then upgrade_ship(s) end
+  if client then
+    s.dx, s.dy = 0, 0
+  end
   
---  if player_id == my_id then
---    s.c   = pick({9,10})
---    s.plt = friendpal
---  else
---    s.c   = pick({8,14})
---    s.plt = enemypal
---  end
   s.plt = ship_plts[s.color]
   
   register_object(s)

@@ -20,6 +20,7 @@ players = {}
 my_name = pick{"Governor", "Captain", "Jarl", "Commander", "President", "General", "Admiral", "Marshal", "Chancellor"}.." "..pick{"Addison", "Ainslie", "Alexis", "Alpha", "Angel", "Arden", "Ashley", "Ashton", "Aubrey", "Audie", "Avery", "Bailey", "Beverly", "Billie", "Blair", "Blake", "Braidy", "Brook", "Cameron", "Carey", "Carson", "Casey", "Charlie", "Corry", "Courtney", "Kree", "Dakota", "Dallas", "Darby", "Darian", "Delaney", "Dell", "Devin", "Drew", "Elliot", "Ellis", "Emerson", "Emery", "Erin", "Esme", "Evan", "Evelyn", "Finley", "Finn", "Freddie", "Flynn", "Gail", "Gerrie", "Gwynn", "Hadley", "Halsey", "Harley", "Haiden", "Hailey", "Hilary", "Hollis", "Hudson", "Ivy", "Jaime", "Jan", "Jean", "Jerry", "Jesse", "Jocelyn", "Jodi", "Joey", "Jonny", "Jordan", "Jude", "Justice", "Kai", "Kye", "Kary", "Kay", "Keegan", "Kelly", "Kenzie", "Kerry", "Kim", "Kirby", "Kit", "Kyrie", "Lane", "Laurel", "Laurence", "Lauren", "Lee", "Leighton", "Lesley", "Lindsey", "Logan", "Loren", "Lucky", "Madison", "Madox", "Marion", "Marley", "Marlowe", "Mason", "Meade", "Meredith", "Merle", "Micah", "Milo", "Morgan", "Murphy", "Nash", "Nova", "Odell", "Paige", "Palmer", "Parker", "Paris", "Paxton", "Peyton", "Quinn", "Randy", "Reagan", "Rennie", "Reed", "Reese", "Ricky", "Riley", "Ridley", "Robin", "Rory", "Rowan", "Royce", "Rudy", "Ryan", "Rylan", "Sasha", "Sawyer", "Skyler", "Scout", "Selby", "Shane", "Shannon", "Shay", "Shelby", "Shelley", "Sheridan", "Shirley", "Sidney", "Skeeter", "Spencer", "Stormy", "Tanner", "Taran", "Tatum", "Taylor", "Tegan", "Temple", "Terry", "Toby", "Tommie", "Toni", "Torrance", "Tori", "Tracy", "Tristan", "Tyler", "Valentine", "Vivian", "Wallis", "Willie", "Winnie", "Wyatt", "Zane"}
 connecting = false
 connect_t = false
+debug_mode = 0
 
 function _init()
 --  fullscreen()
@@ -105,6 +106,15 @@ function _update(dt)
     xmod,ymod=0,0
     update_game(dt)
     xmod,ymod=0,0
+  end
+  
+  if btnp(5) then
+    debug_mode = (debug_mode+1)%3
+    if debug_mode > 0 then
+      debuggg = "debug_mode = "..debug_mode
+    else
+      debuggg = ""
+    end
   end
   
   network_t = network_t - delta_time
@@ -456,7 +466,6 @@ function update_player(s)
   
   lsrand(s.seed or 0)
   if s.id == -2 then
-    debuggg = ""..#s.ships
     for _,ship in pairs(s.ships) do
       update_falling_ship(ship)
     end
@@ -1266,11 +1275,7 @@ function draw_network_state()
     y = y + (big and 16 or 12)
   end
 
-  --font("small")
-  
   camera(0,0)
---  draw_text(""..#players, 2,2,0)
-  
   local scrnw, scrnh = screen_size()
   x,y,al = 4, 4, 0
   
@@ -1340,7 +1345,6 @@ function draw_network_state()
   end
 
   if #debuggg > 0 then
-    --draw_text("debug: "..debuggg, x, y, 0)  y = y+12
     _log("debug: "..debuggg, false, 21)
   end
 end
