@@ -590,7 +590,7 @@ function draw_ship(s)
     draw_anim(x,y,inf.anim,state,s.t,s.aim)
     
     if s.t<0.5 then
-      draw_convertring(s, s.t)
+      draw_convertring(s, xx, yy, s.t)
     end
   end
   
