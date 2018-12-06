@@ -105,9 +105,7 @@ function update_ship(s)
   
   local adif=update_ship_movement(s)
   
-  if not gameover then
-    update_ship_shooting(s,adif)
-  end
+  update_ship_shooting(s,adif)
   
   local xx,yy
   if client then
@@ -126,19 +124,23 @@ function update_ship(s)
   
   s.fxt = s.fxt - delta_time
   if s.fxt <= 0 then
+    local l = s.info.hlen+4
+    local sxx = xx-l*s.co
+    local syy = yy-l*s.si
+    
     if s.dead then
       if rnd(3)<1 then
-        create_smoke(xx,yy,1,1+rnd(3))
+        create_smoke(sxx,syy,1,1+rnd(3))
       elseif rnd(2)<1 then
-        create_smoke(xx,yy,1,1+rnd(3),25)
+        create_smoke(sxx,syy,1,1+rnd(3),25)
       end
     else
       if (rnd(64)>group_size("ship_player"..s.player)) then
-        create_smoke(xx,yy,2,rnd(3),pick{21, s.color},s.aim+0.5)
+        create_smoke(sxx,syy,2,rnd(3),pick{21, s.color},s.aim+0.5)
       end
       
       if s.hp<s.stats.maxhp/3 and rnd(2)<1 then
-        create_smoke(xx,yy,1,rnd(3),25,rnd(1))
+        create_smoke(sxx,syy,1,rnd(3),25,rnd(1))
       end
     end
     s.fxt = 0.033
@@ -189,9 +191,10 @@ function update_falling_ship(s)
   s.fxt = s.fxt - delta_time
   if s.fxt <= 0 then
     if rnd(3)<1 then
-      create_smoke(s.x,s.y,1,1+rnd(3),23)
+      create_smoke(s.x, s.y, 1,1+rnd(3),23)
     elseif rnd(2)<1 then
-      create_smoke(s.x,s.y,1,1+rnd(3),25)
+      local l = s.info.hlen
+      create_smoke(s.x, s.y, 1,1+rnd(3),25)
     end
 
     s.fxt = 0.033
@@ -219,19 +222,20 @@ function update_ship_movement(s)
     
     local acc = stt.acc+s.boost*0.05
     
-    s.vx = s.vx+acc*cos(s.aim)*dt30f
-    s.vy = s.vy+acc*sin(s.aim)*dt30f
+    s.co = cos(s.aim)
+    s.si = sin(s.aim)
+    
+    s.vx = s.vx+acc*s.co*dt30f
+    s.vy = s.vy+acc*s.si*dt30f
   end
   
   s.vy = s.vy+stt.grv*dt30f
   
   local spd=dist(s.vx,s.vy)
-  local dir=atan2(s.vx,s.vy)
+  local nspd=min(spd,stt.spdcap+s.boost)
   
-  spd=min(spd,stt.spdcap+s.boost)
-  
-  s.vx = spd*cos(dir)
-  s.vy = spd*sin(dir)
+  s.vx = s.vx/spd*nspd
+  s.vy = s.vy/spd*nspd
   
   s.x = s.x+s.vx*dt30f
   s.y = s.y+s.vy*dt30f
@@ -259,26 +263,23 @@ function update_ship_shooting(s,adif)
       s.curcld=max(stt.attack,s.curcld)
     end
     
-    if p.shooting then
-      local dir=s.aim
-      local cur=atan2(p.x-s.x,p.y-s.y)
-      shootdir=dir+0.5*angle_diff(dir,cur)
-    else
-      s.shootin=false
-    end
-  else
-    if abs(adif)<0.2 and dist(s.x,s.y,massx,massy)<400 then
-      if not s.shootin then
-        s.shootin=true
-        s.curcld=max(stt.attack,s.curcld)
-      end
-      shootdir=s.aim
-    else
-      s.shootin=false
-    end
+    s.shootin = p.shooting
+
+--  else
+--    if abs(adif)<0.2 and dist(s.x,s.y,massx,massy)<400 then
+--      if not s.shootin then
+--        s.shootin=true
+--        s.curcld=max(stt.attack,s.curcld)
+--      end
+--      shootdir=s.aim
+--    else
+--      s.shootin=false
+--    end
   end
   
   if s.shootin and s.curcld<=0 then
+    local shootdir = s.aim + 0.25*adif
+  
     local d=inf.hlen+8
     local x,y=s.x+d*cos(shootdir),s.y+d*sin(shootdir)
     create_bullet(x, y, shootdir+rnd(0.01)-0.005, stt.bltspd, s.color, s.player)
@@ -585,17 +586,19 @@ function draw_ship(s)
   all_colors_to()
   
   if not s.dead then
-    local x,y=xx-inf.hlen*cos(s.aim),yy-inf.hlen*sin(s.aim)
+    local l = inf.hlen
+    local x, y = xx-l*s.co, yy-l*s.si
     local state=(s.boost==4) and "bfire" or "fire"
     draw_anim(x,y,inf.anim,state,s.t,s.aim)
     
-    if s.t<0.5 then
+    if s.t<0.3 then
       draw_convertring(s, xx, yy, s.t)
     end
   end
   
   if s.justfired>0 then
-    local x,y=xx+(inf.hlen+1)*cos(s.aim),yy+(inf.hlen+1)*sin(s.aim)
+    local l = inf.hlen+1
+    local x,y=xx+l*s.co,yy+l*s.si
     spr(20,0,x,y,1,1,s.aim,false,false,1,3)
     s.justfired=s.justfired-1
   end
@@ -688,6 +691,23 @@ function draw_bullet(s)
   all_colors_to()
 end
 
+function draw_convertring(s, x, y, t)
+  local t = t/0.3
+  local k = min(4-abs(flr(t*10)-5), 2)
+  local ca, cb = lighter(s.color, k), lighter(s.color, k-1)
+  
+  local foo=function()
+    circ(x,y+1,s.info.hlen+3+2*cos(t*8),cb)
+    circ(x,y,s.info.hlen+3+2*cos(t*8),ca)
+  end
+  
+  draw_outline(foo,25)
+  foo()
+  
+  font("small")
+  draw_text("^ SAVED ^",x,y-s.info.hlen-6-k,1, 25,ca, cb)
+end
+
 
 plane_id = 0
 function create_ship(x,y,vx,vy,typ_id,player_id,id)
@@ -720,7 +740,7 @@ function create_ship(x,y,vx,vy,typ_id,player_id,id)
     player    = player_id,
     
     color     = pick(p.colors),
-    aim       = rnd(1), -- atan2(x-p.x, y-p.y),
+    aim       = atan2(vx, vy),
     
     id        = id,
     update_id = 0,
@@ -747,6 +767,7 @@ function create_ship(x,y,vx,vy,typ_id,player_id,id)
   s.hp=s.stats.maxhp
   
   s.w, s.h = s.info.w, s.info.w
+  s.co, s.si = cos(s.aim), sin(s.aim)
   
   if client then
     s.dx, s.dy = 0, 0

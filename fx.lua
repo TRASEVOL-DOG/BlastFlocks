@@ -91,24 +91,6 @@ function update_shake()
 end
 
 
-
-function draw_convertring(s, x, y, t)
-  local t = t*2
-  local k = 3-abs(flr(t*10)-5)
-  local ca, cb = lighter(s.color, k), lighter(s.color, k-1)
-  
-  local foo=function()
-    circ(x,y+1,s.info.hlen+3+2*cos(t*8),cb)
-    circ(x,y,s.info.hlen+3+2*cos(t*8),ca)
-  end
-  
-  draw_outline(foo,25)
-  foo()
-  
-  font("small")
-  draw_text("^ SAVED ^",x,y-s.info.hlen-6-k,1, 25,ca, cb)
-end
-
 function draw_skull(s)
   draw_anim(s.x,s.y,"skull",nil,s.t)
 end
@@ -171,19 +153,6 @@ function draw_smoke(s)
 end
 
 
-
-function create_convertring(s)
-  local r={
-    s=s,
-    r=2,
-    t=0,
-    update=update_convertring,
-    draw=draw_convertring,
-    regs={"to_update","to_draw3"}
-  }
-  
-  register_object(r)
-end
 
 function create_skull(x,y)
   local s={

@@ -11,20 +11,22 @@ client, server = nil, nil
 server_address = '127.0.0.1'
 server_port = '22122'
 
+local _old_server = nil
+
 function start_server()
   if not server then
-    server = cs.server
-    server.enabled = true
-    server.start(server_port)
+    if _old_server then
+      server = _old_server
+      server.enabled = true
+    else
+      server = cs.server
+      server.enabled = true
+      server.start(server_port)
+    end
+    
     server.changed = read_server
     server.disconnect = server_client_disconnected
     castle_print("Starting local server on port "..server_port)
-    
-    --deregister_object(player)
-    --my_id = 0
-    --player = server_new_player(0)
-    
-    --server_define_non_players()
   else
     castle_print("Local server already exists.")
   end  
@@ -59,7 +61,7 @@ function read_client()
     if id ~= my_id and not client.share[id] then
       castle_print("Player #"..id.." either disconnected or is no longer relevant")
       -- remove player
-      for s in all(p.ships) do
+      for _,s in pairs(p.ships) do
         deregister_object(s)
       end
       deregister_object(p)
@@ -138,6 +140,10 @@ function read_client()
         s.hp = d[5]
         s.update_id = d[8]
         sh[s_id] = s
+        
+        if s.t < 1 and id~=-2 then
+          sfx("save")
+        end
       end
       
       readids[s.id] = true
@@ -200,6 +206,14 @@ function update_server()
     return
   end
   
+  if (#players >= 8) then
+    ship_up_k = 1
+  elseif (#players >= 4) then
+    ship_up_k = 2
+  else
+    ship_up_k = 3
+  end
+  
   ship_up_i = ship_up_i + ship_up_k
   
   --local ps = {}
@@ -258,7 +272,7 @@ function server_client_disconnected(id)
   -- delete player and convert all their planes to AI?
   -- currently: simply delete player and all their ships
   local p = players[id]
-  for s in all(p.ships) do
+  for _,s in pairs(p.ships) do
     deregister_object(s)
   end
   deregister_object(p)
@@ -283,6 +297,15 @@ function client_disconnect()
   player = create_player(64+32*cos(0.1),64+32*sin(0.1), nil, nil, false, false, nil)
 end
 
+function server_close()
+  if not server then return end
+  
+  server.enabled = false
+  server.changed = nil
+  server.disconnect = nil
+  _old_server, server = server, nil
+end
+
 
 function server_new_player(player_id)
   local x,y = rnd(areaw)-areaw/2, rnd(areah-80)+40
@@ -294,7 +317,7 @@ function server_new_player(player_id)
 
   -- create starter ships
   lsrand(seed)
-  for i=1,10 do
+  for i=1,8 do
     add(p.ships, create_ship(x, y, rnd(4)-2, rnd(4)-2, nil, player_id))
   end
   

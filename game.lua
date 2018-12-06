@@ -17,7 +17,7 @@ require("fx")
 player = nil
 my_id = nil
 players = {}
-my_name = pick{"Governor", "Captain", "Jarl", "Commander", "President", "General", "Admiral", "Marshal", "Chancellor"}.." "..pick{"Addison", "Ainslie", "Alexis", "Alpha", "Angel", "Arden", "Ashley", "Ashton", "Aubrey", "Audie", "Avery", "Bailey", "Beverly", "Billie", "Blair", "Blake", "Braidy", "Brook", "Cameron", "Carey", "Carson", "Casey", "Charlie", "Corry", "Courtney", "Kree", "Dakota", "Dallas", "Darby", "Darian", "Delaney", "Dell", "Devin", "Drew", "Elliot", "Ellis", "Emerson", "Emery", "Erin", "Esme", "Evan", "Evelyn", "Finley", "Finn", "Freddie", "Flynn", "Gail", "Gerrie", "Gwynn", "Hadley", "Halsey", "Harley", "Haiden", "Hailey", "Hilary", "Hollis", "Hudson", "Ivy", "Jaime", "Jan", "Jean", "Jerry", "Jesse", "Jocelyn", "Jodi", "Joey", "Jonny", "Jordan", "Jude", "Justice", "Kai", "Kye", "Kary", "Kay", "Keegan", "Kelly", "Kenzie", "Kerry", "Kim", "Kirby", "Kit", "Kyrie", "Lane", "Laurel", "Laurence", "Lauren", "Lee", "Leighton", "Lesley", "Lindsey", "Logan", "Loren", "Lucky", "Madison", "Madox", "Marion", "Marley", "Marlowe", "Mason", "Meade", "Meredith", "Merle", "Micah", "Milo", "Morgan", "Murphy", "Nash", "Nova", "Odell", "Paige", "Palmer", "Parker", "Paris", "Paxton", "Peyton", "Quinn", "Randy", "Reagan", "Rennie", "Reed", "Reese", "Ricky", "Riley", "Ridley", "Robin", "Rory", "Rowan", "Royce", "Rudy", "Ryan", "Rylan", "Sasha", "Sawyer", "Skyler", "Scout", "Selby", "Shane", "Shannon", "Shay", "Shelby", "Shelley", "Sheridan", "Shirley", "Sidney", "Skeeter", "Spencer", "Stormy", "Tanner", "Taran", "Tatum", "Taylor", "Tegan", "Temple", "Terry", "Toby", "Tommie", "Toni", "Torrance", "Tori", "Tracy", "Tristan", "Tyler", "Valentine", "Vivian", "Wallis", "Willie", "Winnie", "Wyatt", "Zane"}
+my_name = pick{"Governor", "Captain", "Jarl", "Commander", "President", "General", "Admiral", "Marshal", "Chancellor", "Chieftain"}.." "..pick{"Addison", "Ainslie", "Alexis", "Alpha", "Angel", "Arden", "Ashley", "Ashton", "Aubrey", "Audie", "Avery", "Bailey", "Beverly", "Billie", "Blair", "Blake", "Braidy", "Brook", "Cameron", "Carey", "Carson", "Casey", "Charlie", "Corry", "Courtney", "Kree", "Dakota", "Dallas", "Darby", "Darian", "Delaney", "Dell", "Devin", "Drew", "Elliot", "Ellis", "Emerson", "Emery", "Erin", "Esme", "Evan", "Evelyn", "Finley", "Finn", "Freddie", "Flynn", "Gail", "Gerrie", "Gwynn", "Hadley", "Halsey", "Harley", "Haiden", "Hailey", "Hilary", "Hollis", "Hudson", "Ivy", "Jaime", "Jan", "Jean", "Jerry", "Jesse", "Jocelyn", "Jodi", "Joey", "Jonny", "Jordan", "Jude", "Justice", "Kai", "Kye", "Kary", "Kay", "Keegan", "Kelly", "Kenzie", "Kerry", "Kim", "Kirby", "Kit", "Kyrie", "Lane", "Laurel", "Laurence", "Lauren", "Lee", "Leighton", "Lesley", "Lindsey", "Logan", "Loren", "Lucky", "Madison", "Madox", "Marion", "Marley", "Marlowe", "Mason", "Meade", "Meredith", "Merle", "Micah", "Milo", "Morgan", "Murphy", "Nash", "Nova", "Odell", "Paige", "Palmer", "Parker", "Paris", "Paxton", "Peyton", "Quinn", "Randy", "Reagan", "Rennie", "Reed", "Reese", "Ricky", "Riley", "Ridley", "Robin", "Rory", "Rowan", "Royce", "Rudy", "Ryan", "Rylan", "Sasha", "Sawyer", "Skyler", "Scout", "Selby", "Shane", "Shannon", "Shay", "Shelby", "Shelley", "Sheridan", "Shirley", "Sidney", "Skeeter", "Spencer", "Stormy", "Tanner", "Taran", "Tatum", "Taylor", "Tegan", "Temple", "Terry", "Toby", "Tommie", "Toni", "Torrance", "Tori", "Tracy", "Tristan", "Tyler", "Valentine", "Vivian", "Wallis", "Willie", "Winnie", "Wyatt", "Zane"}
 connecting = false
 connect_t = false
 debug_mode = 0
@@ -176,6 +176,8 @@ function init_game()
   fshipdisp=0
   eshipdisp=0
   
+  leaderboard_w = 4
+  
   music("game")
 end
 
@@ -294,6 +296,29 @@ function define_menus()
       client_define_non_players()
     end
   end
+  
+  function restart()
+    if client then
+      client_disconnect()
+      connect_to_server()
+      init_game()
+      client_define_non_players()
+    elseif server then
+      --server_client_disconnected(0)
+      --my_id = 0
+      --player = server_new_player(0)
+      --player.name = my_name
+      
+      for s_id,s in pairs(player.ships) do
+        deregister_object(s)
+        player.ships[s_id] = nil
+      end
+      
+      for i=1,8 do
+        add(player.ships, create_ship(player.x, player.y, rnd(4)-2, rnd(4)-2, nil, my_id))
+      end
+    end
+  end
 
   local menus={
     mainmenu={
@@ -326,7 +351,7 @@ function define_menus()
     },
     pause={
       {"Resume", function() menu_back() paused=false end},
-      {"Restart", init_game},
+      {"Restart", restart},
       {"Settings", function() menu("settings") end},
       {"Back to Main Menu", main_menu},
     },
@@ -347,7 +372,9 @@ end
 --main menu
 function main_menu()
   if client then client_disconnect() end
+  if server then server_close() end
 
+  player.ships = {}
   clear_all_groups()
   register_object(player)
   register_object(cam)
@@ -689,8 +716,8 @@ function update_ui_controls()
   if paused then
     local scrnw,scrnh=screen_size()
     update_menu(scrnw/2,scrnh/2)
-    player:update()
-    return true
+--    player:update()
+--    return true
   elseif gameover then
     local scrnw,scrnh=screen_size()
     update_menu(scrnw/2,scrnh/2+32)
@@ -1079,16 +1106,29 @@ function draw_leaderboard()
   y = y + 16
   for i=1,#l do
     local p,n = players[l[i][1]], l[i][2]
-    local c = 20+min(i, 3)
+    local ca = 20+min(i, 3)
+    local cb = p.colors[1]
+    local cc = p.colors[2]
     if l[i][1] == my_id then
-      draw_text("> "..i.." - ", x, y, 2, nil, c)
+      draw_text("> "..i.." - ", x, y, 2, nil, ca)
     else
-      draw_text(i.." - ", x, y, 2, nil, c)
+      draw_text(i.." - ", x, y, 2, nil, ca)
     end
-    local str = (p.name or "").." ("..n..")"
-    draw_text(str, xb, y, 2, nil, c)
     
-    leaderboard_w = max(leaderboard_w, str_width(str)+2)
+    local str = (p.name or "").." ("..n..")"
+    local k = flr(#str/2)
+    
+    local stra = str:sub(1,k)
+    local strb = str:sub(k+1,#str)
+    
+    draw_text(strb, xb, y, 2, nil, c_lit[cc], cc)
+    local xx = xb - str_width(strb)
+    draw_text(stra, xx, y, 2, nil, c_lit[cb], cb)
+    
+    --local str = (p.name or "").." ("..n..")"
+    --draw_text(str, xb, y, 2, nil, cb)
+    
+    leaderboard_w = max(leaderboard_w, str_width(stra)+str_width(strb)+2)
     y = y + 16
   end
 end
@@ -1133,15 +1173,17 @@ function draw_pause()
   local scrnw,scrnh=screen_size()
 
   color(25)
-  for i=0,scrnh,2 do
-    line(0,i,scrnw,i)
+  for i=0,scrnh+scrnw,2 do
+    --line(0,i,scrnw,i)
+    line(i,0,i-scrnh,scrnh)
   end
   
-  font("big")
-  if t%0.4<0.3 then
-    draw_text("PAUSE",scrnw/2,16)
-  end
-  draw_menu(scrnw/2,scrnh/2+16,t)
+--  font("big")
+--  if t%0.4<0.3 then
+--    draw_text("PAUSE",scrnw/2,16)
+--  end
+  
+  draw_menu(scrnw/2,scrnh/2,t)
 end
 
 function draw_gameover()

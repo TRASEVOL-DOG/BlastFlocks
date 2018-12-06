@@ -122,9 +122,7 @@ function update_menu(x,y)
         if btnp(8) or btnp(7) then
           sfx("confirm")
           menulock = false
-          if (debug_mode == 1) then
           love.keyboard.setTextInput(false)
-          end
         end
       end
     end

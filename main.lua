@@ -19,7 +19,7 @@ function love.load()
   _init()
   
   love.keyboard.setKeyRepeat(true)
---  love.keyboard.setTextInput(false)
+  love.keyboard.setTextInput(false)
 end
 
 function love.draw()

@@ -207,49 +207,39 @@ function print(str,x,y,c)
   love.graphics.print(str,x,y)
 end
 
-function super_print(str,x,y,c0,c1,c2)
-  local c0=c0 or 25
-  local c1=c1 or 21
-  local c2=c2 or graphics.textdrk[c1]
-  
-  print(str,x,y-2,25)
-  print(str,x-1,y-1,25)
-  print(str,x+1,y-2,25)
-  print(str,x+2,y-1,25)
-  print(str,x-2,y,25)
-  print(str,x+2,y,25)
+function super_print(str,x,y,c0,c1,c2,w)
+  local c0 = c0 or 25
+  local c1 = c1 or 22
+  local c2 = c2 or graphics.textdrk[c1]
+  local w  = w or graphics.curfont:getWidth(str)
 
-  print(str,x,y+3,25)
-  print(str,x-1,y+3,25)
-  print(str,x-2,y+2,25)
-  print(str,x+1,y+2,25)
-  print(str,x-2,y+1,25)
-  print(str,x+2,y+1,25)
+  print(str,x,y+2,c0)
+  print(str,x+1,y+1,c0)
+  print(str,x-1,y+1,c0)
+  print(str,x+1,y,c0)
+  print(str,x-1,y,c0)
+  print(str,x,y-1,c0)
   
-  print(str,x-1,y+2,c2)
-  print(str,x+1,y+1,c2)
-  print(str,x,y+2,c2)
+  print(str,x,y+1,graphics.textdrk[c2])
+  print(str,x,y,c2)
   
-  print(str,x-1,y,c1)
-  print(str,x+1,y,c1)
-  print(str,x,y-1,c1)
-  print(str,x,y+1,c1)
-  
-  print(str,x-1,y+1,c1)
-  print(str,x+1,y-1,c1)
-  
-  print(str,x,y,c0)
+  clip(x,y+6,w,6,0)
+  print(str,x,y,c1)
+  clip(x,y+8,w,2,0)
+  print(str,x,y,c_lit[c1])
+  clip()
 end
 
 function draw_text(str,x,y,al,c0,c1,c2)
   local al=al or 1
  
-  if al==1 then x=x-graphics.curfont:getWidth(str)/2
-  elseif al==2 then x=x-graphics.curfont:getWidth(str) end
+  local w = graphics.curfont:getWidth(str)
+  if al==1 then x=x-w/2
+  elseif al==2 then x=x-w end
   
   y = y - 4
   
-  super_print(str,x,y,c0,c1,c2)
+  super_print(str,x,y,c0,c1,c2,w)
 end
 
 function str_width(str, fnt)
