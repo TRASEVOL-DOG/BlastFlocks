@@ -21,14 +21,14 @@ function init_sprite_mgr()
       fire={
         sheet=0,
         dt=0.02,
-        sprites={32,33,34,35},
+        sprites={256, 257, 258, 259},
         cx=7,
         cy=3.5
       },
       bfire={
         sheet=0,
         dt=0.02,
-        sprites={36,37,38,39,40,41},
+        sprites={260, 261, 262, 263, 264, 265},
         cx=7,
         cy=3.5
       }
@@ -36,24 +36,24 @@ function init_sprite_mgr()
     bigship={
       rotate={
         sheet=0,
-        dt=1/22,
+        dt=1/26,
         w=2,
         h=2,
-        sprites={74,72,70,68,66,64,64,66,68,70,72,74,72,70,68,66,64,64,66,68,70,72}
+        sprites={76,74,72,70,68,66,64,64,66,68,70,72,74,76,74,72,70,68,66,64,64,66,68,70,72,74}
       },
       fire={
         sheet=0,
         dt=0.02,
-        sprites={40,41,42,43},
+        sprites={256, 257, 258, 259},
         cx=7,
-        cy=3
+        cy=3.5
       },
       bfire={
         sheet=0,
         dt=0.02,
-        sprites={56,57,58,59},
+        sprites={260, 261, 262, 263, 264, 265},
         cx=7,
-        cy=3
+        cy=3.5
       }
     },
     helixship={
@@ -75,7 +75,18 @@ function init_sprite_mgr()
         h=2,
         cx=8,
         cy=8,
-        sprites={96,110,96,96,96,98,100,102,104,106,108,110,110}
+        sprites={224, 238, 224, 224, 224, 226, 228, 230, 232, 234, 236, 238, 238}
+      }
+    },
+    crown={
+      only={
+        sheet=0,
+        dt=0.025,
+        w=2,
+        h=1,
+        cx=8,
+        cy=4,
+        sprites={196, 198, 200, 202, 204, 206, 212, 214, 216, 218}
       }
     }
   }
@@ -143,6 +154,25 @@ function draw_anim(x,y,object,state,t,r,flipx,flipy)
   plt_shader()
   love.graphics.draw(info.sheet,quad,x,y,r*2*math.pi,flipx,flipy,info.cx,info.cy)
   set_shader()
+end
+
+function draw_anim_outline(x,y,object,state,t,outline_c,r,flipx,flipy)
+  local state=state or "only"
+  local flipx=flipx and -1 or 1
+  local flipy=flipy and -1 or 1
+  local r=r or 0
+  local info=sprite.anims[object][state]
+  
+  local quad=info.quads[flr(t/info.dt)%#info.quads+1]
+  
+  all_colors_to(outline_c)
+  plt_shader()
+  love.graphics.draw(info.sheet,quad,x-1,y,r*2*math.pi,flipx,flipy,info.cx,info.cy)
+  love.graphics.draw(info.sheet,quad,x+1,y,r*2*math.pi,flipx,flipy,info.cx,info.cy)
+  love.graphics.draw(info.sheet,quad,x,y-1,r*2*math.pi,flipx,flipy,info.cx,info.cy)
+  love.graphics.draw(info.sheet,quad,x,y+1,r*2*math.pi,flipx,flipy,info.cx,info.cy)
+  set_shader()
+  all_colors_to()
 end
 
 

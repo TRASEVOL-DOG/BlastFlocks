@@ -112,8 +112,13 @@ function update_menu(x,y)
         o.slidv=v
       elseif o.typ=="text_field" and mouse_btnp(0) then
         sfx("confirm")
-        menulock = true
-        love.keyboard.setTextInput(true, x, oy, o.w, o.h)
+        if (menulock) then
+          menulock = false
+          love.keyboard.setTextInput(false)
+        else
+          menulock = true
+          love.keyboard.setTextInput(true, x, oy, o.w, o.h)
+        end
       end
     end
     

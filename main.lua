@@ -32,7 +32,7 @@ delta_time = 0
 dt30f = 0
 function love.update(dt)
   delta_time = love.timer.getDelta()
-  dt30f = dt*33
+  dt30f = dt*30
  
   _update(dt)
   update_input_mgr()

@@ -55,6 +55,8 @@ function read_client()
   
   my_id = client.id
   
+  local delay = (client.getPing()/2)/1000 -- ????
+  
   --if server then return end -- should client be read if it's also the server??
   
   for id, p in pairs(players) do
@@ -96,6 +98,7 @@ function read_client()
         players[id] = p
       end
       new_group("ship_player"..id)
+      p.id = id
     elseif id >= 0 then
       if id ~= my_id then
         p.x = p_d[1]-- or p.x
@@ -120,8 +123,8 @@ function read_client()
           s.dx = s.dx+ (((s.x-d[1]+areaw/2)%areaw)-areaw/2)
           s.dy = s.dy+ s.y-d[2]
           
-          s.x      = d[1]
-          s.y      = d[2]
+          s.x      = d[1] + delay*30*d[3]
+          s.y      = d[2] + delay*30*d[4]
           s.vx     = d[3]
           s.vy     = d[4]
           s.hp     = d[5]
@@ -132,7 +135,8 @@ function read_client()
         end
       else
         s = create_ship(
-          d[1], d[2],
+          d[1] + delay*30*d[3],
+          d[2] + delay*30*d[4],
           d[3], d[4],
           d[7], id, s_id
         )
@@ -178,6 +182,7 @@ function read_server()
       p.boosting = ho[4]
       p.name = ho[5]
     else
+      castle_print("New connection: Client #"..id);
       server_new_player(id)
     end
   end
@@ -331,6 +336,8 @@ function server_new_player(player_id)
     --[9] = {}  -- name
   }
   server.share[player_id] = p_d
+  
+  castle_print("Player #"..player_id.." created.");
   
   return p
 end

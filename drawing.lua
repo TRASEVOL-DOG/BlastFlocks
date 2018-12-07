@@ -115,7 +115,11 @@ function color(c)
 end
 
 function clip(x, y, w, h)
-  love.graphics.setScissor(x, y, w, h)
+  if x and y then
+    love.graphics.setScissor(flr(x-graphics.camx), flr(y-graphics.camy), w, h)
+  else
+    love.graphics.setScissor()
+  end
 end
 
 function pal(c1,c2)
@@ -230,6 +234,38 @@ function super_print(str,x,y,c0,c1,c2,w)
   clip()
 end
 
+function super_print_2(str,x,y,c0,c1,c2,c3,c4,w)
+  local c0 = c0 or 25
+  local c1 = c1 or 22
+  local c2 = c2 or graphics.textdrk[c1]
+  local w  = w or graphics.curfont:getWidth(str)
+
+  print(str,x,y+2,c0)
+  print(str,x+1,y+1,c0)
+  print(str,x-1,y+1,c0)
+  print(str,x+1,y,c0)
+  print(str,x-1,y,c0)
+  print(str,x,y-1,c0)
+  
+  clip(x,y,w,9)
+  print(str,x,y+1,graphics.textdrk[c2])
+  print(str,x,y,c2)
+  clip(x,y+6,w,3)
+  print(str,x,y,c1)
+  clip(x,y+8,w,1)
+  print(str,x,y,c_lit[c1])
+  
+  clip(x,y+9,w,9)
+  print(str,x,y+1,graphics.textdrk[c4])
+  print(str,x,y,c4)
+  clip(x,y+9,w,3)
+  print(str,x,y,c3)
+  clip(x,y+9,w,1)
+  print(str,x,y,c_lit[c3])
+  
+  clip()
+end
+
 function draw_text(str,x,y,al,c0,c1,c2)
   local al=al or 1
  
@@ -241,6 +277,19 @@ function draw_text(str,x,y,al,c0,c1,c2)
   
   super_print(str,x,y,c0,c1,c2,w)
 end
+
+function draw_text_bicolor(str,x,y,al,c0, c1a,c2a, c1b,c2b)
+  local al=al or 1
+ 
+  local w = graphics.curfont:getWidth(str)
+  if al==1 then x=x-w/2
+  elseif al==2 then x=x-w end
+  
+  y = y - 4
+  
+  super_print_2(str,x,y,c0,c1a,c2a,c1b,c2b,w)
+end
+
 
 function str_width(str, fnt)
   if fnt then

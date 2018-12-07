@@ -17,7 +17,7 @@ require("fx")
 player = nil
 my_id = nil
 players = {}
-my_name = pick{"Governor", "Captain", "Jarl", "Commander", "President", "General", "Admiral", "Marshal", "Chancellor", "Chieftain"}.." "..pick{"Addison", "Ainslie", "Alexis", "Alpha", "Angel", "Arden", "Ashley", "Ashton", "Aubrey", "Audie", "Avery", "Bailey", "Beverly", "Billie", "Blair", "Blake", "Braidy", "Brook", "Cameron", "Carey", "Carson", "Casey", "Charlie", "Corry", "Courtney", "Kree", "Dakota", "Dallas", "Darby", "Darian", "Delaney", "Dell", "Devin", "Drew", "Elliot", "Ellis", "Emerson", "Emery", "Erin", "Esme", "Evan", "Evelyn", "Finley", "Finn", "Freddie", "Flynn", "Gail", "Gerrie", "Gwynn", "Hadley", "Halsey", "Harley", "Haiden", "Hailey", "Hilary", "Hollis", "Hudson", "Ivy", "Jaime", "Jan", "Jean", "Jerry", "Jesse", "Jocelyn", "Jodi", "Joey", "Jonny", "Jordan", "Jude", "Justice", "Kai", "Kye", "Kary", "Kay", "Keegan", "Kelly", "Kenzie", "Kerry", "Kim", "Kirby", "Kit", "Kyrie", "Lane", "Laurel", "Laurence", "Lauren", "Lee", "Leighton", "Lesley", "Lindsey", "Logan", "Loren", "Lucky", "Madison", "Madox", "Marion", "Marley", "Marlowe", "Mason", "Meade", "Meredith", "Merle", "Micah", "Milo", "Morgan", "Murphy", "Nash", "Nova", "Odell", "Paige", "Palmer", "Parker", "Paris", "Paxton", "Peyton", "Quinn", "Randy", "Reagan", "Rennie", "Reed", "Reese", "Ricky", "Riley", "Ridley", "Robin", "Rory", "Rowan", "Royce", "Rudy", "Ryan", "Rylan", "Sasha", "Sawyer", "Skyler", "Scout", "Selby", "Shane", "Shannon", "Shay", "Shelby", "Shelley", "Sheridan", "Shirley", "Sidney", "Skeeter", "Spencer", "Stormy", "Tanner", "Taran", "Tatum", "Taylor", "Tegan", "Temple", "Terry", "Toby", "Tommie", "Toni", "Torrance", "Tori", "Tracy", "Tristan", "Tyler", "Valentine", "Vivian", "Wallis", "Willie", "Winnie", "Wyatt", "Zane"}
+my_name = pick{"Governor", "Captain", "Jarl", "Commander", "President", "General", "Admiral", "Marshal", "Chancellor", "Chieftain"}.." "..pick{"Addison", "Ainslie", "Alexis", "Alpha", "Angel", "Arden", "Ashley", "Ashton", "Aubrey", "Audie", "Avery", "Bailey", "Beverly", "Billie", "Blair", "Blake", "Braidy", "Brook", "Cameron", "Carey", "Carson", "Casey", "Charlie", "Corry", "Courtney", "Kree", "Dakota", "Dallas", "Darby", "Darian", "Delaney", "Dell", "Devin", "Drew", "Elliot", "Ellis", "Emerson", "Emery", "Erin", "Esme", "Evan", "Evelyn", "Finley", "Finn", "Freddie", "Flynn", "Gail", "Gerrie", "Gwynn", "Hadley", "Halsey", "Harley", "Haiden", "Hailey", "Hilary", "Hollis", "Hudson", "Ivy", "Jaime", "Jan", "Jean", "Jerry", "Jesse", "Jocelyn", "Jodi", "Joey", "Jonny", "Jordan", "Jude", "Justice", "Kai", "Kye", "Kary", "Kay", "Keegan", "Kelly", "Kenzie", "Kerry", "Kim", "Kirby", "Kit", "Kyrie", "Lane", "Laurel", "Laurence", "Lauren", "Lee", "Leighton", "Lesley", "Lindsey", "Logan", "Loren", "Lucky", "Madison", "Madox", "Marion", "Marley", "Marlowe", "Mason", "Meade", "Meredith", "Merle", "Micah", "Milo", "Morgan", "Murphy", "Nash", "Nova", "Odell", "Paige", "Palmer", "Parker", "Paris", "Paxton", "Peyton", "Quinn", "Randy", "Reagan", "Remy", "Rennie", "Reed", "Reese", "Ricky", "Riley", "Ridley", "Robin", "Rory", "Rowan", "Royce", "Rudy", "Ryan", "Rylan", "Sasha", "Sawyer", "Skyler", "Scout", "Selby", "Shane", "Shannon", "Shay", "Shelby", "Shelley", "Sheridan", "Shirley", "Sidney", "Skeeter", "Spencer", "Stormy", "Tanner", "Taran", "Tatum", "Taylor", "Tegan", "Temple", "Terry", "Toby", "Tommie", "Toni", "Torrance", "Tori", "Tracy", "Tristan", "Tyler", "Valentine", "Vivian", "Wallis", "Willie", "Winnie", "Wyatt", "Zane"}
 connecting = false
 connect_t = false
 debug_mode = 0
@@ -215,20 +215,18 @@ function update_game()
   local omx=massx
   local omy=massy
   
-  if my_id then
-    local group = "ship_player"..my_id
-    if group_exists(group) and group_size(group)>0 then
-      massx,massy=get_mass_pos(group)
-    elseif not gameover then
-  --    boomsfx()
-  --    create_explosion(massx,massy,32,10)
-  --    add_shake(64)
-  --    menu("gameover")
-  --    gameover=true
-  --    music()
-  --    sfx("gameover")
-    end
+  if player.msize > 0 then
+    massx, massy = player.mx, player.my
+  elseif not gameover then
+--    boomsfx()
+--    create_explosion(massx,massy,32,10)
+--    add_shake(64)
+--    menu("gameover")
+--    gameover=true
+--    music()
+--    sfx("gameover")
   end
+
   massvx=massx-omx
   massvy=massy-omy
   
@@ -251,6 +249,8 @@ function draw_game()
   camera(0,0)
   
   draw_background()
+  
+  ship_outline_col = flr(min(25+4*cos(t*2), 25))
   
   camera(xmod,ymod)
   draw_objects()
@@ -496,9 +496,17 @@ function update_player(s)
     for _,ship in pairs(s.ships) do
       update_falling_ship(ship)
     end
-  else
+  else--if s.id then
     for _,ship in pairs(s.ships) do
       ship:update()
+    end
+    
+    if s.id then
+      local group = "ship_player"..s.id
+      s.msize = group_size(group)
+      if s.msize then
+        s.mx, s.my = get_mass_pos(group)
+      end
     end
   end
 end
@@ -644,10 +652,18 @@ function get_mass_pos(grp)
   local ay = s.y
   
   local k=0
-  for o in group(grp) do
-    mx=mx+o.info.value*rel_wrap(o.x, ax)
-    my=my+o.info.value*rel_wrap(o.y, ay)
-    k=k+o.info.value
+  if client then
+    for o in group(grp) do
+      mx=mx+o.info.value*rel_wrap(o.x+o.dx, ax)
+      my=my+o.info.value*rel_wrap(o.y+o.dy, ay)
+      k=k+o.info.value
+    end
+  else
+    for o in group(grp) do
+      mx=mx+o.info.value*rel_wrap(o.x, ax)
+      my=my+o.info.value*rel_wrap(o.y, ay)
+      k=k+o.info.value
+    end
   end
   
   mx=mx/k
@@ -692,7 +708,7 @@ function update_camera(c)
       camyto=areah-k+sqr((k-(areah-to))/k)*k-scrnh/2
       camyto=min(camyto,areah-scrnh/2)
     end
-  end 
+  end
   
   c.x=lerp(c.x,camxto,0.05*dt30f)
   c.y=lerp(c.y,camyto,0.05*dt30f)
@@ -730,13 +746,15 @@ function update_connection_screen()
   t=t+0.01*dt30f
 
   if client and client.connected and client.id then
-    if client.share[client.id] and group_size("ship_player"..client.id)>0 then
+    --if client.share[client.id] and group_size("ship_player"..client.id)>0 then
+    if player.msize > 0 then
       my_id = client.id
       connecting = false
       menu_back()
       menu_back()
       
-      local mx,my = get_mass_pos("ship_player"..my_id)
+      --local mx,my = get_mass_pos("ship_player"..my_id)
+      local mx,my = player.mx, player.my
       local scrnw, scrnh = screen_size()
       cam.x = mx
       cam.y = my
@@ -814,6 +832,16 @@ function draw_player(s)
   camera(xmod, ymod)
   pal(21,21)
   foo(a)
+  
+  if s.name and not s.it_me then
+    font("small")
+    if s.msize > 0 then
+      local ca,cb = s.colors[1], s.colors[2]
+      draw_text_bicolor(s.name, s.mx, s.my-16, 1, 25, c_lit[ca], ca, c_lit[cb], cb)
+    else
+      draw_text(s.name, s.x, s.y-16, 1, 25, 22)
+    end
+  end
 end
 
 function draw_hole(s)
@@ -1033,11 +1061,15 @@ function draw_minimap()
   local x = scrnw - 4 - w
   local y = scrnh - h - 4
   
-  local dx,dy = get_mass_pos("ship_player"..my_id)
-  dx = dx % areaw
-  dy = mid(dy, 0, areah)
-  dx = dx / areaw * w + 48
-  dy = dy / areah * h
+  local dx,dy = -48,0
+  function map_pos(pla)
+    return (pla.mx/areaw*w -dx)%w, mid(pla.my/areah*h, 0, h-1)
+  end
+  function map_posb(pla)
+    return flr(x+(pla.mx/areaw*w -dx)%w+0.5), flr(y+mid(pla.my/areah*h, 0, h-1)+0.5)
+  end
+  
+  dx,dy = map_pos(player)
   
   rectfill(x, y, x+w-1, y+h-1, 25)
   
@@ -1051,48 +1083,63 @@ function draw_minimap()
     line(x, y+i, x+w, y+i)
   end
   
-  clip (x, y, w, h)
+  clip(x, y, w, h)
+  
+  if my_id then
+    local hw = scrnw/2*w/areaw
+    local hh = scrnh/2*h/areah
+    --local xx = flr(x+w/2+0.5)
+    --local yy = flr(y+dy+0.5)
+    
+    local cx, cy = cam:screen_pos()
+    local xx,yy = map_posb({mx=cx, my=cy})
+    
+    rect(xx, yy, xx+hw*2, yy+hh*2, 15)
+    point(xx+hw*2, yy+hh*2, 15)
+  end
   
   pal(0,25)
   for id,p in pairs(players) do
     if id >= 0 then
-      local mx,my = get_mass_pos("ship_player"..id)
-      mx = mx % areaw
-      my = mid(my, 0, areah)
+      local mx,my = map_posb(p)
       
-      mx = mx / areaw * w
-      my = my / areah * h
-      
-      mx = (mx-dx)%96
-      
-      double_pal_map(p.colors[1], p.colors[2])
-      if id == my_id then
-        local xx = flr(x+mx+0.5)
-        local yy = flr(y+my+0.5)
-        spr(208, 0, xx, yy, 2, 2)
-        
-        local hw = scrnw/2*w/areaw
-        local hh = scrnh/2*h/areah
-        pal(15,15)
-        rect(xx-hw, yy-hh, xx+hw, yy+hh, 15)
-        point(xx+hw, yy+hh, 15)
-      else
-        spr(210, 0, x+mx, y+my, 2, 2)
+      if id ~= my_id and p.msize>0 then
+        double_pal_map(p.colors[1], p.colors[2])
+        spr(194, 0, mx, my, 2, 2)
       end
     end
   end
-  all_colors_to()
+  
+  if player.msize>0 then
+    local mx,my = flr(x+w/2+0.5), flr(y+dy+0.5) -- player position
+    double_pal_map(player.colors[1], player.colors[2])
+    spr(192, 0, mx, my, 2, 2)
+  end
   
   clip()
   
   rect(x-1, y-2, x+w, y+h+1, 25)
   rect(x, y, x+w-1, y+h, 23)
   rect(x, y-1, x+w-1, y+h-1, 21)
+  
+  if leaderboard[1] then
+    local p = players[leaderboard[1][1]]
+    if p then
+      local mx, my = map_posb(p)
+      draw_anim_outline(mx, my-9+1.5*cos(t*2), "crown", nil, t, 21)
+      double_pal_map(p.colors[1], p.colors[2])
+      pal(0,25)
+      draw_anim(mx, my-9+1.5*cos(t*2), "crown", nil, t)
+    end
+  end
+  all_colors_to()
 end
 
 leaderboard_w = 4
+leaderboard = {}
 function draw_leaderboard()
-  local l = gen_leaderboard()
+  leaderboard = gen_leaderboard()
+  local l = leaderboard
   
   local scrnw, scrnh = screen_size()
   local w = leaderboard_w
@@ -1116,19 +1163,9 @@ function draw_leaderboard()
     end
     
     local str = (p.name or "").." ("..n..")"
-    local k = flr(#str/2)
-    
-    local stra = str:sub(1,k)
-    local strb = str:sub(k+1,#str)
-    
-    draw_text(strb, xb, y, 2, nil, c_lit[cc], cc)
-    local xx = xb - str_width(strb)
-    draw_text(stra, xx, y, 2, nil, c_lit[cb], cb)
-    
-    --local str = (p.name or "").." ("..n..")"
-    --draw_text(str, xb, y, 2, nil, cb)
-    
-    leaderboard_w = max(leaderboard_w, str_width(stra)+str_width(strb)+2)
+    draw_text_bicolor(str, xb, y, 2, nil, c_lit[cb], cb, c_lit[cc], cc)
+
+    leaderboard_w = max(leaderboard_w, str_width(str)+2)
     y = y + 16
   end
 end
@@ -1413,6 +1450,9 @@ function create_player(x, y, colors, seed, shooting, boosting, player_id)
     w = 8,
     h = 8,
     t = 0,
+    mx = 0,
+    my = 0,
+    msize = 0,
     colors   = colors,
     seed     = seed,
     shooting = shooting,

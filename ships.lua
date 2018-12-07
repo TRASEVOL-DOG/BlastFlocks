@@ -18,7 +18,7 @@ function init_ship_stats()
       anim     = "ship",
       hlen     = 6,
       btyp     = "shell",
-      w        = 4,
+      w        = 12,
       value    = 10,
       spawnval = 2
     },
@@ -26,7 +26,7 @@ function init_ship_stats()
       anim     = "bigship",
       hlen     = 11,
       btyp     = "shell",
-      w        = 12,
+      w        = 20,
       value    = 100,
       spawnval = 20
     },
@@ -112,8 +112,8 @@ function update_ship(s)
     --s.dx = lerp(s.dx, 0, 0.075*dt30f)
     --s.dy = lerp(s.dy, 0, 0.075*dt30f)
     
-    s.dx = s.dx - sgn(s.dx)*min(abs(s.dx), dt30f)
-    s.dy = s.dy - sgn(s.dy)*min(abs(s.dy), dt30f)
+    s.dx = s.dx - sgn(s.dx)*min(abs(s.dx), (1+abs(s.dx/16))*dt30f)
+    s.dy = s.dy - sgn(s.dy)*min(abs(s.dy), (1+abs(s.dy/16))*dt30f)
     
     xx = s.x + s.dx
     yy = s.y + s.dy
@@ -281,7 +281,13 @@ function update_ship_shooting(s,adif)
     local shootdir = s.aim + 0.25*adif
   
     local d=inf.hlen+8
-    local x,y=s.x+d*cos(shootdir),s.y+d*sin(shootdir)
+    local x,y
+    if client then
+      x,y=s.x+s.dx+d*cos(shootdir),s.y+s.dy+d*sin(shootdir)
+    else
+      x,y=s.x+d*cos(shootdir),s.y+d*sin(shootdir)
+    end
+    
     create_bullet(x, y, shootdir+rnd(0.01)-0.005, stt.bltspd, s.color, s.player)
     s.shots=s.shots+1
     
@@ -549,13 +555,6 @@ end
 function draw_ship(s)
   local inf=s.info
   
-  if s.x+s.w*2<xmod or s.x-s.w*2>xmod+screen_width or s.y+s.h*2<ymod or s.y-s.h*2>ymod+screen_height then
-    return
-  end
-  
-  local ofx,ofy=0,0
-  if s.boost==4 then ofx,ofy=ofx+rnd(2)-1,ofy+rnd(2)-1 end
-  
   local xx,yy
   if client and debug_mode~=1 then
     xx, yy = s.x+s.dx, s.y+s.dy
@@ -563,16 +562,23 @@ function draw_ship(s)
     xx, yy = s.x, s.y
   end
   
+  if xx+s.w*2<xmod or xx-s.w*2>xmod+screen_width or yy+s.h*2<ymod or yy-s.h*2>ymod+screen_height then
+    return
+  end
+  
+  local ofx,ofy=0,0
+  if s.boost==4 then ofx,ofy=ofx+rnd(2)-1,ofy+rnd(2)-1 end
+  
   if debug_mode==2 then
     all_colors_to(21)
     draw_anim(s.x+ofx,s.y+ofy,inf.anim,"rotate",s.aim,s.aim,false,(s.aim+0.25)%1>0.5)
   end
   
-  local foo=function()
-    draw_anim(xx+ofx,yy+ofy,inf.anim,"rotate",s.aim,s.aim,false,(s.aim+0.25)%1>0.5)
+  if s.player == my_id then
+    draw_anim_outline(xx+ofx,yy+ofy,inf.anim,"rotate",s.aim,ship_outline_col,s.aim,false,(s.aim+0.25)%1>0.5)
+  else
+    draw_anim_outline(xx+ofx,yy+ofy,inf.anim,"rotate",s.aim,25,s.aim,false,(s.aim+0.25)%1>0.5)
   end
-  
-  draw_outline(foo,25)
   
   if s.gothit>0 or (s.dead and s.t>0.5) then
     all_colors_to(21)
@@ -581,7 +587,7 @@ function draw_ship(s)
     apply_pal_map(s.plt)
   end
   
-  foo()
+  draw_anim(xx+ofx,yy+ofy,inf.anim,"rotate",s.aim,s.aim,false,(s.aim+0.25)%1>0.5)
   
   all_colors_to()
   
@@ -711,13 +717,9 @@ end
 
 plane_id = 0
 function create_ship(x,y,vx,vy,typ_id,player_id,id)
+  local typ_id = typ_id or 1 --(flr(rnd(2))+1)
   local typ
-  if typ_id then
-    typ=ship_types[typ_id]
-  else
-    typ = "smol"
-    typ_id = 1
-  end
+  typ=ship_types[typ_id]
   
   if typ=="helix" then
     create_helixship(x,y)
@@ -862,7 +864,7 @@ function create_bullet(x,y,dir,spd,c,player_id)
     vy     = spd*sin(dir),
     a      = dir,
     spd    = spd,
-    t      = 0.75,
+    t      = 1.25,
     s      = 5,
     color  = c,
     plt    = ship_plts[c],
