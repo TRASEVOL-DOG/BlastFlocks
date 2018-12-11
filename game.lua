@@ -318,6 +318,10 @@ function define_menus()
         add(player.ships, create_ship(player.x, player.y, rnd(4)-2, rnd(4)-2, nil, my_id))
       end
     end
+    
+    menu_back()
+    menu_back()
+    paused = false
   end
 
   local menus={
@@ -863,7 +867,7 @@ function draw_player(s)
   end
   
   if leaderboard[1] and s.id == leaderboard[1][1] then
-    local x,y = s.mx, s.my+4.5*cos(t*3)-(s.it_me and 0 or 24)
+    local x,y = s.mx, s.my+4.5*cos(t*3)-(s.it_me and 8 or 24)
     local c = s.it_me and ship_outline_col or 25
     draw_anim_outline(x, y, "crown", nil, t, c)
     double_pal_map(s.colors[1], s.colors[2])
