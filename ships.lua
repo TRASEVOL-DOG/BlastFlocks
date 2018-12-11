@@ -10,8 +10,9 @@ require("sprite")
 require("fx")
 
 
-ship_types = {"smol", "biggie", "helix"}
-
+ship_types = {"smol", "medium", "biggie", "huge", "helix"}
+ship_base_n = {6, 4, 2, 1}
+-- ^^ number of ships per type needed for upgrade to next type
 function init_ship_stats()
   ship_infos={
     smol={
@@ -20,16 +21,33 @@ function init_ship_stats()
       btyp     = "shell",
       w        = 12,
       value    = 10,
-      spawnval = 2
+      spawnval = 0
+    },
+    medium={
+      anim     = "mediumship",
+      hlen     = 8,
+      btyp     = "shell",
+      w        = 16,
+      value    = 25,
+      spawnval = 0
     },
     biggie={
       anim     = "bigship",
       hlen     = 11,
       btyp     = "shell",
       w        = 20,
-      value    = 100,
-      spawnval = 20
+      value    = 50,
+      spawnval = 0
     },
+    huge={
+      anim     = "hugeship",
+      hlen     = 13,
+      btyp     = "shell",
+      w        = 24,
+      value    = 100,
+      spawnval = 0
+    },
+    
     helix={
       anim     = "helixship",
       hlen     = 24,
@@ -53,29 +71,66 @@ function init_ship_stats()
       vacap  = {0.002, 0.01, 0.008}, 
       grv    = {0.05, 0.02, 0.02}, 
 
-      cldwn  = {1.5, 0, -1.3}, 
-      attack = {0, 0.2, 0}, 
-      kick   = {1, 0, 0}, 
-      bltspd = {3, 1, 7}, 
+      cldwn  = {1.5, 0, -1.3},
+      attack = {0, 0.2, 0},
+      kick   = {1, 0, 0},
+      bltspd = {3, 1, 7},
 
       maxhp  = {3.5, 0, 0.5}
-    }, 
-    biggie={
+    },
+    
+    medium={ -- NOT DEFINED - ONLY COPIED FROM BIGGIE
       acc    = {0.2, 0.2, 0.2}, 
       dec    = {0.95, 0, -0.05}, 
       spdcap = {2, 0.5, 0.5}, 
       acca   = {0.0005, 0.001, 0.001}, 
-      deca   = {0.95, 0, 0}, 
-      vacap  = {0.003, 0.002, 0.004}, 
+      deca   = {0.92, 0, 0}, 
+      vacap  = {0.002, 0.005, 0.007}, 
       grv    = {0.05, 0.02, 0.02}, 
       
-      cldwn  = {0.1, 0, -0.025}, 
-      attack = {0, 0.05, 0}, 
+      cldwn  = {0.65, 0, -0.5}, 
+      attack = {0, 0.15, 0}, 
       kick   = {1, 0, 0}, 
       bltspd = {3, 1, 7}, 
 
       maxhp  = {6, 0, 2}
     },
+    
+    biggie={
+      acc    = {0.2, 0.2, 0.2}, 
+      dec    = {0.95, 0, -0.05}, 
+      spdcap = {2, 0.5, 0.5}, 
+      acca   = {0.0005, 0.001, 0.001}, 
+      deca   = {0.94, 0, 0}, 
+      vacap  = {0.002, 0.005, 0.006}, 
+      grv    = {0.05, 0.02, 0.02}, 
+      
+      cldwn  = {0.6, 0, -0.5}, 
+      attack = {0, 0.1, 0}, 
+      kick   = {1, 0, 0}, 
+      bltspd = {3, 1, 7}, 
+
+      maxhp  = {8, 0, 2}
+    },
+    
+    huge={ -- NOT DEFINED - ONLY COPIED FROM BIGGIE
+      acc    = {0.15, 0.2, 0.2}, 
+      dec    = {0.95, 0, -0.05}, 
+      spdcap = {2, 0.5, 0.5}, 
+      acca   = {0.0005, 0.001, 0.001}, 
+      deca   = {0.96, 0, 0}, 
+      vacap  = {0.002, 0.004, 0.005}, 
+      grv    = {0.05, 0.02, 0.02}, 
+      
+      cldwn  = {0.55, 0, -0.5}, 
+      attack = {0, 0.05, 0}, 
+      kick   = {0.5, 0, 0}, 
+      bltspd = {3, 1, 7}, 
+
+      maxhp  = {11, 0, 2}
+    },
+    
+    
     helix={
       --handled  in  helix  update
     }
@@ -89,7 +144,7 @@ function update_ship(s)
   
   lsrand(s.id)
   
-  load_shipinfo(s,ship_types[s.typ_id], true)
+  load_shipstats(s,ship_types[s.typ_id % 8], true)
   
   local p = players[s.player]
   if not p then
@@ -147,7 +202,7 @@ function update_ship(s)
   end
   
   if not s.dead then
---    local col
+--    local col    -- vvv code for scrapping vvv
 --    for id,p in pairs(players) do
 --      if id ~= s.player then
 --        col = col or collide_objgroup(s, "ship_player"..id)
@@ -163,6 +218,16 @@ function update_ship(s)
 --    end
     
     if p and not p.shooting then
+      local typ = s.typ_id % 8
+      if typ < 4 and #p.typs[typ] > ship_base_n[typ] + #p.typs[typ+1]*2 then
+        local col = collide_objgroup(s,"ship_player"..s.player)
+        if col and (col.typ_id % 8) == (s.typ_id % 8) then
+          del(p.typs[typ], s)
+          del(p.typs[typ], col)
+          upgrade_ship(s, col)
+        end
+      end
+    
       local col=collide_objgroup(s,"ship_player-2")
       if col and not (col.dead and col.t>0.5) then
         befriend_ship(col, s.player)
@@ -545,9 +610,36 @@ function pass_to_player(s, player)
     s.t = 0
   end
   
-  -- temporary, should just take player color
+  s.typ_id = s.typ_id % 8
+  
   s.color = pick(players[player].colors)
   s.plt   = ship_plts[s.color]
+end
+
+function upgrade_ship(s, s2)
+-- if (s.typ_id % 8) >= 4 then
+--   return
+-- end
+
+  s.typ_id = (s.typ_id % 8) + 9
+  s.typ = ship_types[s.typ_id % 8]
+  
+  if s2 then
+    deregister_object(s2)
+    if server then
+      del(players[s2.player].ships, s2)
+    else
+      players[s2.player].ships[s2.id] = nil
+    end
+  end
+  
+  load_shipinfo(s,ship_types[s.typ_id % 8], true)
+  
+  s.t = 0
+  
+  s.hp=s.stats.maxhp
+  
+  sfx("save")
 end
 
 
@@ -703,23 +795,26 @@ function draw_convertring(s, x, y, t)
   local ca, cb = lighter(s.color, k), lighter(s.color, k-1)
   
   local foo=function()
-    circ(x,y+1,s.info.hlen+3+2*cos(t*8),cb)
-    circ(x,y,s.info.hlen+3+2*cos(t*8),ca)
+    circ(x,y+1,s.info.hlen+3+2*cos(t*4),cb)
+    circ(x,y,s.info.hlen+3+2*cos(t*4),ca)
   end
   
   draw_outline(foo,25)
   foo()
   
   font("small")
-  draw_text("^ SAVED ^",x,y-s.info.hlen-6-k,1, 25,ca, cb)
+  
+  local str = (s.typ_id > 8) and "* UPGRADE! *" or "^ SAVED ^"
+  
+  draw_text(str,x,y-s.info.hlen-6-k,1, 25,ca, cb)
 end
 
 
 plane_id = 0
 function create_ship(x,y,vx,vy,typ_id,player_id,id)
-  local typ_id = typ_id or 1 --(flr(rnd(2))+1)
+  local typ_id = typ_id or 1--(flr(rnd(4))+1)
   local typ
-  typ=ship_types[typ_id]
+  typ=ship_types[typ_id % 8]
   
   if typ=="helix" then
     create_helixship(x,y)
@@ -765,10 +860,10 @@ function create_ship(x,y,vx,vy,typ_id,player_id,id)
     regs      = {"to_draw2","to_wrap","ship", "ship_player"..player_id}
   }
   
-  load_shipinfo(s, typ, true)
+  load_shipinfo(s,ship_types[s.typ_id % 8], true)
+  load_shipstats(s,ship_types[s.typ_id % 8], true)
   s.hp=s.stats.maxhp
   
-  s.w, s.h = s.info.w, s.info.w
   s.co, s.si = cos(s.aim), sin(s.aim)
   
   if client then
@@ -788,35 +883,21 @@ function load_shipinfo(s,typ, upgraded)
     s.info[inf]=val
   end
   
+  --s.hp=s.stats.maxhp
+  s.typ=typ
+  s.w, s.h = s.info.w, s.info.w
+end
+
+function load_shipstats(s,typ, upgraded)
   local stats=ship_stats[typ]-- or ship_stats.smol
   s.stats={}
   for stat,val in pairs(stats) do
     s.stats[stat]=val[1]+lrnd(val[2])+(upgraded and val[3] or 0)
   end
   
-  --s.hp=s.stats.maxhp
-  s.typ=typ
-  
   s.retrievable = (lrnd(2) < 1)
 end
 
-function upgrade_ship(s)
-  local stats=ship_stats[s.typ]
-  for stat,val in pairs(stats) do
-    s.stats[stat]=s.stats[stat]+val[3]
-  end
-  
-  s.hp=s.stats.maxhp
-end
-
-function downgrade_ship(s)
-  local stats=ship_stats[s.typ]
-  for stat,val in pairs(stats) do
-    s.stats[stat]=s.stats[stat]-val[3]
-  end
-  
-  s.hp=s.stats.maxhp
-end
 
 function create_helixship(x,y)
   local s={

@@ -440,8 +440,18 @@ function draw_mainmenu()
       foo(0,0)
     end
     
-    draw_text("left click to fire, right click to boost",scrnw/2,scrnh*0.2+48,1,25,19,0)
-    draw_text("you can't rescue ships while firing",scrnw/2,scrnh*0.2+64,1,25,19,0)
+    --draw_text("left click to fire, right click to boost",scrnw/2,scrnh*0.2+48,1,25,19,0)
+    --draw_text("you can't rescue ships while firing",scrnw/2,scrnh*0.2+64,1,25,19,0)
+    
+    local stra = "- left click to fire"
+    local strb = "- right click to boost"
+    local strc = "- save falling ships"
+    
+    local x = scrnw/2 - str_width(strb)/2 - 8
+    y = scrnh*0.2+32
+    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
+    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
+    draw_text(strc, x, y, 0, nil, 8, 9)
   
     y = scrnh/2+48
   end
@@ -497,6 +507,11 @@ function update_player(s)
       update_falling_ship(ship)
     end
   else--if s.id then
+    s.typs = {{},{},{},{}}
+    for _,ship in pairs(s.ships) do
+      add(s.typs[ship.typ_id % 8], ship)
+    end
+  
     for _,ship in pairs(s.ships) do
       ship:update()
     end
@@ -817,11 +832,15 @@ function draw_player(s)
     camera(xmod, ymod)
     draw_outline(foo,25,a)
   else
-    foo=function(a)
-      for i=a,a+0.75,0.25 do
-        local x1,y1=s.x+2*cos(i),s.y+2*sin(i)
-        local x2,y2=s.x+6*cos(i),s.y+6*sin(i)
-        line(x1,y1,x2,y2, 21)
+    if s.msize > 0 then
+      foo=function() end
+    else
+      foo=function(a)
+        for i=a,a+0.75,0.25 do
+          local x1,y1=s.x+2*cos(i),s.y+2*sin(i)
+          local x2,y2=s.x+6*cos(i),s.y+6*sin(i)
+          line(x1,y1,x2,y2, 21)
+        end
       end
     end
   end
@@ -841,6 +860,16 @@ function draw_player(s)
     else
       draw_text(s.name, s.x, s.y-16, 1, 25, 22)
     end
+  end
+  
+  if leaderboard[1] and s.id == leaderboard[1][1] then
+    local x,y = s.mx, s.my+4.5*cos(t*3)-(s.it_me and 0 or 24)
+    local c = s.it_me and ship_outline_col or 25
+    draw_anim_outline(x, y, "crown", nil, t, c)
+    double_pal_map(s.colors[1], s.colors[2])
+    pal(0,25)
+    draw_anim(x, y, "crown", nil, t)
+    all_colors_to()
   end
 end
 

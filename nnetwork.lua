@@ -56,9 +56,7 @@ function read_client()
   my_id = client.id
   
   local delay = (client.getPing()/2)/1000 -- ????
-  
-  --if server then return end -- should client be read if it's also the server??
-  
+
   for id, p in pairs(players) do
     if id ~= my_id and not client.share[id] then
       castle_print("Player #"..id.." either disconnected or is no longer relevant")
@@ -113,15 +111,28 @@ function read_client()
     local sh_d = (id == -2) and p_d[1] or p_d[8]
 
     local readids = {}
+    
+    local upgrade_counts = 0
+    
+    for s_id,d in pairs(sh_d) do
+      local s = sh[s_id]
+      if s and s.update_id < d[8] and d[7]>s.typ_id then -- upgrade!
+        upgrade_counts = upgrade_counts + 1
+      end
+    end
+
 
     for s_id,d in pairs(sh_d) do
-    
       local s = sh[s_id]
-    
+
       if s then
         if s.update_id < d[8] then
           s.dx = s.dx+ (((s.x-d[1]+areaw/2)%areaw)-areaw/2)
           s.dy = s.dy+ s.y-d[2]
+          
+          if d[7]>s.typ_id then -- upgrade!
+            upgrade_ship(s)
+          end
           
           s.x      = d[1] + delay*30*d[3]
           s.y      = d[2] + delay*30*d[4]
@@ -156,7 +167,13 @@ function read_client()
     for s_id,s in pairs(sh) do
       if not readids[s_id] then
         if id > -2 or s.t < -1.8 then -- visible destroy
-          destroy_ship(s)
+          if upgrade_counts > 0 then
+            upgrade_counts = upgrade_counts - 1
+            deregister_object(s)
+            sh[s_id] = nil
+          else
+            destroy_ship(s)
+          end
         else                          -- discreet destroy
           deregister_object(s)
           sh[s_id] = nil
@@ -241,7 +258,7 @@ function update_server()
       for i=1,#sh do
         local s = sh[i]
         
-        if (i-ship_up_i)%#sh < ship_up_k or not sh_d[s.id] then
+        if (i-ship_up_i)%#sh < ship_up_k or not sh_d[s.id] or sh_d[s.id][7] ~= s.typ_id then
           s.update_id = s.update_id + 1
           sh_d[s.id] = {
             flr(s.x),

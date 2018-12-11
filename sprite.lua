@@ -33,6 +33,31 @@ function init_sprite_mgr()
         cy=3.5
       }
     },
+    
+    mediumship={
+      rotate={
+        sheet=0,
+        dt=1/18,
+        w=2,
+        h=2,
+        sprites={40, 38, 36, 34, 32, 32, 34, 36, 38, 40, 38, 36, 34, 32, 32, 34, 36, 38}
+      },
+      fire={
+        sheet=0,
+        dt=0.02,
+        sprites={256, 257, 258, 259},
+        cx=7,
+        cy=3.5
+      },
+      bfire={
+        sheet=0,
+        dt=0.02,
+        sprites={260, 261, 262, 263, 264, 265},
+        cx=7,
+        cy=3.5
+      }
+    },
+    
     bigship={
       rotate={
         sheet=0,
@@ -56,6 +81,31 @@ function init_sprite_mgr()
         cy=3.5
       }
     },
+    
+    hugeship={
+      rotate={
+        sheet=0,
+        dt=1/30,
+        w=3,
+        h=3,
+        sprites={150, 147, 144, 108, 105, 102, 99, 96, 96, 99, 102, 105, 108, 144, 147, 150, 147, 144, 108, 105, 102, 99, 96, 96, 99, 102, 105, 108, 144, 147}
+      },
+      fire={
+        sheet=0,
+        dt=0.02,
+        sprites={256, 257, 258, 259},
+        cx=7,
+        cy=3.5
+      },
+      bfire={
+        sheet=0,
+        dt=0.02,
+        sprites={260, 261, 262, 263, 264, 265},
+        cx=7,
+        cy=3.5
+      }
+    },
+    
     helixship={
       only={
         sheet=0,
