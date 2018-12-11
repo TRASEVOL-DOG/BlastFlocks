@@ -21,7 +21,8 @@ function init_ship_stats()
       btyp     = "shell",
       w        = 12,
       value    = 10,
-      spawnval = 0
+      spawnval = 0,
+      lives    = 3
     },
     medium={
       anim     = "mediumship",
@@ -29,7 +30,8 @@ function init_ship_stats()
       btyp     = "shell",
       w        = 16,
       value    = 25,
-      spawnval = 0
+      spawnval = 0,
+      lives    = 4
     },
     biggie={
       anim     = "bigship",
@@ -37,7 +39,8 @@ function init_ship_stats()
       btyp     = "shell",
       w        = 20,
       value    = 50,
-      spawnval = 0
+      spawnval = 0,
+      lives    = 5
     },
     huge={
       anim     = "hugeship",
@@ -45,7 +48,8 @@ function init_ship_stats()
       btyp     = "shell",
       w        = 24,
       value    = 100,
-      spawnval = 0
+      spawnval = 0,
+      lives    = 6
     },
     
     helix={
@@ -75,6 +79,8 @@ function init_ship_stats()
       attack = {0, 0.2, 0},
       kick   = {1, 0, 0},
       bltspd = {3, 1, 7},
+      
+      revive = {50, 0, 0},
 
       maxhp  = {3.5, 0, 0.5}
     },
@@ -91,7 +97,9 @@ function init_ship_stats()
       cldwn  = {0.65, 0, -0.5}, 
       attack = {0, 0.15, 0}, 
       kick   = {1, 0, 0}, 
-      bltspd = {3, 1, 7}, 
+      bltspd = {3, 1, 7},
+      
+      revive = {65, 0, 0},
 
       maxhp  = {6, 0, 2}
     },
@@ -108,7 +116,9 @@ function init_ship_stats()
       cldwn  = {0.6, 0, -0.5}, 
       attack = {0, 0.1, 0}, 
       kick   = {1, 0, 0}, 
-      bltspd = {3, 1, 7}, 
+      bltspd = {3, 1, 7},
+      
+      revive = {75, 0, 0},
 
       maxhp  = {8, 0, 2}
     },
@@ -125,7 +135,9 @@ function init_ship_stats()
       cldwn  = {0.55, 0, -0.5}, 
       attack = {0, 0.05, 0}, 
       kick   = {0.5, 0, 0}, 
-      bltspd = {3, 1, 7}, 
+      bltspd = {3, 1, 7},
+      
+      revive = {85, 0, 0},
 
       maxhp  = {11, 0, 2}
     },
@@ -886,6 +898,7 @@ function load_shipinfo(s,typ, upgraded)
   --s.hp=s.stats.maxhp
   s.typ=typ
   s.w, s.h = s.info.w, s.info.w
+  s.lives = s.info.lives
 end
 
 function load_shipstats(s,typ, upgraded)
@@ -895,7 +908,7 @@ function load_shipstats(s,typ, upgraded)
     s.stats[stat]=val[1]+lrnd(val[2])+(upgraded and val[3] or 0)
   end
   
-  s.retrievable = (lrnd(2) < 1)
+  s.retrievable = lrnd(100) < s.stats.revive
 end
 
 
