@@ -698,8 +698,8 @@ function update_gangs()
     local target
     for p_id, p in pairs(players) do
       if p_id >= 0 then
-        local dy = gang.y-p.my
         local dx = ((gang.x-p.mx+areaw/2)%areaw)-areaw/2
+        local dy = gang.y-p.my
         local nd = sqrdist(dx, dy)
         if nd < d then
           target = p_id
@@ -726,8 +726,8 @@ function update_gangs()
     local target
     for p_id, p in pairs(players) do
       if p_id >= 0 then
-        local dy = gang.y-p.my
         local dx = ((gang.x-p.mx+areaw/2)%areaw)-areaw/2
+        local dy = gang.y-p.my
         local nd = sqrdist(dx, dy)
         if nd < mind then
           gang_relevance[p_id][gang.id] = true
@@ -812,7 +812,7 @@ function update_gang_sys()
       end
     end
   
-    gang_grid_t = 2
+    gang_grid_t = 1
   end
 end
 
@@ -837,12 +837,20 @@ function sync_gang(gang, ships, target, delay)
   for s_id, d in pairs(ships) do
     local s = gang.ships[s_id]
     if s then
-      local dx = (((s.x-d[1]+areaw/2)%areaw)-areaw/2)
-      local dy = s.y-d[2]
-      s.dx = s.dx+ dx
-      s.dy = s.dy+ dy
-      s.x = s.x - dx + delay*30*s.vx
-      s.y = s.y - dy + delay*30*s.vy
+      local ox,oy = s.x,s.y
+      s.x = d[1]
+      s.y = d[2]
+      s.dx = ox-s.x
+      s.dy = oy-s.y
+      s.x = s.x + delay*30*s.vx
+      s.y = s.y + delay*30*s.vy
+      
+--      local dx = ((s.x-d[1]+areaw/2)%areaw)-areaw/2
+--      local dy = s.y-d[2]
+--      s.dx = s.dx+ dx
+--      s.dy = s.dy+ dy
+--      s.x = s.x - dx + delay*30*s.vx
+--      s.y = s.y - dy + delay*30*s.vy
     end
   end
   

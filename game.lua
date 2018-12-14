@@ -543,7 +543,7 @@ function update_player(s)
       if s.id then
         local group = "ship_player"..s.id
         s.msize = group_size(group)
-        if s.msize then
+        if s.msize > 0 then
           s.mx, s.my = get_mass_pos(group)
         end
       end
