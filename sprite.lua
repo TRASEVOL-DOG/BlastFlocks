@@ -120,7 +120,7 @@ function init_sprite_mgr()
     skull={
       only={
         sheet=0,
-        dt=0.025,
+        dt=0.01,
         w=2,
         h=2,
         cx=8,

@@ -234,9 +234,9 @@ function menu_keypressed(key)
       if key == "backspace" then
         o.txt = o.txt:sub(1, #o.txt-1)
         o.call(o.txt)
-      elseif key == "v" and (love.keyboard.isDown("rctrl") or love.keyboard.isDown("lctrl")) then
+      elseif key == "v" and (love.keyboard.isDown("rctrl") or love.keyboard.isDown("lctrl") or love.keyboard.isDown("rgui") or love.keyboard.isDown("lgui")) then
         o.txt = o.txt..love.system.getClipboardText()
-        if #o.txt>o.mlen then o.txt=o.txt:sub(1,o.mlen) end
+        if #o.txt>o.mlen then o.txt = o.txt:sub(1,o.mlen) end
         o.call(o.txt)
       end
     end

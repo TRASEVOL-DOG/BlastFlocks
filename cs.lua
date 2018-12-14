@@ -22,7 +22,6 @@ else
 end
 
 
-
 local server = {}
 do
     server.enabled = false
@@ -39,19 +38,42 @@ do
     local idToPeer = {}
     local nextId = 1
 
+    function server.useCastleConfig()
+        if castle then
+            function castle.startServer(port)
+                server.enabled = true
+                server.start(port)
+            end
+        end
+    end
+
+    local useCompression = true
+    function server.disableCompression()
+        useCompression = false
+    end
+
     function server.start(port)
         host = enet.host_create('*:' .. tostring(port or '22122'))
         if host == nil then
             error("couldn't start server -- is port in use?")
         end
-        host:compress_with_range_coder()
+        if useCompression then
+            host:compress_with_range_coder()
+        end
         server.started = true
     end
 
     function server.send(id, ...)
-        assert(idToPeer[id], 'no connected client with this `id`'):send(marshal.encode({
-            message = { nArgs = select('#', ...), ... },
-        }))
+        local data = marshal.encode({ message = { nArgs = select('#', ...), ... } })
+        if id == 'all' then
+            host:broadcast(data)
+        else
+            assert(idToPeer[id], 'no connected client with this `id`'):send(data)
+        end
+    end
+
+    function server.kick(id)
+        assert(idToPeer[id], 'no connected client with this `id`'):disconnect()
     end
 
     function server.getPing(id)
@@ -169,9 +191,25 @@ do
     local host
     local peer
 
+    function client.useCastleConfig()
+        if castle then
+            function castle.startClient(address)
+                client.enabled = true
+                client.start(address)
+            end
+        end
+    end
+
+    local useCompression = true
+    function client.disableCompression()
+        useCompression = false
+    end
+
     function client.start(address)
         host = enet.host_create()
-        host:compress_with_range_coder()
+        if useCompression then
+            host:compress_with_range_coder()
+        end
         host:connect(address or '127.0.0.1:22122')
     end
 
@@ -179,6 +217,10 @@ do
         assert(peer, 'client is not connected'):send(marshal.encode({
             message = { nArgs = select('#', ...), ... },
         }))
+    end
+
+    function client.kick()
+        assert(peer, 'client is not connected'):disconnect()
     end
 
     function client.getPing()
@@ -189,6 +231,7 @@ do
         -- Process network events
         if host then
             while true do
+                if not host then break end
                 local event = host:service(0)
                 if not event then break end
 
@@ -202,6 +245,16 @@ do
                     if client.disconnect then
                         client.disconnect()
                     end
+                    client.connected = false
+                    client.id = nil
+                    for k in pairs(share) do
+                        share[k] = nil
+                    end
+                    for k in pairs(home) do
+                        home[k] = nil
+                    end
+                    host = nil
+                    peer = nil
                 end
 
                 -- Received a request?

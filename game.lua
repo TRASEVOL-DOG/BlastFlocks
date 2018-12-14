@@ -32,6 +32,7 @@ function _init()
     "to_wrap",
     "ship",
     "ship_player-2",
+    "ship_player-1",
     
     "friend_bullet",
     "enemy_bullet",
@@ -52,7 +53,9 @@ function _init()
   ship_cols = {}
   ship_poss = {}
   ship_plts = {}
-  for i=0,31 do
+  
+  local i=0
+  while i < 32 do
     local c = sget(i,4)
     if c == 25 then break end
     
@@ -61,13 +64,26 @@ function _init()
       add(ship_poss, {c,cb})
     end
     ship_plts[c] = {[22]=c_lit[c], [23]=c, [24]=c_drk[c]}
+    
+    i = i+1
   end
-  ship_plts[22] = {[22]=21, [23]=22, [24]=23}
+  
+  i = i+1
+  while i < 32 do
+    local c = sget(i,4)
+    if c == 25 then break end
+    ship_plts[c] = {[22]=c_lit[c], [23]=c, [24]=c_drk[c]}
+    i = i+1
+  end
+  
+--  ship_plts[22] = {[22]=21, [23]=22, [24]=23}
+--  ship_plts[23] = {[22]=22, [23]=23, [24]=24}
+--  ship_plts[24] = {[22]=23, [23]=24, [24]=25}
   ship_nposs = {}
   
   drk=c_drk
   
-  areaw=2400
+  areaw=3200
   areah=1600
   
   shkx,shky=0,0
@@ -75,7 +91,7 @@ function _init()
   
 --  splash_screen()
   
-  player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, nil, false, false, nil)
+  player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, false, false, nil)
   
   massx,massy=0,0
   massvx,massvy=0,0
@@ -161,7 +177,7 @@ function init_game()
 --    create_ship(rnd(32)-16,rnd(32),"smol",true)
 --  end
   
-  spawner=create_spawner()
+--  spawner=create_spawner()
   
   level=1
   levelt=1
@@ -177,6 +193,8 @@ function init_game()
   eshipdisp=0
   
   leaderboard_w = 4
+  
+  init_gang_sys()
   
   music("game")
 end
@@ -207,7 +225,10 @@ function update_game()
   
   shootshake=0
   
+  
+  update_gangs()
   update_objects()
+  update_gang_sys()
   
   shootshake=min(shootshake,2)
   add_shake(shootshake)
@@ -258,8 +279,8 @@ function draw_game()
   camera(0,0)
 --  draw_levelup()
 
-  draw_minimap()
   draw_leaderboard()
+  draw_minimap()
   
   local scrnw,scrnh=screen_size()
   
@@ -504,27 +525,27 @@ function update_player(s)
     end
   end
   
-  
-  lsrand(s.seed or 0)
-  if s.id == -2 then
-    for _,ship in pairs(s.ships) do
-      update_falling_ship(ship)
-    end
-  else--if s.id then
-    s.typs = {{},{},{},{}}
-    for _,ship in pairs(s.ships) do
-      add(s.typs[ship.typ_id % 8], ship)
-    end
-  
-    for _,ship in pairs(s.ships) do
-      ship:update()
-    end
+  if s.ships and not s.far then
+    if s.id == -2 then
+      for _,ship in pairs(s.ships) do
+        update_falling_ship(ship)
+      end
+    else--if s.id then
+      s.typs = {{},{},{},{}}
+      for _,ship in pairs(s.ships) do
+        add(s.typs[ship.typ_id % 8], ship)
+      end
     
-    if s.id then
-      local group = "ship_player"..s.id
-      s.msize = group_size(group)
-      if s.msize then
-        s.mx, s.my = get_mass_pos(group)
+      for _,ship in pairs(s.ships) do
+        ship:update()
+      end
+      
+      if s.id then
+        local group = "ship_player"..s.id
+        s.msize = group_size(group)
+        if s.msize then
+          s.mx, s.my = get_mass_pos(group)
+        end
       end
     end
   end
@@ -1087,14 +1108,14 @@ end
 function draw_minimap()
   if not my_id then return end
 
-  local w = 96
+  local w = 128
   local h = 64
   
   local scrnw, scrnh = screen_size()
   local x = scrnw - 4 - w
   local y = scrnh - h - 4
   
-  local dx,dy = -48,0
+  local dx,dy = -w/2,0
   function map_pos(pla)
     return (pla.mx/areaw*w -dx)%w, mid(pla.my/areah*h, 0, h-1)
   end
@@ -1107,12 +1128,12 @@ function draw_minimap()
   rectfill(x, y, x+w-1, y+h-1, 25)
   
   color(16)
-  for i=0,95,16 do
-    local xx = x+((i-dx)%96)
+  for i=0,w,16 do
+    local xx = x+((i-dx)%w)
     line(xx, y, xx, y+h)
   end
   
-  for i=0,63,16 do
+  for i=0,h,16 do
     line(x, y+i, x+w, y+i)
   end
   
@@ -1132,6 +1153,15 @@ function draw_minimap()
   end
   
   pal(0,25)
+  for id,gang in pairs(gang_grid) do
+    if gang.target then
+      local mx,my = map_posb({mx=gang.x, my=gang.y})
+      
+      apply_pal_map(ship_plts[0])
+      spr(191, 0, mx, my)
+    end
+  end
+  
   for id,p in pairs(players) do
     if id >= 0 then
       local mx,my = map_posb(p)
@@ -1184,7 +1214,7 @@ function draw_leaderboard()
   font("big")
   draw_text("Leaderboard:", x+w/2-6, y)
   y = y + 16
-  for i=1,#l do
+  for i=1, min(#l, 10) do
     local p,n = players[l[i][1]], l[i][2]
     local ca = 20+min(i, 3)
     local cb = p.colors[1]
@@ -1476,7 +1506,7 @@ end
 
 
 --creates
-function create_player(x, y, colors, seed, shooting, boosting, player_id)
+function create_player(x, y, colors, shooting, boosting, player_id)
   local p={
     x = x or 0,
     y = y or 0,
@@ -1487,7 +1517,6 @@ function create_player(x, y, colors, seed, shooting, boosting, player_id)
     my = 0,
     msize = 0,
     colors   = colors,
-    seed     = seed,
     shooting = shooting,
     boosting = boost,
     ships    = {},
@@ -1605,7 +1634,7 @@ function gen_leaderboard()
   local t={}
   for id,p in pairs(players) do
     if id>=0 then
-      local n=group_size("ship_player"..id)
+      local n=p.msize
       local pos
       for i=1,#t do
         if n>t[i][2] then

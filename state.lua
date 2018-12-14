@@ -40,7 +40,7 @@ local Methods = {}
 local proxies = setmetatable({}, { __mode = 'k' })
 
 
--- `pairs`, `ipairs` wrappers for nodes
+-- `pairs`, `ipairs` wrappers for nodes -- also set in `portal.globals` for ghost / castle engine
 
 local oldPairs = pairs
 function pairs(t)
@@ -48,6 +48,7 @@ function pairs(t)
     if not proxy then return oldPairs(t) end
     return oldPairs(proxy.children)
 end
+if portal then portal.globals.pairs = pairs end
 local pairs = oldPairs
 
 local oldIPairs = ipairs
@@ -56,6 +57,7 @@ function ipairs(t)
     if not proxy then return oldIPairs(t) end
     return oldIPairs(proxy.children)
 end
+if portal then portal.globals.ipairs = ipairs end
 local ipairs = oldIPairs
 
 
@@ -167,6 +169,10 @@ function Methods:__path()
     return (proxy.parent and (proxy.parent:__path() .. ':') or '') .. tostring(proxy.name)
 end
 
+-- This node as a table -- be careful about editing the table (normal events won't fire)
+function Methods:__table()
+    return proxies[self].children
+end
 
 -- Mark key `k` for sync. If `k` is `nil` and `rec` is `true`, marks everything recursively.
 function Methods:__sync(k, rec)
@@ -299,8 +305,16 @@ function Methods:__flush(getDiff, client)
     local children, dirty, relevanceDescs = proxy.children, proxy.dirty, proxy.relevanceDescs
     if relevanceDescs then -- Always descend into relevance paths
         for k in pairs(relevanceDescs) do
-            children[k]:__flush()
-            dirty[k] = nil -- No need to visit again
+        
+            -- REMY WAS HERE
+            if not children[k] then
+              relevanceDescs[k] = nil
+              dirty[k] = nil -- No need to visit again
+            else
+              children[k]:__flush()
+              dirty[k] = nil -- No need to visit again
+            end
+            
         end
     end
     for k in pairs(dirty) do -- Flush everything that's dirty

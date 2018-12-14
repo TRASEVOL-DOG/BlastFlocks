@@ -156,13 +156,13 @@ function update_ship(s)
   
   lsrand(s.id)
   
-  load_shipstats(s,ship_types[s.typ_id % 8], true)
+  load_shipstats(s,ship_types[s.typ_id % 8], not s.gang)
   
-  local p = players[s.player]
-  if not p then
-    print("WARNING: Playerless ships!!")
-    p = {x = s.x, y = s.y}
-  end
+  local p = s.gang or players[s.player]
+--  if not p then
+--    print("WARNING: Playerless ships!!")
+--    p = {x = s.x, y = s.y}
+--  end
   
   if p and p.boosting then
     s.boost=4
@@ -201,6 +201,14 @@ function update_ship(s)
       elseif rnd(2)<1 then
         create_smoke(sxx,syy,1,1+rnd(3),25)
       end
+    elseif s.gang then
+      if (rnd(10)<1) then
+        create_smoke(sxx,syy,2,rnd(3),pick{21, s.color},s.aim+0.5)
+      end
+      
+      if s.hp<s.stats.maxhp/3 and rnd(2)<1 then
+        create_smoke(sxx,syy,1,rnd(3),25,rnd(1))
+      end
     else
       if (rnd(64)>group_size("ship_player"..s.player)) then
         create_smoke(sxx,syy,2,rnd(3),pick{21, s.color},s.aim+0.5)
@@ -213,7 +221,7 @@ function update_ship(s)
     s.fxt = 0.033
   end
   
-  if not s.dead then
+  if not s.dead and not s.gang then
 --    local col    -- vvv code for scrapping vvv
 --    for id,p in pairs(players) do
 --      if id ~= s.player then
@@ -264,14 +272,25 @@ function update_falling_ship(s)
   s.boost = 6
   local adif=update_ship_movement(s)
   
+  local xx,yy
+  if client then
+    s.dx = s.dx - sgn(s.dx)*min(abs(s.dx), (1+abs(s.dx/16))*dt30f)
+    s.dy = s.dy - sgn(s.dy)*min(abs(s.dy), (1+abs(s.dy/16))*dt30f)
+    
+    xx = s.x + s.dx
+    yy = s.y + s.dy
+  else
+    xx = s.x
+    yy = s.y
+  end
   
   s.fxt = s.fxt - delta_time
   if s.fxt <= 0 then
     if rnd(3)<1 then
-      create_smoke(s.x, s.y, 1,1+rnd(3),23)
+      create_smoke(xx, yy, 1,1+rnd(3),23)
     elseif rnd(2)<1 then
       local l = s.info.hlen
-      create_smoke(s.x, s.y, 1,1+rnd(3),25)
+      create_smoke(xx, yy, 1,1+rnd(3),25)
     end
 
     s.fxt = 0.033
@@ -283,9 +302,17 @@ function update_ship_movement(s)
   
   local adif=0
   if not s.dead then
-    local targ = players[s.player]
+    local targ
+
+    if s.gang then
+      local p = players[s.gang.target]
+      targ = {x = p.mx, y = p.my}
+    else
+      targ = players[s.player]
+    end
     
     if not targ then targ = {x = s.x, y = s.y} end
+    
     
     local tax = rel_wrap(targ.x, s.x)
     
@@ -334,24 +361,24 @@ function update_ship_shooting(s,adif)
   local p = players[s.player]
   
   local shootdir
-  if p then
+  if s.gang then
+    local targ = players[s.gang.target]
+    if abs(adif)<0.2 and dist(s.x,s.y,targ.mx,targ.my)<400 then
+      if not s.shootin then
+        s.shootin=true
+        s.curcld=max(stt.attack,s.curcld)
+      end
+      adif = 0
+    else
+      s.shootin=false
+    end
+  elseif p then
     if p.shooting and not s.shootin then
       s.shootin=true
       s.curcld=max(stt.attack,s.curcld)
     end
     
     s.shootin = p.shooting
-
---  else
---    if abs(adif)<0.2 and dist(s.x,s.y,massx,massy)<400 then
---      if not s.shootin then
---        s.shootin=true
---        s.curcld=max(stt.attack,s.curcld)
---      end
---      shootdir=s.aim
---    else
---      s.shootin=false
---    end
   end
   
   if s.shootin and s.curcld<=0 then
@@ -365,14 +392,15 @@ function update_ship_shooting(s,adif)
       x,y=s.x+d*cos(shootdir),s.y+d*sin(shootdir)
     end
     
-    create_bullet(x, y, shootdir+rnd(0.01)-0.005, stt.bltspd, s.color, s.player)
+    create_bullet(x, y, shootdir+rnd(0.01)-0.005, stt.bltspd, s.color, s.player, s.gang ~= nil)
     s.shots=s.shots+1
     
-    if s.shots%3==0 and s.typ=="biggie" and not p then
-      s.curcld=2*stt.cldwn
-    else
-      s.curcld=stt.cldwn
-    end
+--    if s.shots%3==0 and s.typ=="biggie" and not p then
+--      s.curcld=2*stt.cldwn
+--    else
+--      s.curcld=stt.cldwn
+--    end
+    s.curcld=stt.cldwn
     
     shootshake=shootshake+1
     s.justfired=2
@@ -515,7 +543,7 @@ function update_bullet(s,dt)
     end
   end
   if col and not (col.dead and col.t>0.5) then
-    damage_ship(col,2,s)
+    damage_ship(col, s.is_ai and 0.5 or 2, s)
     
     create_explosion(s.x,s.y,4,s.color)
     
@@ -596,15 +624,18 @@ function pass_to_player(s, player)
   group_del("ship_player"..s.player, s)
   group_add("ship_player"..player,s)
   
+  local op = s.gang or players[s.player]
   if server then
-    del(players[s.player].ships, s)
+    del(op.ships, s)
     add(players[player].ships, s)
   else
-    players[s.player].ships[s.id] = nil
+    op.ships[s.id] = nil
     players[player].ships[s.id] = s
   end
   
   s.player = player
+  
+  if s.gang then s.gang = nil end
   
   if s.player == -2 then
     s.dead = true
@@ -652,6 +683,172 @@ function upgrade_ship(s, s2)
   s.hp=s.stats.maxhp
   
   sfx("save")
+end
+
+
+function update_gangs()
+  if server then
+    for id,p in pairs(players) do
+      gang_relevance[id] = {}
+    end
+  end
+
+  function search_new_target(gang)
+    local d = sqr(gang_safe_dist)
+    local target
+    for p_id, p in pairs(players) do
+      if p_id >= 0 then
+        local dy = gang.y-p.my
+        local dx = ((gang.x-p.mx+areaw/2)%areaw)-areaw/2
+        local nd = sqrdist(dx, dy)
+        if nd < d then
+          target = p_id
+          d = nd
+        end
+      end
+    end
+    
+    if target then
+      if gang.target then
+        gang.target = target
+      else
+        activate_gang(gang, target)
+      end
+      return true
+    end
+    
+    return false
+  end
+  
+  local active_search_new_target = server and function(gang)
+    local mind = sqr(gang_safe_dist)
+    local d = mind
+    local target
+    for p_id, p in pairs(players) do
+      if p_id >= 0 then
+        local dy = gang.y-p.my
+        local dx = ((gang.x-p.mx+areaw/2)%areaw)-areaw/2
+        local nd = sqrdist(dx, dy)
+        if nd < mind then
+          gang_relevance[p_id][gang.id] = true
+          
+          if nd < d then
+            target = p_id
+            d = nd
+          end
+        end
+      end
+    end
+    
+    if target then
+      if gang.target then
+        gang.target = target
+      else
+        activate_gang(gang, target)
+      end
+      return true
+    end
+    
+    return false
+  end or search_new_target
+
+  for id, gang in pairs(gang_grid) do
+    if gang.target then
+      local nships = 0
+      for _,_ in pairs(gang.ships) do
+        nships = nships + 1
+      end
+      
+      if nships <= 0 then
+        delete_gang(gang)
+      else
+        calculate_gang_pos(gang)
+        
+        if active_search_new_target(gang) then
+          local p = players[gang.target]
+          if p then
+              
+              for _,sh in pairs(gang.ships) do
+                update_ship(sh)
+              end
+              
+            end
+          end
+        else
+          delete_gang(gang)
+        end
+      end
+    else
+      if server then
+        search_new_target(gang)
+      else
+        delete_gang(gang)
+      end
+    end
+  end
+end
+
+function update_gang_sys()
+  if not server then
+    return
+  end
+  
+  gang_grid_t = gang_grid_t - delta_time
+  if gang_grid_t < 0 then
+    local x,y = rnd(areaw), rnd(areah)
+    local id = get_gang_id(x,y)
+    
+    if id and not gang_grid[id] then
+      local d = sqr(gang_safe_dist)
+      for p_id, p in pairs(players) do
+        if p_id >= 0 then
+          local dy = y-p.my
+          local dx = ((x-p.mx+areaw/2)%areaw)-areaw/2
+          d = min(d, sqrdist(dx, dy))
+        end
+      end
+      
+      if d>=sqr(gang_safe_dist) then
+        create_gang(x, y, id)
+      end
+    end
+  
+    gang_grid_t = 2
+  end
+end
+
+function calculate_gang_pos(gang)
+  local x,y,k=0,0,0
+  for _,sh in pairs(gang.ships) do
+    x = x + sh.x
+    y = y + sh.y
+    k = k + 1
+  end
+  gang.x = x/k
+  gang.y = y/k
+end
+
+function sync_gang(gang, ships, target, delay)
+  for s_id, sh in pairs(gang.ships) do
+    if not ships[s_id] then
+      destroy_ship(sh)
+    end
+  end
+  
+  for s_id, d in pairs(ships) do
+    local s = gang.ships[s_id]
+    if s then
+      local dx = (((s.x-d[1]+areaw/2)%areaw)-areaw/2)
+      local dy = s.y-d[2]
+      s.dx = s.dx+ dx
+      s.dy = s.dy+ dy
+      s.x = s.x - dx + delay*30*s.vx
+      s.y = s.y - dy + delay*30*s.vy
+    end
+  end
+  
+  calculate_gang_pos(gang)
+  gang.target = target
 end
 
 
@@ -793,7 +990,7 @@ function draw_bullet(s)
   apply_pal_map(s.plt)
   
 --  if s.player == my_id then
-    spr(6,0,s.x,s.y,2,2,s.a)
+    spr(s.s,0,s.x,s.y,2,2,s.a)
 --  else
 --    spr(8,0,s.x,s.y,2,2,s.a)
 --  end
@@ -912,6 +1109,125 @@ function load_shipstats(s,typ, upgraded)
 end
 
 
+function create_gang(x, y, id, target, ships)
+  local s = {
+    x = x,
+    y = y,
+    id = id,
+    update_id = 0
+  }
+  
+  if target then
+    activate_gang(s, target, ships)
+  end
+  
+  if gang_grid[id] then
+    delete_gang(gang_grid[id])
+  end
+  
+  gang_grid[id] = s
+  
+  return s
+end
+
+function activate_gang(s, target, ships)
+  if ships then
+    local x,y,k = 0,0,0
+    for _,sh in pairs(ships) do
+      x = x+sh[1]
+      y = y+sh[2]
+      k = k+1
+    end
+    s.x = x/k
+    s.y = y/k
+  end
+  
+  s.target = target
+  local p = players[target]
+  local dx = ((p.mx-s.x+areaw/2)%areaw)-areaw/2
+  local dy = p.my-s.y
+  s.a = atan2(dx, dy)
+  
+  s.ships={}
+  
+  local coa = cos(s.a)
+  local sia = sin(s.a)
+  local cob = cos(s.a + 0.25)
+  local sib = sin(s.a + 0.25)
+  
+  if ships then
+    for s_id,sh_d in pairs(ships) do
+      local sh = create_ship(sh_d[1], sh_d[2], 2*coa, 2*sia, sh_d[3], -1, s_id)
+      sh.a = s.a
+      sh.gang = s
+      
+      if server then
+        add(s.ships, sh)
+      elseif client then
+        s.ships[sh.id] = sh
+      end
+    end
+  else
+    local k = irnd(4)
+    for i=1,k do
+      local x = s.x + cob * 8 * (i-k/2-0.5)
+      local y = s.y + sib * 8 * (i-k/2-0.5)
+      
+      local sh = create_ship(x, y, coa, sia, typ or pick{1,1,1,1,2}, -1, id)
+      sh.a = s.a
+      sh.gang = s
+      
+      if server then
+        add(s.ships, sh)
+      elseif client then
+        s.ships[sh.id] = sh
+      end
+    end
+  end
+  
+  if server then
+    add(gang_list, s)
+  end
+end
+
+function init_gang_sys()
+  gang_grid = {}
+  gang_grid_k = 400
+  
+  if server then
+    gang_list = {} -- active gangs only!
+    gang_relevance = {}
+  end
+  
+  gang_safe_dist = 700
+  gang_lose_dist = 850
+  
+  gang_grid_wn = flr(areaw/gang_grid_k)
+  gang_grid_hn = flr(areah/gang_grid_k)
+  
+  gang_grid_t = 0
+  
+--  for x=0, gang_grid_wn-1 do
+--    for y=0, gang_grid_hn-1 do
+--      local id = y*gang_grid_wn + x
+--      
+--    end
+--  end
+  
+end
+
+function get_gang_id(x,y)
+  local x = flr((x%areaw)/gang_grid_k)
+  local y = flr(y/gang_grid_k)
+  
+  if y<0 or y>=gang_grid_hn then
+    return nil
+  else
+    return y*gang_grid_wn + x
+  end
+end
+
+
 function create_helixship(x,y)
   local s={
     x       = x,
@@ -947,7 +1263,9 @@ function create_helixship(x,y)
   register_object(s)
 end
 
-function create_bullet(x,y,dir,spd,c,player_id)
+function create_bullet(x,y,dir,spd,c,player_id, is_ai)
+  local c = is_ai and pick{0,1} or c
+
   local b={
     x      = x,
     y      = y,
@@ -958,8 +1276,9 @@ function create_bullet(x,y,dir,spd,c,player_id)
     vy     = spd*sin(dir),
     a      = dir,
     spd    = spd,
-    t      = 1.25,
-    s      = 5,
+    t      = is_ai and 2 or 1.25,
+    s      = is_ai and 8 or 6,
+    is_ai  = is_ai,
     color  = c,
     plt    = ship_plts[c],
     update = update_bullet,
@@ -981,12 +1300,29 @@ function destroy_ship(s)
   create_skull(s.x,s.y)
 
   deregister_object(s)
-  if (players[s.player]) then
+  
+  local p = s.gang or players[s.player]
+  if p then
     if server then
-      del(players[s.player].ships, s)
+      del(p.ships, s)
     else
-      players[s.player].ships[s.id] = nil
+      p.ships[s.id] = nil
     end
+  end
+end
+
+function delete_gang(s)
+  gang_grid[s.id] = nil
+  
+  if s.ships then
+    for i,sh in pairs(s.ships) do
+      deregister_object(sh)
+      s.ships[i] = nil
+    end
+  end
+  
+  if s.target and server then
+    del(gang_list, s)
   end
 end
 
