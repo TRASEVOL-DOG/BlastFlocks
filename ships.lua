@@ -768,11 +768,10 @@ function update_gangs()
           local p = players[gang.target]
           if p then
               
-              for _,sh in pairs(gang.ships) do
-                update_ship(sh)
-              end
-              
+            for _,sh in pairs(gang.ships) do
+              update_ship(sh)
             end
+            
           end
         else
           delete_gang(gang)
