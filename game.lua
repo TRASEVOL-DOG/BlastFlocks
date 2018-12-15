@@ -124,7 +124,7 @@ function _update(dt)
     xmod,ymod=0,0
   end
   
-  if btnp(5) then
+  if not server_only and btnp(5) then
     debug_mode = (debug_mode+1)%3
     if debug_mode > 0 then
       debuggg = "debug_mode = "..debug_mode
@@ -206,7 +206,7 @@ function update_game()
   t=t+0.01*dt30f
   
   -- TESTING: SERVER - ADD 1 PLANE TO EVERYONE
-  if server and btnp(5) then
+  if server and not server_only and btnp(5) then
     for id,p in pairs(players) do
       if id>=0 then
         add(p.ships, create_ship(p.x, p.y, 0, 0, 1, id))
