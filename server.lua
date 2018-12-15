@@ -23,6 +23,7 @@ function server.load()
     castle_print("Attempt to 2nd server init?")
     return
   end
+  castle_print("Starting server init...")
 
   server_only = true
   

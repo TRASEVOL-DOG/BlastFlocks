@@ -166,7 +166,10 @@ end
 
 function init_game()
   clear_all_groups()
-  register_object(player)
+  if player then
+    register_object(player)
+  end
+  
   register_object(cam)
 
   mainmenu=false

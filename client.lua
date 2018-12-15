@@ -11,6 +11,11 @@ end
 client.changed = read_client
 
 
+function client.connect() -- Called on connect from server
+    castle_print("Client connected!")
+end
+
+
 -- Client gets all Love events
 
 local client_init = false
@@ -19,6 +24,7 @@ function client.load()
     castle_print("Attempt to 2nd client init?")
     return
   end
+  castle_print("Starting client init...")
 
   init_graphics(2,2)
   init_audio()
