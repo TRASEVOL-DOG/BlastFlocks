@@ -321,7 +321,7 @@ function define_menus()
       server_define_non_players()
     end
     
-    if not server then
+    if client then
       connect_to_server()
       init_game()
       menu("cancel")
