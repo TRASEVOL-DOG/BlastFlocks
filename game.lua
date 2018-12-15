@@ -309,7 +309,7 @@ end
 
 function define_menus()
   function start_game()
-    if server then
+    if server and server_only then
       menu_back()
       init_game()
     
