@@ -51,6 +51,8 @@ end
 
 
 function sfx(name,x,y,pitch)
+  if server_only then return end
+
   local s=sfxs[name]
   local x,y=x or 0, y or 0
   local k=200
@@ -70,6 +72,8 @@ function sfx(name,x,y,pitch)
 end
 
 function music(name)
+  if server_only then return end
+
   if curmusic then
     musics[curmusic]:stop()
   end
@@ -84,10 +88,14 @@ function music(name)
 end
 
 function listener(x,y)
+  if server_only then return end
+
   love.audio.setPosition(x,y)
 end
 
 function sfx_volume(v)
+  if server_only then return end
+
   if not v then
     return sfx_vol
   end
@@ -100,6 +108,8 @@ function sfx_volume(v)
 end
 
 function music_volume(v)
+  if server_only then return end
+
   if not v then
     return music_vol
   end
@@ -112,6 +122,8 @@ function music_volume(v)
 end
 
 function master_volume(v)
+  if server_only then return end
+
   if not v then
     return master_vol
   end

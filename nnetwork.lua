@@ -4,7 +4,7 @@
 local cs = require("cs")
 
 
-client, server = nil, nil
+--client, server = nil, nil
 server_address = '127.0.0.1'
 server_port = '22122'
 
@@ -30,18 +30,20 @@ function start_server()
 end
 
 function connect_to_server()
-  if not client then
-    local address = server_address..':'..server_port
-    client = cs.client
-    client.enabled = true
-    client.start(address)
-    client.changed = read_client
-    castle_print("Connecting to server at "..address)
-    
-    connecting = true
-  else
-    castle_print("Already connected or connecting.")
-  end
+--  if not client then
+--    local address = server_address..':'..server_port
+--    client = cs.client
+--    client.enabled = true
+--    client.start(address)
+--    client.changed = read_client
+--    castle_print("Connecting to server at "..address)
+--    
+--    connecting = true
+--  else
+--    castle_print("Already connected or connecting.")
+--  end
+
+  connecting = true
 end
 
 
@@ -478,6 +480,7 @@ function client_disconnect()
   if client.id then
     castle_print("Disconnecting as client #"..client.id)
   else
+    error("Abandoning connection.")
     castle_print("Abandoning connection.")
   end
   

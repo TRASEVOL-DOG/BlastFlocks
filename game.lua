@@ -50,30 +50,23 @@ function _init()
   enemypal={   [22]=19, [23]=0,  [24]=1}
   neutralpal={ [22]=22, [23]=23, [24]=24}
   
-  ship_cols = {}
+  ship_cols = {21,23,2,3,8,9,11,12,13,14,15,17,18,20}
   ship_poss = {}
   ship_plts = {}
   
-  local i=0
-  while i < 32 do
-    local c = sget(i,4)
-    if c == 25 then break end
-    
-    add(ship_cols, c)
-    for cb in all(ship_cols) do
+  local i = 1
+  for c in all(ship_cols) do
+    for j=1,i do
+      local cb = ship_cols[j]
       add(ship_poss, {c,cb})
     end
     ship_plts[c] = {[22]=c_lit[c], [23]=c, [24]=c_drk[c]}
-    
-    i = i+1
+    i=i+1
   end
   
-  i = i+1
-  while i < 32 do
-    local c = sget(i,4)
-    if c == 25 then break end
+  local more_cols = {0,1,22,23,24}
+  for c in all(more_cols) do
     ship_plts[c] = {[22]=c_lit[c], [23]=c, [24]=c_drk[c]}
-    i = i+1
   end
   
 --  ship_plts[22] = {[22]=21, [23]=22, [24]=23}
@@ -91,7 +84,9 @@ function _init()
   
 --  splash_screen()
   
-  player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, false, false, nil)
+  if not server_only then
+    player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, false, false, nil)
+  end
   
   massx,massy=0,0
   massvx,massvy=0,0
@@ -103,13 +98,18 @@ function _init()
   level=0
   levelt=0
   
-  main_menu()
+  if server_only then
+    init_game()
+    server_define_non_players()
+  else
+    main_menu()
+  end
 end
 
 network_t = 0
 function _update(dt)
-  if client then client.preupdate() end
-  if server then server.preupdate() end
+--  if client then client.preupdate() end
+--  if server then server.preupdate() end
 
 --  read_server()
 
@@ -140,8 +140,8 @@ function _update(dt)
     network_t = 0.033
   end
   
-  if client then client.postupdate() end
-  if server then server.postupdate() end
+--  if client then client.postupdate() end
+--  if server then server.postupdate() end
 end
 
 debuggg = ""
@@ -396,7 +396,7 @@ end
 
 --main menu
 function main_menu()
-  if client then client_disconnect() end
+--  if client then client_disconnect() end
   if server then server_close() end
 
   player.ships = {}
@@ -925,6 +925,7 @@ function draw_hole(s)
 end
 
 function draw_background()
+--  if not draw_skybackground() then return end
   if not draw_gridbackground() then return end
 
   if group_size("screen_glitch")==0 then
@@ -998,7 +999,8 @@ function draw_skybackground()
     plt={2,14,15,15,13,7,6}
   else
     --plt={1,12,15,15,13,7,6}
-    plt={15,14,13,13,15,21,22}
+    --plt={15,14,13,13,15,21,22}
+    plt={25,16,18,24,25,23,24}
   end
 
   local c=plt[1]
@@ -1180,7 +1182,8 @@ function draw_minimap()
   end
   
   clip()
-  
+
+  pal(23,23)
   rect(x-1, y-2, x+w, y+h+1, 25)
   rect(x, y, x+w-1, y+h, 23)
   rect(x, y-1, x+w-1, y+h-1, 21)

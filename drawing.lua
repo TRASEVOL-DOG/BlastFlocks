@@ -4,8 +4,8 @@
 require("maths")
 require("shader")
 
-c_drk = {}
-c_lit = {}
+c_drk = {[0]=1,7,3,6,5,6,7,25,9,10,25,12,10,14,15,16,25,18,16,20,18,22,23,24,25,25,27,28,25}
+c_lit = {[0]=19,0,21,2,21,4,5,6,21,8,9,21,11,21,13,14,15,19,17,21,19,21,21,22,23,24,21,26,27}
 
 function init_graphics(scx,scy)
   local fonts={
@@ -28,7 +28,7 @@ function init_graphics(scx,scy)
   render_canvas=love.graphics.newCanvas(w,h)
   render_canvas:setFilter("nearest","nearest")
   
-  love.window.setTitle("*** BLAST FLOCK ***")
+  love.window.setTitle("*** BLAST FLOCKS ***")
   
   init_palette()
   
@@ -64,9 +64,7 @@ function init_graphics(scx,scy)
   --graphics.textdrk={[0]=1,0,1,1,2,1,5,13,2,4,9,3,1,1,2,5}
   graphics.textdrk={}
   for i=0,28 do
-    graphics.textdrk[i] = sget(i, 0)
-    c_drk[i] = sget(i, 0)
-    c_lit[i] = sget(i, 2)
+    graphics.textdrk[i] = c_drk[i]
   end
 end
 
@@ -367,10 +365,18 @@ end
 
 
 function screen_size()
+  if server_only then
+    return 0,0
+  end
+
   return graphics.scrn_w,graphics.scrn_h
 end
 
 function screen_scale()
+  if server_only then
+    return 0,0
+  end
+
   return graphics.scrn_scalex,graphics.scrn_scaley
 end
 

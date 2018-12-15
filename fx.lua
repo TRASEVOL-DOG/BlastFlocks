@@ -155,6 +155,8 @@ end
 
 
 function create_skull(x,y)
+  if server_only then return end
+
   local s={
     x=x,
     y=y,
@@ -168,6 +170,8 @@ function create_skull(x,y)
 end
 
 function create_scoretxt(x,y,amount,c)
+  if server_only then return end
+
   local s={
     x=x,
     y=y,
@@ -200,6 +204,8 @@ end
 --end
 
 function create_screenglitch(w,h)
+  if server_only then return end
+
   local scrnw,scrnh=screen_size()
   
   local s={
@@ -222,6 +228,8 @@ function create_screenglitch(w,h)
 end
 
 function create_explosion(x,y,r,c)
+  if server_only then return nil end
+
   local e={
     x=x,
     y=y,
@@ -238,6 +246,8 @@ function create_explosion(x,y,r,c)
 end
 
 function create_smoke(x,y,spd,r,c,a)
+  if server_only then return nil end
+
   local a=a or rnd(1)
   local spd=0.75*spd+rnd(0.5*spd)
   
