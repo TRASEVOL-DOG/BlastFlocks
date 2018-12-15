@@ -1526,7 +1526,7 @@ end
 
 --creates
 function create_player(x, y, colors, shooting, boosting, player_id)
-  castle_print("Creating player #"..player_id or "nil")
+  castle_print("Creating player #"..(player_id or "nil"))
   local p={
     x = x or 0,
     y = y or 0,
