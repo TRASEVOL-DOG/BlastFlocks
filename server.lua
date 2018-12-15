@@ -57,6 +57,8 @@ function server.update(dt)
     server.load()
     return
   end
+  
+--  castle_print("server update")
 
   server_only = true
   delta_time = dt

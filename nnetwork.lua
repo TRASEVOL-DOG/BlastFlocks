@@ -257,7 +257,7 @@ function read_server()
     return
   end
   
-  my_id = 0
+--  my_id = 0
   
   for id, ho in pairs(server.homes) do
     if players[id] then

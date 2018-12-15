@@ -400,7 +400,7 @@ end
 --main menu
 function main_menu()
 --  if client then client_disconnect() end
-  if server then server_close() end
+--  if server then server_close() end
 
   player.ships = {}
   clear_all_groups()
