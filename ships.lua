@@ -625,7 +625,7 @@ function pass_to_player(s, player)
   group_add("ship_player"..player,s)
   
   local op = s.gang or players[s.player]
-  if server then
+  if server and server_only then
     del(op.ships, s)
     add(players[player].ships, s)
   else
@@ -669,7 +669,7 @@ function upgrade_ship(s, s2)
   
   if s2 then
     deregister_object(s2)
-    if server then
+    if server and server_only then
       del(players[s2.player].ships, s2)
     else
       players[s2.player].ships[s2.id] = nil
@@ -687,7 +687,7 @@ end
 
 
 function update_gangs()
-  if server then
+  if server and server_only then
     for id,p in pairs(players) do
       gang_relevance[id] = {}
     end
@@ -720,7 +720,7 @@ function update_gangs()
     return false
   end
   
-  local active_search_new_target = server and function(gang)
+  local active_search_new_target = server and server_only and function(gang)
     local mind = sqr(gang_safe_dist)
     local d = mind
     local target
@@ -778,7 +778,7 @@ function update_gangs()
         end
       end
     else
-      if server then
+      if server and server_only then
         search_new_target(gang)
       else
         delete_gang(gang)
@@ -788,7 +788,7 @@ function update_gangs()
 end
 
 function update_gang_sys()
-  if not server then
+  if not (server and server_only) then
     return
   end
   
@@ -1168,7 +1168,7 @@ function activate_gang(s, target, ships)
       sh.a = s.a
       sh.gang = s
       
-      if server then
+      if server and server_only then
         add(s.ships, sh)
       elseif client then
         s.ships[sh.id] = sh
@@ -1184,7 +1184,7 @@ function activate_gang(s, target, ships)
       sh.a = s.a
       sh.gang = s
       
-      if server then
+      if server and server_only then
         add(s.ships, sh)
       elseif client then
         s.ships[sh.id] = sh
@@ -1192,7 +1192,7 @@ function activate_gang(s, target, ships)
     end
   end
   
-  if server then
+  if server and server_only then
     add(gang_list, s)
   end
 end
@@ -1201,7 +1201,7 @@ function init_gang_sys()
   gang_grid = {}
   gang_grid_k = 400
   
-  if server then
+  if server and server_only then
     gang_list = {} -- active gangs only!
     gang_relevance = {}
   end
@@ -1310,7 +1310,7 @@ function destroy_ship(s)
   
   local p = s.gang or players[s.player]
   if p then
-    if server then
+    if server and server_only then
       del(p.ships, s)
     else
       p.ships[s.id] = nil
@@ -1328,7 +1328,7 @@ function delete_gang(s)
     end
   end
   
-  if s.target and server then
+  if s.target and server and server_only then
     del(gang_list, s)
   end
 end

@@ -1450,7 +1450,7 @@ function draw_network_state()
     _log("Offline", true, 23)
   end
   
-  if server then
+  if server and server_only then
     -- hosting
     -- seeing # players
     -- player list
