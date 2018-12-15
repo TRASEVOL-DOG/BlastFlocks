@@ -725,7 +725,7 @@ function update_camera(c)
   
   local player=player
   if server_only then
-    player = {massx = 0, massy = 0}
+    player = {x = massx, y = massy}
   end
   
   if m then
