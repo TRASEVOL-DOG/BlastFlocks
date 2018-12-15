@@ -136,10 +136,13 @@ function _update(dt)
   
   network_t = network_t - delta_time
   if network_t < 0 then
-    if connecting or connected then
-      update_client()
+    if server_only then
+      update_server()
+    else
+      if connecting or connected then
+        update_client()
+      end
     end
-    update_server()
     network_t = 0.033
   end
   
