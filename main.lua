@@ -55,7 +55,7 @@ require("shader")
 require("maths")
 require("audio")
 
-USE_CASTLE_CONFIG = true
+--USE_CASTLE_CONFIG = true
 require("server")
 require("client")
 
