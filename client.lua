@@ -33,6 +33,10 @@ function client.load()
   font("small")
   _init()
   
+  if not player then
+    player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, false, false, nil)
+  end
+  
   love.keyboard.setKeyRepeat(true)
   love.keyboard.setTextInput(false)
   

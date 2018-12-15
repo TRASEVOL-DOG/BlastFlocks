@@ -239,16 +239,18 @@ function update_game()
   local omx=massx
   local omy=massy
   
-  if player.msize > 0 then
-    massx, massy = player.mx, player.my
-  elseif not gameover then
---    boomsfx()
---    create_explosion(massx,massy,32,10)
---    add_shake(64)
---    menu("gameover")
---    gameover=true
---    music()
---    sfx("gameover")
+  if not server_only then
+    if player.msize > 0 then
+      massx, massy = player.mx, player.my
+    elseif not gameover then
+--      boomsfx()
+--      create_explosion(massx,massy,32,10)
+--      add_shake(64)
+--      menu("gameover")
+--      gameover=true
+--      music()
+--      sfx("gameover")
+    end
   end
 
   massvx=massx-omx
@@ -720,6 +722,11 @@ function update_camera(c)
   local camyto
   
   local m=group_member("hole",1)
+  
+  local player=player
+  if server_only then
+    player = {massx = 0, massy = 0}
+  end
   
   if m then
     local px,py=massx+massvx*32,massy+massvy*32

@@ -4,9 +4,12 @@
 require("drawing")
 
 input={}
-input.btn_state=  {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}
-input.btn_press=  {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}
-input.btn_release={false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}
+input.btn_state=      {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}
+input.btn_press=      {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}
+input.btn_release=    {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}
+input.mosbtn_state=   {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}
+input.mosbtn_press=   {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}
+input.mosbtn_release= {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}
 
 function init_input_mgr()
   input={}
