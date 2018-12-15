@@ -760,6 +760,8 @@ function update_camera(c)
 end
 
 function update_ui_controls()
+  if server_only then return end
+
   if (btnp(6) or btnp(7)) and not gameover then
     if paused then
       menu_back()
