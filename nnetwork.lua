@@ -195,7 +195,7 @@ function read_player_ships(p, p_d, id)
       local s = sh[s_id]
 
       if s then
-        if s.update_id < d[8] then
+        if s.update_id < d[7] then
           local ox = s.x
           local oy = s.y
           s.x      = d[1] + delay*30*s.vx --d[3]
