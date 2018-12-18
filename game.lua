@@ -511,7 +511,7 @@ function draw_title(y)
     local rx = rs*34
     local ry = -24
     
-    local d = 5.5*cos(love.timer.getTime()*0.75 + abs(rs)*0.15)
+    local d = 5.5*cos(love.timer.getTime()*0.75 + abs(rs)*0.25)
     local a = atan2(rx,ry-64)
     local dx = d*cos(a)
     local dy = d*sin(a)
@@ -527,7 +527,7 @@ function draw_title(y)
     local rx = rs*34
     local ry = 24
     
-    local d = 5.5*cos(-love.timer.getTime()*0.75 - abs(rs)*0.15)
+    local d = 5.5*cos(-love.timer.getTime()*0.75 - abs(rs)*0.25)
     local a = atan2(rx,ry+64)
     local dx = d*cos(a)
     local dy = d*sin(a)
