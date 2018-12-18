@@ -230,6 +230,8 @@ function update_game()
   update_objects()
   update_gang_sys()
   
+  debuggg = debuggg.." - "..love.timer.getTime()
+  
   shootshake=min(shootshake,2)
   add_shake(shootshake)
   
