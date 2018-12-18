@@ -8,7 +8,7 @@ require("drawing")
 function init_sprite_mgr()
   local files={
     "assets/sheet.png",
-    "assets/blastflock.png"
+    "assets/blastflocks.png"
   }
   
   local anim_info={

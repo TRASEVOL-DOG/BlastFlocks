@@ -53,12 +53,12 @@ function read_client()
     return
   end
   
-  my_id = client.id
-  
   -- calculate delay
-  if not (client.share[my_id] and client.share[my_id][99]) then
+  if not (client.share[client.id] and client.share[client.id][99]) then
     return
   end
+  
+  my_id = client.id
   
   local lt = client.share[my_id][99]
   delay = (love.timer.getTime() - lt)/2

@@ -444,28 +444,29 @@ function draw_mainmenu()
   local y=scrnh/2
   if curmenu=="mainmenu" then
     font("big")
-    pal()
-    local foo=function(x,y)
-      spr(0,1,scrnw/2+x,scrnh*0.2-40+y,20,4)
-      spr(64,1,scrnw/2+x,scrnh*0.2+y,20,4)
-    end
-    
-    do
-      all_colors_to(25)
-      foo(0,-3) foo(-1,-2) foo(1,-2) foo(-2,-1) foo(2,-1)
-      foo(-3,0) foo(3,0)
-      foo(-3,1) foo(3,1)
-      foo(0,4) foo(-1,3) foo(1,3) foo(-2,2) foo(2,2)
-      all_colors_to(22)
-      foo(-2,1) foo(-1,2) foo(0,3) foo(1,2) foo(2,1)
-      all_colors_to(21)
-      foo(-2,0) foo(2,0) foo(0,-2) foo(0,2)
-      foo(-1,-1) foo(-1,1) foo(1,-1) foo(1,1)
-      all_colors_to(25)
-      foo(-1,0) foo(1,0) foo(0,-1) foo(0,1)
-      all_colors_to()
-      foo(0,0)
-    end
+--    pal()
+--    local foo=function(x,y)
+--      spr(0,1,scrnw/2+x,scrnh*0.2-40+y,20,4)
+--      spr(64,1,scrnw/2+x,scrnh*0.2+y,20,4)
+--    end
+--    
+--    do
+--      all_colors_to(25)
+--      foo(0,-3) foo(-1,-2) foo(1,-2) foo(-2,-1) foo(2,-1)
+--      foo(-3,0) foo(3,0)
+--      foo(-3,1) foo(3,1)
+--      foo(0,4) foo(-1,3) foo(1,3) foo(-2,2) foo(2,2)
+--      all_colors_to(22)
+--      foo(-2,1) foo(-1,2) foo(0,3) foo(1,2) foo(2,1)
+--      all_colors_to(21)
+--      foo(-2,0) foo(2,0) foo(0,-2) foo(0,2)
+--      foo(-1,-1) foo(-1,1) foo(1,-1) foo(1,1)
+--      all_colors_to(25)
+--      foo(-1,0) foo(1,0) foo(0,-1) foo(0,1)
+--      all_colors_to()
+--      foo(0,0)
+--    end
+    draw_title(scrnh*0.25)
     
     --draw_text("left click to fire, right click to boost",scrnw/2,scrnh*0.2+48,1,25,19,0)
     --draw_text("you can't rescue ships while firing",scrnw/2,scrnh*0.2+64,1,25,19,0)
@@ -474,13 +475,14 @@ function draw_mainmenu()
     local strb = "- right click to boost"
     local strc = "- save falling ships"
     
-    local x = scrnw/2 - str_width(strb)/2 - 8
-    y = scrnh*0.2+32
+    local x = scrnw/2 - str_width(strb)/2 - 5
+    y = scrnh*0.25+48
 --    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
 --    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
 --    draw_text(strc, x, y, 0, nil, 8, 9)
-    draw_text(stra, x, y, 0, nil, 21) y,x = y + 14, x + 8
-    draw_text(strb, x, y, 0, nil, 21) y,x = y + 14, x + 8
+    font("small")
+    draw_text(stra, x, y, 0, nil, 21) y,x = y + 10, x + 5
+    draw_text(strb, x, y, 0, nil, 21) y,x = y + 10, x + 5
     draw_text(strc, x, y, 0, nil, 21)
   
     y = scrnh/2+48
@@ -495,6 +497,44 @@ function draw_mainmenu()
   
   camera(xmod,ymod)
   player:draw()
+end
+
+function draw_title(y)
+  local scrnw, scrnh = screen_size()
+  local x = scrnw/2
+
+  local sprites = {0, 4, 8, 12, 64}
+  local order = {0,1,4,3,2}
+  for i=1,5 do
+    local s = order[i]
+    local rs = s-2
+    local rx = rs*34
+    local ry = -24
+    
+    local d = 4*cos(love.timer.getTime() + rs*0.15)
+    local a = atan2(rx,ry-64)
+    local dx = d*cos(a)
+    local dy = d*sin(a)
+    
+    spr(sprites[s+1], 1, x+rx+dx, y+ry+dy, 4, 4)
+  end
+  
+  local sprites = {68, 72, 76, 128, 132, 136}
+  local order = {0,1,5,4,2,3}
+  for i=1,6 do
+    local s = order[i]
+    local rs = s-2.5
+    local rx = rs*34
+    local ry = 24
+    
+    local d = 4*cos(-love.timer.getTime() - rs*0.15)
+    local a = atan2(rx,ry+64)
+    local dx = d*cos(a)
+    local dy = d*sin(a)
+    
+    spr(sprites[s+1], 1, x+rx+dx, y+ry+dy, 4, 4)
+  end
+  
 end
 
 
@@ -1437,8 +1477,10 @@ function draw_network_state()
   local scrnw, scrnh = screen_size()
   x,y,al = 4, 4, 0
   
-  local fps = love.timer.getFPS()
-  _log("FpS: "..fps, true, (fps>=60) and 8 or (fps>=30) and 3 or 0)
+  if debug_mode > 0 then
+    local fps = love.timer.getFPS()
+    _log("FpS: "..fps, true, (fps>=60) and 8 or (fps>=30) and 3 or 0)
+  end
   
   if not (server or client) then
     _log("Offline", true, 23)
@@ -1473,7 +1515,9 @@ function draw_network_state()
     -- player list
     
     if client.connected then
-      _log("Connected to Server", true, 13)
+      if debug_mode > 0 then
+        _log("Connected to Server", true, 13)
+      end
       
       ping_t = ping_t - delta_time
       if ping_t < 0 then
@@ -1482,27 +1526,29 @@ function draw_network_state()
       end
       _log("Ping: "..ping, true, (ping<100) and 8 or (ping<300) and 3 or 0)
 
-      _log("My ID: "..(my_id or "missing"))
-
-      local count = 0
-      local list = ""
-      for id,_ in pairs(players) do
-        if id >= 0 then
-          count = count + 1
-          list = list..id.." "
+      if debug_mode > 0 then
+        _log("My ID: "..(my_id or "missing"))
+        
+        local count = 0
+        local list = ""
+        for id,_ in pairs(players) do
+          if id >= 0 then
+            count = count + 1
+            list = list..id.." "
+          end
         end
+        list:sub(1, #list-2)
+        
+        _log("Seeing "..count.." players", false)
+        _log(" "..list, false)
+        _log("Counting "..group_size("ship").." ships.", false)
       end
-      list:sub(1, #list-2)
-      
-      _log("Seeing "..count.." players", false)
-      _log(" "..list, false)
-      _log("Counting "..group_size("ship").." ships.", false)
     else
       _log("Client not connected", true, 23)
     end
   end
 
-  if #debuggg > 0 then
+  if #debuggg > 0 and debug_mode > 0 then
     _log("debug: "..debuggg, false, 21)
   end
 end

@@ -154,9 +154,6 @@ end
 function update_ship(s)
   s.t=s.t+0.01*dt30f
   
-  s.tt = (s.tt or 0) + delta_time;
-  debuggg = ""..s.tt
-  
   lsrand(s.id)
   
   load_shipstats(s,ship_types[s.typ_id % 8], not s.gang)
