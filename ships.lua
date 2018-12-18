@@ -175,7 +175,7 @@ function update_ship(s)
   update_ship_shooting(s,adif)
   
   local xx,yy
-  if client then
+  if not (server and server_only) then
     --s.dx = lerp(s.dx, 0, 0.075*dt30f)
     --s.dy = lerp(s.dy, 0, 0.075*dt30f)
     
