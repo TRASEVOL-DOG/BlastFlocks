@@ -997,11 +997,14 @@ function draw_bullet(s)
   
   apply_pal_map(s.plt)
   
---  if s.player == my_id then
+
+  if s.t < 0.4 then
+    local sps = {46,44,42,8}
+    spr(sps[flr(s.t*10)+1],0,s.x,s.y,2,2,s.a)
+  else
     spr(s.s,0,s.x,s.y,2,2,s.a)
---  else
---    spr(8,0,s.x,s.y,2,2,s.a)
---  end
+  end
+  
   
   all_colors_to()
 end

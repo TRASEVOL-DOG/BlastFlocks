@@ -143,7 +143,7 @@ function _update(dt)
         update_client()
       end
     end
-    network_t = 0.033
+    network_t = 0.066
   end
   
 --  if client then client.postupdate() end
@@ -302,24 +302,10 @@ end
 
 function define_menus()
   function start_game()
-    if server and server_only then
-      menu_back()
-      init_game()
-    
-      deregister_object(player)
-      my_id = 0
-      player = server_new_player(0)
-      player.name = my_name
-      
-      server_define_non_players()
-    end
-    
-    if client then
-      connect_to_server()
-      init_game()
-      menu("cancel")
-      client_define_non_players()
-    end
+    connect_to_server()
+    init_game()
+    menu("cancel")
+    client_define_non_players()
   end
   
   function restart()
@@ -351,26 +337,34 @@ function define_menus()
 
   local menus={
     mainmenu={
-      {"Connect and Play", function() menu("connectplay") end},
-      {"Host and Play", function() menu("hostplay") end},
-      {"Settings", function() menu("settings") end}
-    },
-    connectplay={
-      {"Play", start_game},
       {"Player Name", set_player_name, "text_field", 16, my_name},
-      {"Server Address", function(str) server_address=str end, "text_field", 16, server_address},
-      {"Port", function(str) server_port=str end, "text_field", 6, server_port},
-      {"Back", menu_back}
+      {"Play", start_game},
+      {"Settings", function() menu("settings") end}
     },
     cancel={
       {"Go Back", function() connecting=false main_menu() end}
     },
-    hostplay={
-      {"Play", function() start_server() start_game() end},
-      {"Player Name", set_player_name, "text_field", 16, my_name},
-      {"Port", function(str) server_port=str end, "text_field", 6, server_port},
-      {"Back", function() menu("mainmenu") end}
-    },
+--    mainmenu={
+--      {"Connect and Play", function() menu("connectplay") end},
+--      {"Host and Play", function() menu("hostplay") end},
+--      {"Settings", function() menu("settings") end}
+--    },
+--    connectplay={
+--      {"Play", start_game},
+--      {"Player Name", set_player_name, "text_field", 16, my_name},
+--      {"Server Address", function(str) server_address=str end, "text_field", 16, server_address},
+--      {"Port", function(str) server_port=str end, "text_field", 6, server_port},
+--      {"Back", menu_back}
+--    },
+--    cancel={
+--      {"Go Back", function() connecting=false main_menu() end}
+--    },
+--    hostplay={
+--      {"Play", function() start_server() start_game() end},
+--      {"Player Name", set_player_name, "text_field", 16, my_name},
+--      {"Port", function(str) server_port=str end, "text_field", 6, server_port},
+--      {"Back", function() menu("mainmenu") end}
+--    },
     settings={
       {"Fullscreen", fullscreen},
       {"Master Volume", master_volume,"slider",100},
@@ -478,9 +472,12 @@ function draw_mainmenu()
     
     local x = scrnw/2 - str_width(strb)/2 - 8
     y = scrnh*0.2+32
-    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
-    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
-    draw_text(strc, x, y, 0, nil, 8, 9)
+--    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
+--    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
+--    draw_text(strc, x, y, 0, nil, 8, 9)
+    draw_text(stra, x, y, 0, nil, 21, 19) y,x = y + 14, x + 8
+    draw_text(strb, x, y, 0, nil, 21, 13) y,x = y + 14, x + 8
+    draw_text(strc, x, y, 0, nil, 21, 8)
   
     y = scrnh/2+48
   end
@@ -988,11 +985,11 @@ function draw_background()
 end
 
 function draw_gridbackground()
-  local ca,cb=16,15
+  local ca,cb,cc=16,15,14
   
   cls(25)
   draw_grid(0.25*xmod,0.25*ymod,32,ca)
-  draw_grid(0.75*xmod,0.75*ymod,64,cb)
+  draw_grid(0.75*xmod,0.75*ymod,64,cb,cc)
   
   if level>=30 and mainmenu then
     draw_cloudlayer(0.25*xmod,0.25*ymod,150,0.4,6,13) 
@@ -1100,7 +1097,7 @@ function draw_cloud(x,y,sca,c0,c1,d)
   end
 end
 
-function draw_grid(ancx,ancy,d,c)
+function draw_grid(ancx,ancy,d,c,cb)
   local scrnw,scrnh=screen_size()
   
   color(c)
@@ -1115,6 +1112,22 @@ function draw_grid(ancx,ancy,d,c)
   
   for y=gancy,gancy+scrnh+d,d do
     line(ancx,y,ancx+scrnw,y)
+  end
+  
+  if cb then
+    d = d * 4
+    color(cb)
+    
+    local gancx=ancx-ancx%d
+    local gancy=ancy-ancy%d
+    
+    for x=gancx,gancx+scrnw+d,d do
+      line(x,ancy,x,ancy+scrnh)
+    end
+    
+    for y=gancy,gancy+scrnh+d,d do
+      line(ancx,y,ancx+scrnw,y)
+    end
   end
 end
 
