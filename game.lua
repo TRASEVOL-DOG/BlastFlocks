@@ -466,7 +466,7 @@ function draw_mainmenu()
 --      all_colors_to()
 --      foo(0,0)
 --    end
-    draw_title(scrnh*0.25)
+    draw_title(scrnh*0.2)
     
     --draw_text("left click to fire, right click to boost",scrnw/2,scrnh*0.2+48,1,25,19,0)
     --draw_text("you can't rescue ships while firing",scrnw/2,scrnh*0.2+64,1,25,19,0)
@@ -476,7 +476,7 @@ function draw_mainmenu()
     local strc = "- save falling ships"
     
     local x = scrnw/2 - str_width(strb)/2 - 5
-    y = scrnh*0.25+48
+    y = scrnh*0.2+48
 --    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
 --    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
 --    draw_text(strc, x, y, 0, nil, 8, 9)
@@ -511,7 +511,7 @@ function draw_title(y)
     local rx = rs*34
     local ry = -24
     
-    local d = 4*cos(love.timer.getTime() + abs(rs)*0.15)
+    local d = 5.5*cos(love.timer.getTime()*0.75 + abs(rs)*0.15)
     local a = atan2(rx,ry-64)
     local dx = d*cos(a)
     local dy = d*sin(a)
@@ -527,7 +527,7 @@ function draw_title(y)
     local rx = rs*34
     local ry = 24
     
-    local d = 4*cos(-love.timer.getTime() - abs(rs)*0.15)
+    local d = 5.5*cos(-love.timer.getTime()*0.75 - abs(rs)*0.15)
     local a = atan2(rx,ry+64)
     local dx = d*cos(a)
     local dy = d*sin(a)
@@ -535,12 +535,12 @@ function draw_title(y)
     spr(sprites[s+1], 1, x+rx+dx, y+ry+dy, 4, 4)
   end
   
-  apply_pal_map(ship_plts[22])
-  draw_anim(x-112, y, "hugeship", "rotate", 0.25, 0.375, false, false)
-  draw_anim(x-112+10, y+10, "hugeship", "bfire", t, 0.375)
-  
-  draw_anim(x+112, y, "hugeship", "rotate", 0.25, 0.175, false, false)
-  draw_anim(x+112-10, y+10, "hugeship", "bfire", t, 0.175)
+--  apply_pal_map(ship_plts[22])
+--  draw_anim(x-112, y, "hugeship", "rotate", 0.25, 0.375, false, false)
+--  draw_anim(x-112+10, y+10, "hugeship", "bfire", t, 0.375)
+--  
+--  draw_anim(x+112, y, "hugeship", "rotate", 0.25, 0.175, false, false)
+--  draw_anim(x+112-10, y+10, "hugeship", "bfire", t, 0.175)
 end
 
 
