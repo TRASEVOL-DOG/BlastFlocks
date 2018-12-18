@@ -22,7 +22,7 @@ if CASTLE_PREFETCH then
     'assets/Marksman.ttf',
     'assets/EffortsPro.ttf',
     'assets/sheet.png',
-    'assets/blastflock.png',
+    'assets/blastflocks.png',
     'assets/order.ogg',
     'assets/steelandorder.ogg',
     'assets/sfx/boom3.ogg',
