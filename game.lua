@@ -466,7 +466,7 @@ function draw_mainmenu()
 --      all_colors_to()
 --      foo(0,0)
 --    end
-    draw_title(scrnh*0.2)
+    draw_title(scrnh*0.17)
     
     --draw_text("left click to fire, right click to boost",scrnw/2,scrnh*0.2+48,1,25,19,0)
     --draw_text("you can't rescue ships while firing",scrnw/2,scrnh*0.2+64,1,25,19,0)
@@ -475,12 +475,12 @@ function draw_mainmenu()
     local strb = "- right click to boost"
     local strc = "- save falling ships"
     
+    font("small")
     local x = scrnw/2 - str_width(strb)/2 - 5
     y = scrnh*0.2+48
 --    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
 --    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
 --    draw_text(strc, x, y, 0, nil, 8, 9)
-    font("small")
     draw_text(stra, x, y, 0, nil, 21) y,x = y + 10, x + 5
     draw_text(strb, x, y, 0, nil, 21) y,x = y + 10, x + 5
     draw_text(strc, x, y, 0, nil, 21)
