@@ -196,15 +196,18 @@ function read_player_ships(p, p_d, id)
 
       if s then
         if s.update_id < d[8] then
-          s.dx = s.dx+ (((s.x-d[1]+areaw/2)%areaw)-areaw/2)
-          s.dy = s.dy+ s.y-d[2]
+          local ox = s.x
+          local oy = s.y
+          s.x      = d[1] + delay*30*d[3]
+          s.y      = d[2] + delay*30*d[4]
+          
+          s.dx = s.dx+ (((ox-s.x+areaw/2)%areaw)-areaw/2)
+          s.dy = s.dy+ oy-s.y
           
           if d[7]>s.typ_id then -- upgrade!
             upgrade_ship(s)
           end
           
-          s.x      = d[1] + delay*30*d[3]
-          s.y      = d[2] + delay*30*d[4]
           s.vx     = d[3]
           s.vy     = d[4]
           s.hp     = d[5]
