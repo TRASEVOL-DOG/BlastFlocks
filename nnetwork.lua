@@ -198,8 +198,8 @@ function read_player_ships(p, p_d, id)
         if s.update_id < d[8] then
           local ox = s.x
           local oy = s.y
-          s.x      = d[1] + delay*30*d[3]
-          s.y      = d[2] + delay*30*d[4]
+          s.x      = d[1] + delay*30*s.vx --d[3]
+          s.y      = d[2] + delay*30*s.vy --d[4]
           
           s.dx = s.dx+ (((ox-s.x+areaw/2)%areaw)-areaw/2)
           s.dy = s.dy+ oy-s.y
@@ -208,24 +208,26 @@ function read_player_ships(p, p_d, id)
             upgrade_ship(s)
           end
           
-          s.vx     = d[3]
-          s.vy     = d[4]
-          s.hp     = d[5]
-          s.t      = d[6]
-          s.typ_id = d[7]
+          --s.vx     = d[3]
+          --s.vy     = d[4]
+          s.a      = d[3]
+          s.hp     = d[4]
+          s.t      = d[5]
+          s.typ_id = d[6]
           s.type   = ship_types[s.typ_id]
-          s.update_id = d[8]
+          s.update_id = d[7]
         end
       else
         s = create_ship(
-          d[1] + delay*30*d[3],
-          d[2] + delay*30*d[4],
-          d[3], d[4],
-          d[7], id, s_id
+          d[1] ,--+ delay*30*d[3],
+          d[2] ,--+ delay*30*d[4],
+          0,0,  --d[3], d[4],
+          d[6], id, s_id
         )
-        s.t  = d[6]
-        s.hp = d[5]
-        s.update_id = d[8]
+        s.a = d[3]
+        s.t  = d[5]
+        s.hp = d[4]
+        s.update_id = d[7]
         sh[s_id] = s
         
         if s.t < 1 and id~=-2 then
@@ -388,8 +390,7 @@ function update_server()
             sh_d[s.id] = {
               flr(s.x),
               flr(s.y),
-              s.vx,
-              s.vy,
+              s.a,
               s.hp,
               s.t,
               s.typ_id,
@@ -628,12 +629,17 @@ end
 --    [8] = { --ships, -- relev to close-by and self
 --      [1] = x,
 --      [2] = y,
---      [3] = vx,
---      [4] = vy,
---      [5] = hp,
---      [6] = t,
---      [7] = typ_id,
---      [8] = update_id
+--      [3] = a,
+--      [4] = hp,
+--      [5] = t,
+--      [6] = typ_id,
+--      [7] = update_id
+----      [3] = vx,
+----      [4] = vy,
+----      [5] = hp,
+----      [6] = t,
+----      [7] = typ_id,
+----      [8] = update_id
 --    }
 --    
 --    [9]  = msize, -- relev to far away

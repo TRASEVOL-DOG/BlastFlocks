@@ -143,7 +143,7 @@ function _update(dt)
         update_client()
       end
     end
-    network_t = 0.066
+    network_t = 0.050
   end
   
 --  if client then client.postupdate() end
@@ -337,8 +337,8 @@ function define_menus()
 
   local menus={
     mainmenu={
-      {"Player Name", set_player_name, "text_field", 16, my_name},
       {"Play", start_game},
+      {"Player Name", set_player_name, "text_field", 16, my_name},
       {"Settings", function() menu("settings") end}
     },
     cancel={
@@ -475,9 +475,9 @@ function draw_mainmenu()
 --    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
 --    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
 --    draw_text(strc, x, y, 0, nil, 8, 9)
-    draw_text(stra, x, y, 0, nil, 21, 19) y,x = y + 14, x + 8
-    draw_text(strb, x, y, 0, nil, 21, 13) y,x = y + 14, x + 8
-    draw_text(strc, x, y, 0, nil, 21, 8)
+    draw_text(stra, x, y, 0, nil, 21) y,x = y + 14, x + 8
+    draw_text(strb, x, y, 0, nil, 21) y,x = y + 14, x + 8
+    draw_text(strc, x, y, 0, nil, 21)
   
     y = scrnh/2+48
   end
@@ -985,7 +985,7 @@ function draw_background()
 end
 
 function draw_gridbackground()
-  local ca,cb,cc=16,15,14
+  local ca,cb,cc=16,18,15
   
   cls(25)
   draw_grid(0.25*xmod,0.25*ymod,32,ca)
