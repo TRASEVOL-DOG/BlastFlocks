@@ -134,8 +134,8 @@ function _update(dt)
     end
   end
   
---  network_t = network_t - delta_time
---  if network_t < 0 then
+  network_t = network_t - delta_time
+  if network_t < 0 then
     if server_only then
       update_server()
     else
@@ -143,8 +143,8 @@ function _update(dt)
         update_client()
       end
     end
---    network_t = 0.033
---  end
+    network_t = 0.033
+  end
   
 --  if client then client.postupdate() end
 --  if server then server.postupdate() end
