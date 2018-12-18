@@ -989,11 +989,11 @@ function draw_background()
 end
 
 function draw_gridbackground()
-  local ca,cb,cc=16,18,15
+  local ca,cb=16,15
   
   cls(25)
   draw_grid(0.25*xmod,0.25*ymod,32,ca)
-  draw_grid(0.75*xmod,0.75*ymod,64,cb,cc)
+  draw_grid(0.75*xmod,0.75*ymod,64,cb)
   
   if level>=30 and mainmenu then
     draw_cloudlayer(0.25*xmod,0.25*ymod,150,0.4,6,13) 
@@ -1116,22 +1116,6 @@ function draw_grid(ancx,ancy,d,c,cb)
   
   for y=gancy,gancy+scrnh+d,d do
     line(ancx,y,ancx+scrnw,y)
-  end
-  
-  if cb then
-    d = d * 4
-    color(cb)
-    
-    local gancx=ancx-ancx%d
-    local gancy=ancy-ancy%d
-    
-    for x=gancx,gancx+scrnw+d,d do
-      line(x,ancy,x,ancy+scrnh)
-    end
-    
-    for y=gancy,gancy+scrnh+d,d do
-      line(ancx,y,ancx+scrnw,y)
-    end
   end
 end
 
