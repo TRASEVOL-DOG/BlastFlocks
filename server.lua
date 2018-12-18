@@ -1,6 +1,8 @@
 local cs = require 'cs'
 server = cs.server
 
+server.maxClients = 16
+
 if USE_CASTLE_CONFIG then
   server.useCastleConfig()
 else

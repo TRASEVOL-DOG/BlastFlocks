@@ -490,11 +490,6 @@ function draw_mainmenu()
 
   draw_menu(scrnw/2,y,t)
   
-  local x,y = scrnw/2, scrnh-16
-  font("big")
-  draw_text("Server address: "..server_address, x, y, 1, 25, 17)
-  
-  
   camera(xmod,ymod)
   player:draw()
 end
@@ -1425,8 +1420,9 @@ function draw_connection_screen()
   end
   
   --draw_text("Connecting...", scrnw/2, 0.15*scrnh)
-  draw_text(str, scrnw/2, 0.15*scrnh-16)
-  draw_text("to "..server_address..":"..server_port, scrnw/2, 0.15*scrnh)
+  draw_text(str, scrnw/2, 0.15*scrnh)
+--  draw_text(str, scrnw/2, 0.15*scrnh-16)
+--  draw_text("to "..server_address..":"..server_port, scrnw/2, 0.15*scrnh)
   
   local x,y = scrnw/2, 0.5*scrnh
   
