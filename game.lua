@@ -414,6 +414,10 @@ end
 function update_mainmenu()
   t=t+0.01*dt30f
   
+  if not player then
+    player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, false, false, nil)
+  end
+  
   update_shake()
   
   local scrnw,scrnh=screen_size()

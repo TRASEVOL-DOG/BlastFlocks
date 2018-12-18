@@ -186,7 +186,7 @@ function read_player_ships(p, p_d, id)
     
     for s_id,d in pairs(sh_d) do
       local s = sh[s_id]
-      if s and s.update_id < d[8] and d[7]>s.typ_id then -- upgrade!
+      if s and s.update_id < d[7] and d[6]>s.typ_id then -- upgrade!
         upgrade_counts = upgrade_counts + 1
       end
     end
