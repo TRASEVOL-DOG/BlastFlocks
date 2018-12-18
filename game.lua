@@ -511,7 +511,7 @@ function draw_title(y)
     local rx = rs*34
     local ry = -24
     
-    local d = 4*cos(love.timer.getTime() + rs*0.15)
+    local d = 4*cos(love.timer.getTime() + abs(rs)*0.15)
     local a = atan2(rx,ry-64)
     local dx = d*cos(a)
     local dy = d*sin(a)
@@ -527,7 +527,7 @@ function draw_title(y)
     local rx = rs*34
     local ry = 24
     
-    local d = 4*cos(-love.timer.getTime() - rs*0.15)
+    local d = 4*cos(-love.timer.getTime() - abs(rs)*0.15)
     local a = atan2(rx,ry+64)
     local dx = d*cos(a)
     local dy = d*sin(a)
@@ -535,6 +535,12 @@ function draw_title(y)
     spr(sprites[s+1], 1, x+rx+dx, y+ry+dy, 4, 4)
   end
   
+  apply_pal_map(ship_plts[22])
+  draw_anim(x-112, y, "hugeship", "rotate", 0.25, 0.375, false, false)
+  draw_anim(x-112+10, y+10, "hugeship", "bfire", t, 0.375)
+  
+  draw_anim(x+112, y, "hugeship", "rotate", 0.25, 0.175, false, false)
+  draw_anim(x+112-10, y+10, "hugeship", "bfire", t, 0.175)
 end
 
 

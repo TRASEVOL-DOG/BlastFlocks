@@ -31,6 +31,7 @@ function client.load()
   init_shader_mgr()
   init_input_mgr()
   font("small")
+  pal()
   _init()
   
   love.keyboard.setKeyRepeat(true)
