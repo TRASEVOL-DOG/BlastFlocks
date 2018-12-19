@@ -856,6 +856,15 @@ function sync_gang(gang, ships, target, delay)
   gang.target = target
 end
 
+function clear_gangs(x,y)
+  local id = get_gang_id(x,y)
+  local gang = gang_grid[id]
+  
+  if gang and not gang.target then
+    delete_gang(gang)
+  end
+end
+
 
 
 function draw_ship(s)
@@ -1152,6 +1161,7 @@ function activate_gang(s, target, ships)
   
   s.target = target
   local p = players[target]
+  
   local dx = ((p.mx-s.x+areaw/2)%areaw)-areaw/2
   local dy = p.my-s.y
   s.a = atan2(dx, dy)

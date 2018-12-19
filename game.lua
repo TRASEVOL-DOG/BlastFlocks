@@ -114,6 +114,10 @@ function _update(dt)
 
 --  read_server()
 
+  if not server_only then
+    player.it_me = true
+  end
+
   if connecting then
     update_connection_screen()
   elseif mainmenu then
@@ -310,24 +314,11 @@ function define_menus()
   
   function restart()
     if client then
+      restarting = true
       client_disconnect()
       connect_to_server()
       init_game()
       client_define_non_players()
-    elseif server then
-      --server_client_disconnected(0)
-      --my_id = 0
-      --player = server_new_player(0)
-      --player.name = my_name
-      
-      for s_id,s in pairs(player.ships) do
-        deregister_object(s)
-        player.ships[s_id] = nil
-      end
-      
-      for i=1,8 do
-        add(player.ships, create_ship(player.x, player.y, rnd(4)-2, rnd(4)-2, nil, my_id))
-      end
     end
     
     menu_back()
@@ -396,6 +387,7 @@ end
 function main_menu()
 --  if client then client_disconnect() end
 --  if server then server_close() end
+  restarting = true
 
   player.ships = {}
   clear_all_groups()
@@ -413,10 +405,6 @@ end
 
 function update_mainmenu()
   t=t+0.01*dt30f
-  
-  if not player then
-    player=create_player(64+32*cos(0.1),64+32*sin(0.1), nil, false, false, nil)
-  end
   
   update_shake()
   
@@ -839,8 +827,11 @@ function update_connection_screen()
   t=t+0.01*dt30f
 
   if client and client.connected and client.id then
-    --if client.share[client.id] and group_size("ship_player"..client.id)>0 then
-    if player.msize > 0 then
+    if restarting then
+      if not client.share[client.id] then
+        restarting = false
+      end
+    elseif player.msize > 0 then
       my_id = client.id
       connecting = false
       connected = true

@@ -100,7 +100,7 @@ function read_gangs(data)
         sync_gang(s, d[1], d[2], delay)
         s.update_id = d[3]
       end
-    else
+    elseif players[d[2]] then
       s = create_gang(nil, nil, s_id, d[2], d[1])
       s.update_id = d[3]
     end
@@ -238,7 +238,7 @@ function read_player_ships(p, p_d, id)
     
     for s_id,s in pairs(sh) do
       if not readids[s_id] then
-        if id > -2 or s.t < -1.8 then -- visible destroy
+        if id > -2 or s.t < -1.95 then -- visible destroy
           if upgrade_counts > 0 then
             upgrade_counts = upgrade_counts - 1
             deregister_object(s)
@@ -270,7 +270,11 @@ function read_server()
       p.shooting = ho[3]
       p.boosting = ho[4]
       p.name = ho[5]
-    else
+      
+      if not ho[6] then -- client is asking for a restart
+        server_client_disconnected(id)
+      end
+    elseif ho[6] then
       castle_print("New connection: Client #"..id);
       server_new_player(id)
     end
@@ -284,7 +288,11 @@ function update_client()
     return
   end
   
-  client.home[6] = love.timer.getTime()
+  if restarting then
+    client.home[6] = nil
+  else
+    client.home[6] = love.timer.getTime()
+  end
   
   if players[my_id] then
     client.home[1] = flr(player.x)
@@ -468,11 +476,13 @@ function server_client_disconnected(id)
   -- delete player and convert all their planes to AI?
   -- currently: simply delete player and all their ships
   local p = players[id]
-  for _,s in pairs(p.ships) do
-    deregister_object(s)
+  if p then
+    for _,s in pairs(p.ships) do
+      deregister_object(s)
+    end
+    deregister_object(p)
+    players[id] = nil
   end
-  deregister_object(p)
-  players[id] = nil
   
   server.share[id] = nil
 end
@@ -487,8 +497,7 @@ function client_disconnect()
     castle_print("Abandoning connection.")
   end
   
-  client.id, client.connected = nil, nil
-  client, my_id = nil, nil
+  my_id = nil
   
   players = {}
   player = create_player(64+32*cos(0.1),64+32*sin(0.1), nil, false, false, nil)
@@ -508,6 +517,8 @@ function server_new_player(player_id)
   local x,y = rnd(areaw)-areaw/2, rnd(areah-80)+40
   local colors = new_player_color()
 
+  clear_gangs(x,y)
+  
   local p = create_player(x, y, colors, false, false, player_id)
   players[player_id] = p
   
