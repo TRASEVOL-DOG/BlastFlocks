@@ -388,6 +388,8 @@ function main_menu()
 --  if client then client_disconnect() end
 --  if server then server_close() end
   restarting = true
+  
+  init_game()
 
   player.ships = {}
   clear_all_groups()
