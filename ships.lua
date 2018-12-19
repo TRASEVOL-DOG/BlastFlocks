@@ -80,7 +80,7 @@ function init_ship_stats()
       kick   = {1, 0, 0},
       bltspd = {3, 1, 7},
       
-      revive = {50, 0, 0},
+      revive = {75, 0, -25},
 
       maxhp  = {3.5, 0, 0.5}
     },
@@ -99,7 +99,7 @@ function init_ship_stats()
       kick   = {1, 0, 0}, 
       bltspd = {3, 1, 7},
       
-      revive = {65, 0, 0},
+      revive = {80, 0, -15},
 
       maxhp  = {6, 0, 2}
     },
@@ -816,7 +816,7 @@ function update_gang_sys()
       end
     end
   
-    gang_grid_t = 1
+    gang_grid_t = 1.5
   end
 end
 
