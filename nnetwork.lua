@@ -54,7 +54,7 @@ function read_client()
   end
   
   -- calculate delay
-  if not (client.share[client.id] and client.share[client.id][99]) then
+  if restarting or not (client.share[client.id] and client.share[client.id][99]) then
     return
   end
   

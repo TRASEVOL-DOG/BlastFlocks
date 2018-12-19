@@ -830,6 +830,8 @@ function update_connection_screen()
     if restarting then
       if not client.share[client.id] then
         restarting = false
+        init_game()
+        client_define_non_players()
       end
     elseif player.msize > 0 then
       my_id = client.id
