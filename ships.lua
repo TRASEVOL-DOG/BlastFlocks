@@ -629,6 +629,10 @@ function pass_to_player(s, player)
     del(op.ships, s)
     add(players[player].ships, s)
   else
+    if players[player].ships[s.id] then
+      destroy_ship(s)
+      return
+    end
     op.ships[s.id] = nil
     players[player].ships[s.id] = s
   end

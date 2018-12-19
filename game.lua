@@ -206,6 +206,7 @@ function init_game()
   eshipdisp=0
   
   leaderboard_w = 4
+  leaderboard = {}
   
   init_gang_sys()
   
