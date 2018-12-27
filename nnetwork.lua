@@ -306,7 +306,7 @@ end
 ship_up_i = 0
 ship_up_k = 2
 gang_up_i = 0
-gang_up_k = 1
+gang_up_k = 2
 function update_server()
   if not server then
     return
@@ -319,6 +319,7 @@ function update_server()
   end
   
   ship_up_i = ship_up_i + ship_up_k
+  gang_up_i = gang_up_i + gang_up_k
   
   for id, p in pairs(players) do
     local p_d = server.share[id]
