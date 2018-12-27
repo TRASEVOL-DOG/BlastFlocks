@@ -347,7 +347,9 @@ function update_server()
               }
             end
             
+            if rnd(100)<1 then
             castle_print("Updating gang #"..s.id..", pos "..i.." in list")
+            end
             
             s.update_id = s.update_id + 1
             
