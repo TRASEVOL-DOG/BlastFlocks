@@ -800,7 +800,7 @@ function update_gangs()
 end
 
 function server_update_gangs()
-  update_gang_sys()
+--  update_gang_sys()
   
   for id,p in pairs(players) do
     gang_relevance[id] = {}
