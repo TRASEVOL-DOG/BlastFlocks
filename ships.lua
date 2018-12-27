@@ -799,7 +799,6 @@ function update_gangs()
 --  end
 end
 
-
 function server_update_gangs()
   update_gang_sys()
   
@@ -1426,6 +1425,8 @@ function destroy_ship(s)
 end
 
 function delete_gang(s)
+  castle_print("deleting AI gang #"..s.id)
+
   gang_grid[s.id] = nil
   
   if s.ships then
@@ -1435,8 +1436,11 @@ function delete_gang(s)
     end
   end
   
-  if s.target and server and server_only then
-    del(gang_list, s)
+  if server and server_only then
+    if s.target then
+      del(gang_list, s)
+    end
+    server.share[-1][s.id] = nil
   end
 end
 
