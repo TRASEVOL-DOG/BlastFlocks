@@ -337,7 +337,7 @@ function update_server()
             end
           end
           
-          if (i-gang_up_i)%#gang_list < gang_up_k or not p_d[s.id] or #s.ships ~= shn then
+          if (i-gang_up_i)%#gang_list < gang_up_k or #s.ships ~= shn or not p_d[s.id] then
             local ships = {}
             for _,sh in pairs(s.ships) do
               ships[sh.id] = {
@@ -346,6 +346,8 @@ function update_server()
                 sh.typ_id
               }
             end
+            
+            castle_print("Updating gang #"..s.id..", pos "..i.." in list")
             
             s.update_id = s.update_id + 1
             
