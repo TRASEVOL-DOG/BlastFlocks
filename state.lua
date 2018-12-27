@@ -308,13 +308,15 @@ function Methods:__flush(getDiff, client)
     local children, dirty, relevanceDescs = proxy.children, proxy.dirty, proxy.relevanceDescs
     if relevanceDescs then -- Always descend into relevance paths
         for k in pairs(relevanceDescs) do
-            local v = children[k]
-            if v ~= nil and proxies[v] then
-                v:__flush()
-            else -- It's not a child anymore -- remove from `relevanceDescs`
-                relevanceDescs[k] = nil
+        
+            -- REMY WAS HERE
+            if children[k] then
+              children[k]:__flush()
+              dirty[k] = nil -- No need to visit again
+            else
+              relevanceDescs[k] = nil
             end
-            dirty[k] = nil -- No need to visit again
+            
         end
     end
     for k in pairs(dirty) do -- Flush everything that's dirty
@@ -335,13 +337,6 @@ function Methods:__flush(getDiff, client)
         local lastRelevancies = proxy.lastRelevancies
         for client in pairs(nextRelevancies) do
             lastRelevancies[client] = nextRelevancies[client]
-        end
-        for client in pairs(lastRelevancies) do
-            if not nextRelevancies[client] then
-                lastRelevancies[client] = nil
-            end
-        end
-        for client in pairs(nextRelevancies) do
             nextRelevancies[client] = nil
         end
     end
