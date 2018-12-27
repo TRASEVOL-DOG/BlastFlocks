@@ -764,7 +764,9 @@ function update_gangs()
       end
       
       if nships <= 0 then
-        delete_gang(gang)
+        if server and server_only then
+          delete_gang(gang)
+        end
       else
         calculate_gang_pos(gang)
         
