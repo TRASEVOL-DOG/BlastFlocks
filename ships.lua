@@ -692,39 +692,122 @@ end
 
 function update_gangs()
   if server and server_only then
-    for id,p in pairs(players) do
-      gang_relevance[id] = {}
-    end
+    server_update_gangs()
+  else
+    client_update_gangs()
   end
 
-  function search_new_target(gang)
-    local d = sqr(gang_safe_dist)
-    local target
-    for p_id, p in pairs(players) do
-      if p_id >= 0 then
-        local dx = ((gang.x-p.mx+areaw/2)%areaw)-areaw/2
-        local dy = gang.y-p.my
-        local nd = sqrdist(dx, dy)
-        if nd < d then
-          target = p_id
-          d = nd
-        end
-      end
-    end
-    
-    if target then
-      if gang.target then
-        gang.target = target
-      else
-        activate_gang(gang, target)
-      end
-      return true
-    end
-    
-    return false
+--  if server and server_only then
+--    for id,p in pairs(players) do
+--      gang_relevance[id] = {}
+--    end
+--  end
+--
+--  function search_new_target(gang)
+--    local d = sqr(gang_safe_dist)
+--    local target
+--    for p_id, p in pairs(players) do
+--      if p_id >= 0 then
+--        local dx = ((gang.x-p.mx+areaw/2)%areaw)-areaw/2
+--        local dy = gang.y-p.my
+--        local nd = sqrdist(dx, dy)
+--        if nd < d then
+--          target = p_id
+--          d = nd
+--        end
+--      end
+--    end
+--    
+--    if target then
+--      if gang.target then
+--        gang.target = target
+--      else
+--        activate_gang(gang, target)
+--      end
+--      return true
+--    end
+--    
+--    return false
+--  end
+--  
+--  local active_search_new_target = server and server_only and function(gang)
+--    local mind = sqr(gang_safe_dist)
+--    local d = mind
+--    local target
+--    for p_id, p in pairs(players) do
+--      if p_id >= 0 then
+--        local dx = ((gang.x-p.mx+areaw/2)%areaw)-areaw/2
+--        local dy = gang.y-p.my
+--        local nd = sqrdist(dx, dy)
+--        if nd < mind then
+--          gang_relevance[p_id][gang.id] = true
+--          
+--          if nd < d then
+--            target = p_id
+--            d = nd
+--          end
+--        end
+--      end
+--    end
+--    
+--    if target then
+--      if gang.target then
+--        gang.target = target
+--      else
+--        activate_gang(gang, target)
+--      end
+--      return true
+--    end
+--    
+--    return false
+--  end or search_new_target
+--
+--  for id, gang in pairs(gang_grid) do
+--    if gang.target then
+--      local nships = 0
+--      for _,_ in pairs(gang.ships) do
+--        nships = nships + 1
+--      end
+--      
+--      if nships <= 0 then
+--        if server and server_only then
+--          delete_gang(gang)
+--        end
+--      else
+--        calculate_gang_pos(gang)
+--        
+--        if active_search_new_target(gang) then
+--          local p = players[gang.target]
+--          if p then
+--              
+--            for _,sh in pairs(gang.ships) do
+--              update_ship(sh)
+--            end
+--            
+--          end
+--        else
+--          delete_gang(gang)
+--        end
+--      end
+--    else
+--      if server and server_only then
+--        search_new_target(gang)
+--      else
+--        delete_gang(gang)
+--      end
+--    end
+--  end
+end
+
+
+function server_update_gangs()
+  update_gang_sys()
+  
+  for id,p in pairs(players) do
+    gang_relevance[id] = {}
   end
   
-  local active_search_new_target = server and server_only and function(gang)
+  function find_target_and_relevance(gang)
     local mind = sqr(gang_safe_dist)
     local d = mind
     local target
@@ -754,44 +837,42 @@ function update_gangs()
     end
     
     return false
-  end or search_new_target
-
-  for id, gang in pairs(gang_grid) do
+  end
+  
+  for id,gang in pairs(gang_grid) do
     if gang.target then
-      local nships = 0
-      for _,_ in pairs(gang.ships) do
-        nships = nships + 1
-      end
-      
-      if nships <= 0 then
-        if server and server_only then
-          delete_gang(gang)
-        end
+      if calculate_gang_pos(gang)==0 then
+        delete_gang(gang)
       else
-        calculate_gang_pos(gang)
-        
-        if active_search_new_target(gang) then
-          local p = players[gang.target]
-          if p then
-              
-            for _,sh in pairs(gang.ships) do
-              update_ship(sh)
-            end
-            
+      
+        if players[gang.target] then
+          for _,sh in pairs(gang.ships) do
+            update_ship(sh)
           end
-        else
-          delete_gang(gang)
         end
+      end
+    
+      if not find_target_and_relevance(gang) then
+        delete_gang(gang)
       end
     else
-      if server and server_only then
-        search_new_target(gang)
-      else
-        delete_gang(gang)
+      find_target_and_relevance(gang)
+    end
+  end
+end
+
+function client_update_gangs()
+  for id,gang in pairs(gang_grid) do
+    calculate_gang_pos(gang)
+    
+    if players[gang.target] then
+      for _,sh in pairs(gang.ships) do
+        update_ship(sh)
       end
     end
   end
 end
+
 
 function update_gang_sys()
   if not (server and server_only) then
@@ -829,8 +910,17 @@ function calculate_gang_pos(gang)
     y = y + sh.y
     k = k + 1
   end
+  
+  gang.size = k
+  
+  if k==0 then
+    return 0
+  end
+  
   gang.x = x/k
   gang.y = y/k
+  
+  return k
 end
 
 function sync_gang(gang, ships, target, delay)

@@ -230,10 +230,8 @@ function update_game()
   
   shootshake=0
   
-  
   update_gangs()
   update_objects()
-  update_gang_sys()
   
   debuggg = debuggg.." - "..love.timer.getTime()
   

@@ -329,15 +329,16 @@ function update_server()
         
         for i=1,#gang_list do
           local s = gang_list[i]
+          local d = p_d[s.id]
           
           local shn = 0
-          if p_d[s.id] then
-            for _,sh in pairs(p_d[s.id][1]) do
+          if d then
+            for _,sh in pairs(d[1]) do
               shn = shn+1
             end
           end
           
-          if (i-gang_up_i)%#gang_list < gang_up_k or #s.ships ~= shn or not p_d[s.id] then
+          if (not d) or (i-gang_up_i)%#gang_list < gang_up_k or s.size ~= shn or s.target ~= d[2] then
             local ships = {}
             for _,sh in pairs(s.ships) do
               ships[sh.id] = {
@@ -347,9 +348,9 @@ function update_server()
               }
             end
             
-            if rnd(100)<1 then
-            castle_print("Updating gang #"..s.id..", pos "..i.." in list")
-            end
+            --if rnd(100)<1 then
+            --castle_print("Updating gang #"..s.id..", pos "..i.." in list")
+            --end
             
             s.update_id = s.update_id + 1
             
