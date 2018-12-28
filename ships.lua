@@ -898,7 +898,7 @@ function update_gang_sys()
       end
     end
   
-    gang_grid_t = 1.5
+    gang_grid_t = 2
   end
 end
 
@@ -1305,7 +1305,7 @@ end
 
 function init_gang_sys()
   gang_grid = {}
-  gang_grid_k = 400
+  gang_grid_k = 800
   
   if server and server_only then
     gang_list = {} -- active gangs only!
