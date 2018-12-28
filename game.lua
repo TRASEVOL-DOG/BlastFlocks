@@ -1343,24 +1343,24 @@ function draw_gameover()
   local scrnw,scrnh=screen_size()
   font("big")
   
-  if t%0.4<0.3 then
+  if t%0.5<0.4 then
     draw_text("GAME_OVER",scrnw/2,scrnh/4-40,1,nil,23)
     draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4-20,1,nil,23)
     draw_text("GAME_OVER  GAME_OVER  GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4,1,nil,23)
     draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4+20,1,nil,23)
     draw_text("GAME_OVER",scrnw/2,scrnh/4+40,1,nil,23)
     
-    if t%0.4>0.3 then
+    if t%0.5>0.18 then
       draw_text("GAME_OVER",scrnw/2,scrnh/4-40,1,nil,0)
       draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4-20,1,nil,0)
       draw_text("GAME_OVER  GAME_OVER  GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4,1,nil,0)
       draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4+20,1,nil,0)
       draw_text("GAME_OVER",scrnw/2,scrnh/4+40,1,nil,0)
-    elseif t%0.4>0.2 then
+    elseif t%0.5>0.12 then
       draw_text("GAME_OVER",scrnw/2,scrnh/4-20,1,nil,0)
       draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4,1,nil,0)
       draw_text("GAME_OVER",scrnw/2,scrnh/4+20,1,nil,0)
-    elseif t%0.4>0.1 then
+    elseif t%0.5>0.06 then
       draw_text("GAME_OVER",scrnw/2,scrnh/4,1,nil,0)
     end
   end
