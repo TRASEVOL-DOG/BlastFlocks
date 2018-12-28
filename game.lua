@@ -244,7 +244,7 @@ function update_game()
   if not server_only then
     if player.msize > 0 then
       massx, massy = player.mx, player.my
-    elseif not gameover then
+    elseif not gameover and not mainmenu then
       boomsfx()
       create_explosion(massx,massy,32,10)
       add_shake(64)
@@ -386,6 +386,7 @@ end
 function main_menu()
 --  if client then client_disconnect() end
 --  if server then server_close() end
+  mainmenu=true
   menu_back()
   menu_back()
 
@@ -401,7 +402,6 @@ function main_menu()
   levelt=0
   cloudrngk=rnd(9999)
   
-  mainmenu=true
   menu("mainmenu")
   
   music("title")
