@@ -402,6 +402,7 @@ function main_menu()
   levelt=0
   cloudrngk=rnd(9999)
   
+  mainmenu=true
   menu("mainmenu")
   
   music("title")
