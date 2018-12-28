@@ -386,6 +386,8 @@ end
 function main_menu()
 --  if client then client_disconnect() end
 --  if server then server_close() end
+  menu_back()
+
   restarting = true
   
   init_game()
@@ -1341,11 +1343,16 @@ function draw_gameover()
   local scrnw,scrnh=screen_size()
   font("big")
   
+  if (t+0.05)%0.4<0.3 then
+    draw_text("GAME_OVER GAME_OVER GAME_OVER",scrnw/2,scrnh/4-16,1,23)
+    draw_text("GAME_OVER GAME_OVER GAME_OVER",scrnw/2,scrnh/4,1,23)
+    draw_text("GAME_OVER GAME_OVER GAME_OVER",scrnw/2,scrnh/4+16,1,23)
+  end  
   if t%0.4<0.3 then
-    draw_text("GAME_OVER",scrnw/2,scrnh/4,1,0,14,2)
+    draw_text("GAME_OVER",scrnw/2,scrnh/4,1,0)
   end
   
-  draw_text("you had "..highest.." ships at one time!",scrnw/2,scrnh/2,1,0,9,4)
+  draw_text_bicolor("you had "..highest.." ships at one time!",scrnw/2,scrnh/2,1,nil,c_lit[player.colors[1]],player.colors[1],c_lit[player.colors[2]],player.colors[2])
   
   draw_menu(scrnw/2,3*scrnh/4,t)
 end
