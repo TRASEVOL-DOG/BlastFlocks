@@ -3,8 +3,7 @@
 
 function init_audio()
   local music_list={
-    title= "order.ogg",
-    game=  "steelandorder.ogg"
+    theme= "Cyanotype_loop.ogg"
   }
  
   local sfx_list={
@@ -43,7 +42,7 @@ function init_audio()
   --master_vol=100
   
   sfx_volume(100)
-  music_volume(0)
+  music_volume(60)
   master_volume(100)
   
   curmusic=nil

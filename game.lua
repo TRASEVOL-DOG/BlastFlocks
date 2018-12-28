@@ -209,8 +209,6 @@ function init_game()
   leaderboard = {}
   
   init_gang_sys()
-  
-  music("game")
 end
 
 function update_game()
@@ -320,6 +318,8 @@ function define_menus()
       client_define_non_players()
     end
     
+    music("theme")
+    
     menu_back()
     menu_back()
     paused = false
@@ -358,7 +358,7 @@ function define_menus()
     settings={
       {"Fullscreen", fullscreen},
       {"Master Volume", master_volume,"slider",100},
-      {"Music Volume", music_volume,"slider",100},
+      {"Music Volume", music_volume,"slider",60},
       {"Sfx Volume", sfx_volume,"slider",100},
       {"Back", menu_back}
     },
@@ -405,7 +405,7 @@ function main_menu()
   mainmenu=true
   menu("mainmenu")
   
-  music("title")
+  music("theme")
 end
 
 function update_mainmenu()
@@ -480,6 +480,8 @@ function draw_mainmenu()
   
     y = scrnh/2+48
   end
+  
+  draw_credits()
 
   draw_menu(scrnw/2,y,t)
   
@@ -1531,6 +1533,31 @@ function draw_network_state()
   if #debuggg > 0 and debug_mode > 0 then
     _log("debug: "..debuggg, false, 21)
   end
+end
+
+function draw_credits()
+  local scrnw, scrnh = screen_size()
+  
+  local x=scrnh-4
+  local y=16
+  
+  font("big")
+  
+  draw_text("A Castle Game",x,y,2,nil,13) y=y+32
+  
+  draw_text("Made by",x,y,2,nil,3) y=y+16
+  draw_text("Remy Devaux",x,y,2,nil,3) y=y+16
+  draw_text("aka Trasevol_Dog",x,y,2,nil,3) y=y+32
+  
+  draw_text("With music by",x,y,2,nil,17) y=y+16
+  draw_text("Andrew Matecha",x,y,2,nil,17) y=y+32
+  
+  draw_text("Thank you to my Patreon supporters!",4,scrnh-32,0,nil,9)
+  local str = "   ~~~   *Joseph White, *Spaceling, rotatetranslate, Anne Le Clech, Wojciech Rak, HJS, slono, Austin East, Zachary Cook, Jefff, Meru, Bitzawolf, Paul Nguyen, Dan Lewis, Christian Östman, Dan Rees-Jones, Reza Esmaili, Andreas Bretteville, Joel Jorgensen, Marty Kovach, Giles Graham, Flo Devaux, Cole Smith, Thomas Wright, HERVAN, berkfrei, Tim and Alexandra Swast, Jearl, Chris McCluskey, Sam Loeschen, Pat LaBine, Collin Caldwell, Andrew Reitano, Qristy Overton, Finn Ellis, amy, Brent Werness, yunowadidis-musik, Max Cahill, hushcoil, Jacel the Thing, Gruber, Pierre B., Sean S. LeBlanc, Andrew Reist, vaporstack, Jakub Wasilewski"
+  local w = str_width(str)
+  local x = 4-(t%w)
+  draw_text(str,x,scrnh-16,0,nil,9)
+  draw_text(str,x+w,scrnh-16,0,nil,9)
 end
 
 function double_pal_map(col_a, col_b)
