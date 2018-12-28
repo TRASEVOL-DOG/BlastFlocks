@@ -387,6 +387,7 @@ function main_menu()
 --  if client then client_disconnect() end
 --  if server then server_close() end
   menu_back()
+  menu_back()
 
   restarting = true
   
