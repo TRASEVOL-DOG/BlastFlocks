@@ -358,7 +358,7 @@ function define_menus()
     settings={
       {"Fullscreen", fullscreen},
       {"Master Volume", master_volume,"slider",100},
-      {"Music Volume", music_volume,"slider",60},
+      {"Music Volume", music_volume,"slider",100},
       {"Sfx Volume", sfx_volume,"slider",100},
       {"Back", menu_back}
     },
@@ -1538,7 +1538,7 @@ end
 function draw_credits()
   local scrnw, scrnh = screen_size()
   
-  local x=scrnh-4
+  local x=scrnw-4
   local y=16
   
   font("big")
@@ -1552,12 +1552,13 @@ function draw_credits()
   draw_text("With music by",x,y,2,nil,17) y=y+16
   draw_text("Andrew Matecha",x,y,2,nil,17) y=y+32
   
-  draw_text("Thank you to my Patreon supporters!",4,scrnh-32,0,nil,9)
+  font("small")
+  draw_text("Thank you to my Patreon supporters!",4,scrnh-24,0,nil,9)
   local str = "   ~~~   *Joseph White, *Spaceling, rotatetranslate, Anne Le Clech, Wojciech Rak, HJS, slono, Austin East, Zachary Cook, Jefff, Meru, Bitzawolf, Paul Nguyen, Dan Lewis, Christian Östman, Dan Rees-Jones, Reza Esmaili, Andreas Bretteville, Joel Jorgensen, Marty Kovach, Giles Graham, Flo Devaux, Cole Smith, Thomas Wright, HERVAN, berkfrei, Tim and Alexandra Swast, Jearl, Chris McCluskey, Sam Loeschen, Pat LaBine, Collin Caldwell, Andrew Reitano, Qristy Overton, Finn Ellis, amy, Brent Werness, yunowadidis-musik, Max Cahill, hushcoil, Jacel the Thing, Gruber, Pierre B., Sean S. LeBlanc, Andrew Reist, vaporstack, Jakub Wasilewski"
   local w = str_width(str)
-  local x = 4-(t%w)
-  draw_text(str,x,scrnh-16,0,nil,9)
-  draw_text(str,x+w,scrnh-16,0,nil,9)
+  local x = 4-((t*100)%w)
+  draw_text(str,x,scrnh-10,0,nil,9)
+  draw_text(str,x+w,scrnh-10,0,nil,9)
 end
 
 function double_pal_map(col_a, col_b)
