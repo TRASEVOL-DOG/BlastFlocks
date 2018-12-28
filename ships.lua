@@ -1425,8 +1425,6 @@ function destroy_ship(s)
 end
 
 function delete_gang(s)
-  castle_print("deleting AI gang #"..s.id)
-
   gang_grid[s.id] = nil
   
   if s.ships then

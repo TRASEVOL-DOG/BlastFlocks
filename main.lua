@@ -1,6 +1,24 @@
 -- BLAST FLOCK source files
 -- by TRASEVOL_DOG (https://trasevol.dog/)
 
+
+--love.filesystem.newFile("error_log.txt")
+--love.filesystem.append("error_log.txt", "hello")
+--
+--local _oerhand=error
+----local _oerhand=love.errorhandler
+--function error(msg)
+----function love.errorhandler(msg)
+--  castle_print("error!!")
+--  love.filesystem.append("error_log.txt", "\n\n\n"..msg)
+--  love.filesystem.append("error_log.txt", "\n"..(debug.traceback("Error: " .. tostring(msg), 0):gsub("\n[^\n]+$", "")))
+--  love.filesystem.append("error_log.txt", "\n"..(debug.traceback("Error: " .. tostring(msg), 1):gsub("\n[^\n]+$", "")))
+--  love.filesystem.append("error_log.txt", "\n"..(debug.traceback("Error: " .. tostring(msg), 2):gsub("\n[^\n]+$", "")))
+--  love.filesystem.append("error_log.txt", "\n"..(debug.traceback("Error: " .. tostring(msg), 1+(layer or 1)):gsub("\n[^\n]+$", "")))
+--
+--  _oerhand(msg)
+--end
+
 if CASTLE_PREFETCH then
   CASTLE_PREFETCH({
     'audio.lua',
@@ -73,4 +91,5 @@ end
 
 function eventpump() -- here to avoid things bugging out
 end
+
 

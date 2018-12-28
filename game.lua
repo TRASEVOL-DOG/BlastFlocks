@@ -245,13 +245,13 @@ function update_game()
     if player.msize > 0 then
       massx, massy = player.mx, player.my
     elseif not gameover then
---      boomsfx()
---      create_explosion(massx,massy,32,10)
---      add_shake(64)
---      menu("gameover")
---      gameover=true
---      music()
---      sfx("gameover")
+      boomsfx()
+      create_explosion(massx,massy,32,10)
+      add_shake(64)
+      menu("gameover")
+      gameover=true
+      music()
+      sfx("gameover")
     end
   end
 
@@ -369,7 +369,7 @@ function define_menus()
       {"Back to Main Menu", main_menu},
     },
     gameover={
-      {"Restart", init_game},
+      {"Restart", restart},
       {"Back to Main Menu", main_menu}
     }
   }
@@ -818,7 +818,7 @@ function update_ui_controls()
 --    return true
   elseif gameover then
     local scrnw,scrnh=screen_size()
-    update_menu(scrnw/2,scrnh/2+32)
+    update_menu(scrnw/2, 3*scrnh/4)
   end
   
   return false
@@ -1342,52 +1342,12 @@ function draw_gameover()
   font("big")
   
   if t%0.4<0.3 then
-    draw_text("GAME_OVER",scrnw/2,16,1,0,14,2)
+    draw_text("GAME_OVER",scrnw/2,scrnh/4,1,0,14,2)
   end
   
-  draw_text("you scored",scrnw/2,48,1,0,9,4)
-  draw_text(bignumstr(score,','),scrnw/2,64,1,0,10,4)
+  draw_text("you had "...." ships at one time!",scrnw/2,scrnh/2,1,0,9,4)
   
-  local rank,comment
-  local lvl=flr(flr(level)/24*100)
-  if lvl>=200 then
-    rank='*S*'
-    comment="!!! I didn't know this was possible !!!"
-  elseif lvl>=160 then
-    rank='A++'
-    comment="!!! wow you might actually be able to get the S rank !!!"
-  elseif lvl>=125 then
-    rank='A+'
-    comment="!!! superb, I can see the S rank from here !!!"
-  elseif lvl>=100 then
-    rank='A'
-    comment="!! Nice job! Are you gonna go for the 'S' rank now? !!"
-  elseif lvl>=80 then
-    rank='B'
-    comment="!! Not Bad !!"
-  elseif lvl>=60 then
-    rank='C'
-    comment="! You're getting there !"
-  elseif lvl>=40 then
-    rank='D'
-    comment="! You can do better !"
-  elseif lvl>=20 then
-    rank='E'
-    comment="! Not great !"
-  else
-    rank='F'
-    comment=". We all start somewhere ."
-  end
-  
-  draw_text("rank: "..rank,scrnw/2,96,1,0,8,2)
-  draw_text(comment,scrnw/2,112,1,0,14,2)
-  
-  if rank=='*S*' then
-    local str="!! Please send a screenshot to @TRASEVOL_DOG on Twitter !!"
-    draw_text(str,scrnw/2,128,1,0,14,2)
-  end
-  
-  draw_menu(scrnw/2,scrnh/2+48,t)
+  draw_menu(scrnw/2,3*scrnh/4,t)
 end
 
 function draw_connection_screen()
