@@ -1345,7 +1345,7 @@ function draw_gameover()
     draw_text("GAME_OVER",scrnw/2,scrnh/4,1,0,14,2)
   end
   
-  draw_text("you had "...." ships at one time!",scrnw/2,scrnh/2,1,0,9,4)
+  draw_text("you had "..highest.." ships at one time!",scrnw/2,scrnh/2,1,0,9,4)
   
   draw_menu(scrnw/2,3*scrnh/4,t)
 end
