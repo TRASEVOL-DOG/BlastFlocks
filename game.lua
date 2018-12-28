@@ -319,6 +319,7 @@ function define_menus()
     end
     
     music("theme")
+    music_lowpass(false)
     
     menu_back()
     menu_back()
@@ -363,7 +364,7 @@ function define_menus()
       {"Back", menu_back}
     },
     pause={
-      {"Resume", function() menu_back() paused=false end},
+      {"Resume", function() menu_back() paused=false music_lowpass(false) end},
       {"Restart", restart},
       {"Settings", function() menu("settings") end},
       {"Back to Main Menu", main_menu},
@@ -406,6 +407,7 @@ function main_menu()
   menu("mainmenu")
   
   music("theme")
+  music_lowpass(true)
 end
 
 function update_mainmenu()
@@ -810,10 +812,12 @@ function update_ui_controls()
       menu_back()
       if not curmenu then
         paused=false
+        music_lowpass(false)
       end
     else
       menu("pause")
       paused=true
+      music_lowpass(true)
     end
   end
   
@@ -855,6 +859,8 @@ function update_connection_screen()
       
       massx, massy = mx, my
       massvx, massvy = 0, 0
+      
+      music_lowpass(false)
     end
   end
   
@@ -1545,16 +1551,17 @@ function draw_credits()
   
   draw_text("A Castle Game",x,y,2,nil,13) y=y+32
   
-  draw_text("Made by",x,y,2,nil,3) y=y+16
-  draw_text("Remy Devaux",x,y,2,nil,3) y=y+16
-  draw_text("aka Trasevol_Dog",x,y,2,nil,3) y=y+32
-  
-  draw_text("With music by",x,y,2,nil,17) y=y+16
-  draw_text("Andrew Matecha",x,y,2,nil,17) y=y+32
-  
   font("small")
+  draw_text("Made by",x,y,2,nil,3) y=y+14
+  draw_text("Remy Devaux",x,y,2,nil,3) y=y+14
+  draw_text("@Trasevol_Dog",x,y,2,nil,3) y=y+32
+  
+  draw_text("With music by",x,y,2,nil,17) y=y+14
+  draw_text("Andrew Matecha",x,y,2,nil,17) y=y+14
+  draw_text("@amatecha",x,y,2,nil,17) y=y+32
+  
   draw_text("Thank you to my Patreon supporters!",4,scrnh-24,0,nil,9)
-  local str = "   ~~~   *Joseph White, *Spaceling, rotatetranslate, Anne Le Clech, Wojciech Rak, HJS, slono, Austin East, Zachary Cook, Jefff, Meru, Bitzawolf, Paul Nguyen, Dan Lewis, Christian Östman, Dan Rees-Jones, Reza Esmaili, Andreas Bretteville, Joel Jorgensen, Marty Kovach, Giles Graham, Flo Devaux, Cole Smith, Thomas Wright, HERVAN, berkfrei, Tim and Alexandra Swast, Jearl, Chris McCluskey, Sam Loeschen, Pat LaBine, Collin Caldwell, Andrew Reitano, Qristy Overton, Finn Ellis, amy, Brent Werness, yunowadidis-musik, Max Cahill, hushcoil, Jacel the Thing, Gruber, Pierre B., Sean S. LeBlanc, Andrew Reist, vaporstack, Jakub Wasilewski"
+  local str = "   ~~~   ^Joseph White^,  ^Spaceling^,  rotatetranslate,  Anne Le Clech,  Wojciech Rak,  HJS,  slono,  Austin East,  Zachary Cook,  Jefff,  Meru,  Bitzawolf,  Paul Nguyen,  Dan Lewis,  Christian Östman,  Dan Rees-Jones,  Reza Esmaili,  Andreas Bretteville,  Joel Jorgensen,  Marty Kovach,  Giles Graham,  Flo Devaux,  Cole Smith,  Thomas Wright,  HERVAN,  berkfrei,  Tim and Alexandra Swast,  Jearl,  Chris McCluskey,  Sam Loeschen,  Pat LaBine,  Collin Caldwell,  Andrew Reitano,  Qristy Overton,  Finn Ellis,  amy,  Brent Werness,  yunowadidis-musik,  Max Cahill,  hushcoil,  Jacel the Thing,  Gruber,  Pierre B.,  Sean S. LeBlanc,  Andrew Reist,  vaporstack,  Jakub Wasilewski"
   local w = str_width(str)
   local x = 4-((t*100)%w)
   draw_text(str,x,scrnh-10,0,nil,9)

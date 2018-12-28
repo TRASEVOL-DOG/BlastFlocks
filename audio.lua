@@ -86,6 +86,20 @@ function music(name)
   love.audio.play(musics[name])
 end
 
+function music_lowpass(enable)
+  if server_only then return end
+
+  if enable then
+    for n,m in pairs(musics) do
+      m:setFilter{type="lowpass",highgain=.4,volume=music_vol/100}
+    end
+  else
+    for n,m in pairs(musics) do
+      m:setFilter()
+    end
+  end
+end
+
 function listener(x,y)
   if server_only then return end
 
