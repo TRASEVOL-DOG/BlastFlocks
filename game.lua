@@ -1343,13 +1343,26 @@ function draw_gameover()
   local scrnw,scrnh=screen_size()
   font("big")
   
-  if (t+0.05)%0.4<0.3 then
-    draw_text("GAME_OVER GAME_OVER GAME_OVER",scrnw/2,scrnh/4-16,1,23)
-    draw_text("GAME_OVER GAME_OVER GAME_OVER",scrnw/2,scrnh/4,1,23)
-    draw_text("GAME_OVER GAME_OVER GAME_OVER",scrnw/2,scrnh/4+16,1,23)
-  end  
   if t%0.4<0.3 then
-    draw_text("GAME_OVER",scrnw/2,scrnh/4,1,0)
+    draw_text("GAME_OVER",scrnw/2,scrnh/4-40,1,nil,23)
+    draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4-20,1,nil,23)
+    draw_text("GAME_OVER  GAME_OVER  GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4,1,nil,23)
+    draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4+20,1,nil,23)
+    draw_text("GAME_OVER",scrnw/2,scrnh/4+40,1,nil,23)
+    
+    if t%0.4>0.3 then
+      draw_text("GAME_OVER",scrnw/2,scrnh/4-40,1,nil,0)
+      draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4-20,1,nil,0)
+      draw_text("GAME_OVER  GAME_OVER  GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4,1,nil,0)
+      draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4+20,1,nil,0)
+      draw_text("GAME_OVER",scrnw/2,scrnh/4+40,1,nil,0)
+    elseif t%0.4>0.2 then
+      draw_text("GAME_OVER",scrnw/2,scrnh/4-20,1,nil,0)
+      draw_text("GAME_OVER  GAME_OVER  GAME_OVER",scrnw/2,scrnh/4,1,nil,0)
+      draw_text("GAME_OVER",scrnw/2,scrnh/4+20,1,nil,0)
+    elseif t%0.4>0.1 then
+      draw_text("GAME_OVER",scrnw/2,scrnh/4,1,nil,0)
+    end
   end
   
   draw_text_bicolor("you had "..highest.." ships at one time!",scrnw/2,scrnh/2,1,nil,c_lit[player.colors[1]],player.colors[1],c_lit[player.colors[2]],player.colors[2])
