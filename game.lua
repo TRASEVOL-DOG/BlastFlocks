@@ -400,7 +400,7 @@ function main_menu()
   menu_back()
   menu_back()
 
-  restarting = true
+--  restarting = true
   
   init_game()
 
