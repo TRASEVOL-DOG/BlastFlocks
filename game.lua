@@ -425,7 +425,7 @@ function update_mainmenu()
   update_shake()
   
   local scrnw,scrnh=screen_size()
-  local y = (curmenu == "mainmenu") and (scrnh/2+48) or (scrnh/2)
+  local y = (curmenu == "mainmenu") and (scrnh/2+56) or (scrnh/2)
   update_menu(scrnw/2,y-16)
   
   update_player(player)
@@ -479,27 +479,27 @@ function draw_mainmenu()
     local strb = "- right click to boost"
     local strc = "- save falling ships"
     
+    local cols = {15,14,13,21,21,21,21,21,21,21,21,21,21,13,14}
+    local c
+
     font("small")
     local x = scrnw/2 - str_width(strb)/2 - 5
     y = scrnh*0.2+48
 --    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
 --    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
 --    draw_text(strc, x, y, 0, nil, 8, 9)
+    c = cols[flr(t*50+2)%#cols+1]
     draw_text(stra, x, y, 0, nil, 21) y,x = y + 10, x + 5
+    c = cols[flr(t*50+1)%#cols+1]
     draw_text(strb, x, y, 0, nil, 21) y,x = y + 10, x + 5
+    c = cols[flr(t*50)%#cols+1]
     draw_text(strc, x, y, 0, nil, 21)
   
-    y = scrnh/2+48
+    y = scrnh/2+56
   end
   
   draw_credits()
   
---  local cols = {15,14,13,21,21,13,14}
---  local c = cols[flr(t*50)%#cols+1]
---  font("big")
---  draw_text("Join the Castle Discord!",4,scrnh/2-8,0,nil,c)
---  font("small")
---  draw_text("https://discordapp.com/invite/4C7yEEC",4,scrnh/2+8,0,nil,c)
 
   draw_menu(scrnw/2,y,t)
   
