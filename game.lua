@@ -489,11 +489,11 @@ function draw_mainmenu()
 --    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
 --    draw_text(strc, x, y, 0, nil, 8, 9)
     c = cols[flr(t*50+2)%#cols+1]
-    draw_text(stra, x, y, 0, nil, 21) y,x = y + 10, x + 5
+    draw_text(stra, x, y, 0, nil, c) y,x = y + 10, x + 5
     c = cols[flr(t*50+1)%#cols+1]
-    draw_text(strb, x, y, 0, nil, 21) y,x = y + 10, x + 5
+    draw_text(strb, x, y, 0, nil, c) y,x = y + 10, x + 5
     c = cols[flr(t*50)%#cols+1]
-    draw_text(strc, x, y, 0, nil, 21)
+    draw_text(strc, x, y, 0, nil, c)
   
     y = scrnh/2+56
   end
