@@ -152,6 +152,11 @@ function _update(dt)
   
 --  if client then client.postupdate() end
 --  if server then server.postupdate() end
+
+--  debuggg = ""..(client and client.id or "nil")
+--  if (not server_only) and client and connecting then
+--    read_client()
+--  end
 end
 
 debuggg = ""
@@ -181,6 +186,8 @@ function init_game()
   end
   
   register_object(cam)
+  
+  ship_list = {}
 
   mainmenu=false
   paused=false
@@ -227,6 +234,12 @@ function update_game()
   end
   
   shootshake=0
+  
+--  for id,p in pairs(players) do
+--    if id>=0 and not p.__registered then
+--      register_object(p)
+--    end
+--  end
   
   update_gangs()
   update_objects()
@@ -330,7 +343,8 @@ function define_menus()
     mainmenu={
       {"Play", start_game},
       {"Player Name", set_player_name, "text_field", 16, my_name},
-      {"Settings", function() menu("settings") end}
+      {"Settings", function() menu("settings") end},
+      {"Join the Castle Discord!", function() love.system.openURL("https://discordapp.com/invite/4C7yEEC") end}
     },
     cancel={
       {"Go Back", function() connecting=false main_menu() end}
@@ -416,7 +430,7 @@ function update_mainmenu()
   update_shake()
   
   local scrnw,scrnh=screen_size()
-  local y = (curmenu == "mainmenu") and (scrnh/2+48) or (scrnh/2)
+  local y = (curmenu == "mainmenu") and (scrnh/2+56) or (scrnh/2)
   update_menu(scrnw/2,y-16)
   
   update_player(player)
@@ -470,20 +484,27 @@ function draw_mainmenu()
     local strb = "- right click to boost"
     local strc = "- save falling ships"
     
+    local cols = {15,14,13,21,21,21,21,21,21,21,21,21,21,13,14}
+    local c
+
     font("small")
     local x = scrnw/2 - str_width(strb)/2 - 5
     y = scrnh*0.2+48
 --    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
 --    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
 --    draw_text(strc, x, y, 0, nil, 8, 9)
-    draw_text(stra, x, y, 0, nil, 21) y,x = y + 10, x + 5
-    draw_text(strb, x, y, 0, nil, 21) y,x = y + 10, x + 5
-    draw_text(strc, x, y, 0, nil, 21)
+    c = cols[flr(t*50+2)%#cols+1]
+    draw_text(stra, x, y, 0, nil, c) y,x = y + 10, x + 5
+    c = cols[flr(t*50+1)%#cols+1]
+    draw_text(strb, x, y, 0, nil, c) y,x = y + 10, x + 5
+    c = cols[flr(t*50)%#cols+1]
+    draw_text(strc, x, y, 0, nil, c)
   
-    y = scrnh/2+48
+    y = scrnh/2+56
   end
   
   draw_credits()
+  
 
   draw_menu(scrnw/2,y,t)
   
@@ -1216,7 +1237,7 @@ function draw_minimap()
   
   pal(0,25)
   for id,gang in pairs(gang_grid) do
-    if gang.target then
+    if gang.target and gang.size>0 then
       local mx,my = map_posb({mx=gang.x, my=gang.y})
       
       apply_pal_map(ship_plts[0])
