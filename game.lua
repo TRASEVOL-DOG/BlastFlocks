@@ -230,11 +230,11 @@ function update_game()
   
   shootshake=0
   
-  for id,p in pairs(players) do
-    if id>=0 and not p.__registered then
-      register_object(p)
-    end
-  end
+--  for id,p in pairs(players) do
+--    if id>=0 and not p.__registered then
+--      register_object(p)
+--    end
+--  end
   
   update_gangs()
   update_objects()
