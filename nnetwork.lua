@@ -26,7 +26,7 @@ function start_server()
     castle_print("Starting local server on port "..server_port)
   else
     castle_print("Local server already exists.")
-  end
+  end  
 end
 
 function connect_to_server()
@@ -71,7 +71,6 @@ function read_client()
       if p.ships then
         for _,s in pairs(p.ships) do
           deregister_object(s)
-          ship_list[s.id] = nil
         end
       end
       
@@ -217,7 +216,7 @@ function read_player_ships(p, p_d, id)
           s.type   = ship_types[s.typ_id]
           s.update_id = d[8]
         end
-      else --if not (ship_list[s_id] and ship_list[s_id].t < 1) then
+      else
         s = create_ship(
           d[1] + delay*30*d[3],
           d[2] + delay*30*d[4],
@@ -239,23 +238,17 @@ function read_player_ships(p, p_d, id)
     
     for s_id,s in pairs(sh) do
       if not readids[s_id] then
-        if (id==-2 and s.t>0) or (id>-2 and s.t<1) then
-          -- wait and see if we're really out of sync
-        else        
-          if id > -2 or s.t < -1.95 then -- visible destroy
-            if upgrade_counts > 0 then
-              upgrade_counts = upgrade_counts - 1
-              deregister_object(s)
-              sh[s_id] = nil
-              ship_list[s_id] = nil
-            else
-              destroy_ship(s)
-            end
-          else                          -- discreet destroy
+        if id > -2 or s.t < -1.95 then -- visible destroy
+          if upgrade_counts > 0 then
+            upgrade_counts = upgrade_counts - 1
             deregister_object(s)
             sh[s_id] = nil
-            ship_list[s_id] = nil
+          else
+            destroy_ship(s)
           end
+        else                          -- discreet destroy
+          deregister_object(s)
+          sh[s_id] = nil
         end
       end
     end
@@ -492,7 +485,6 @@ function server_client_disconnected(id)
   if p then
     for _,s in pairs(p.ships) do
       deregister_object(s)
-      ship_list[s.id] = nil
     end
     deregister_object(p)
     players[id] = nil
