@@ -152,6 +152,8 @@ function _update(dt)
   
 --  if client then client.postupdate() end
 --  if server then server.postupdate() end
+
+  debuggg = ""..(client and client.id or "nil")
 end
 
 debuggg = ""
@@ -400,7 +402,7 @@ function main_menu()
   menu_back()
   menu_back()
 
---  restarting = true
+  restarting = true
   
   init_game()
 
