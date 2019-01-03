@@ -53,6 +53,7 @@ function read_client()
     castle_print("client not connected?")
     return
   end
+    castle_print("hello??")
   
   -- calculate delay
   if restarting or not (client.share[client.id] and client.share[client.id][99]) then
