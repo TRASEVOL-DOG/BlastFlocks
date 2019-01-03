@@ -154,6 +154,7 @@ function _update(dt)
 --  if server then server.postupdate() end
 
   debuggg = ""..(client and client.id or "nil")
+  my_id = client and client.id
 end
 
 debuggg = ""
