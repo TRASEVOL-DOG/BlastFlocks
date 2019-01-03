@@ -9,6 +9,7 @@ require("sprite")
 
 require("fx")
 
+ship_list = {}
 
 ship_types = {"smol", "medium", "biggie", "huge", "helix"}
 ship_base_n = {6, 4, 2, 1}
@@ -661,6 +662,8 @@ function pass_to_player(s, player)
   
   s.color = pick(players[player].colors)
   s.plt   = ship_plts[s.color]
+  
+  ship_list[s.id] = s -- should already be the case, just tryna stay safe
 end
 
 function upgrade_ship(s, s2)
@@ -678,6 +681,7 @@ function upgrade_ship(s, s2)
     else
       players[s2.player].ships[s2.id] = nil
     end
+    ship_list[s2.id] = nil
   end
   
   load_shipinfo(s,ship_types[s.typ_id % 8], true)
@@ -898,7 +902,7 @@ function update_gang_sys()
       end
     end
   
-    gang_grid_t = 2
+    gang_grid_t = 1
   end
 end
 
@@ -1193,6 +1197,12 @@ function create_ship(x,y,vx,vy,typ_id,player_id,id)
   
   s.plt = ship_plts[s.color]
   
+  if ships_list[s.id] then
+    castle_print("Warning: Creating ship with existing ID.")
+  end
+  
+  ship_list[s.id] = s
+  
   register_object(s)
   return s
 end
@@ -1413,6 +1423,7 @@ function destroy_ship(s)
   create_skull(s.x,s.y)
 
   deregister_object(s)
+  ship_list[s.id] = nil
   
   local p = s.gang or players[s.player]
   if p then
