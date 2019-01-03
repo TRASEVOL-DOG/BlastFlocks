@@ -237,7 +237,9 @@ function read_player_ships(p, p_d, id)
         end
       end
       
-      readids[s.id] = true
+      if s then
+        readids[s.id] = true
+      end
     end
     
     for s_id,s in pairs(sh) do
