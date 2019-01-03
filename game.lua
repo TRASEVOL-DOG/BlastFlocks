@@ -181,6 +181,8 @@ function init_game()
   end
   
   register_object(cam)
+  
+  ship_list = {}
 
   mainmenu=false
   paused=false
@@ -227,6 +229,12 @@ function update_game()
   end
   
   shootshake=0
+  
+  for id,p in pairs(players) do
+    if id>=0 and not p.__registered then
+      register_object(p)
+    end
+  end
   
   update_gangs()
   update_objects()
@@ -331,6 +339,7 @@ function define_menus()
       {"Play", start_game},
       {"Player Name", set_player_name, "text_field", 16, my_name},
       {"Settings", function() menu("settings") end}
+      {"Join the Castle Discord!", function() love.system.openURL("https://discordapp.com/invite/4C7yEEC") end}
     },
     cancel={
       {"Go Back", function() connecting=false main_menu() end}
@@ -484,6 +493,13 @@ function draw_mainmenu()
   end
   
   draw_credits()
+  
+--  local cols = {15,14,13,21,21,13,14}
+--  local c = cols[flr(t*50)%#cols+1]
+--  font("big")
+--  draw_text("Join the Castle Discord!",4,scrnh/2-8,0,nil,c)
+--  font("small")
+--  draw_text("https://discordapp.com/invite/4C7yEEC",4,scrnh/2+8,0,nil,c)
 
   draw_menu(scrnw/2,y,t)
   
@@ -1216,7 +1232,7 @@ function draw_minimap()
   
   pal(0,25)
   for id,gang in pairs(gang_grid) do
-    if gang.target then
+    if gang.target and gang.size>0 then
       local mx,my = map_posb({mx=gang.x, my=gang.y})
       
       apply_pal_map(ship_plts[0])

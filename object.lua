@@ -66,13 +66,14 @@ function register_object(o)
     end
     add(objs[reg],o)
   end
-  o.registered = (o.registered or 0) + 1
+  o.__registered = true
 end
 
 function deregister_object(o)
   for reg in all(o.regs) do
     del(objs[reg],o)
   end
+  o.__registered = false
 end
 
 function group_add(group,o)
