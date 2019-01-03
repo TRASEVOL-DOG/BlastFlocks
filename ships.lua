@@ -1197,7 +1197,7 @@ function create_ship(x,y,vx,vy,typ_id,player_id,id)
   
   s.plt = ship_plts[s.color]
   
-  if ships_list[s.id] then
+  if ship_list[s.id] then
     castle_print("Warning: Creating ship with existing ID.")
   end
   
@@ -1442,6 +1442,7 @@ function delete_gang(s)
     for i,sh in pairs(s.ships) do
       deregister_object(sh)
       s.ships[i] = nil
+      ship_list[s.id] = nil
     end
   end
   
