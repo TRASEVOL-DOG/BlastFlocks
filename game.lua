@@ -339,7 +339,7 @@ function define_menus()
       {"Play", start_game},
       {"Player Name", set_player_name, "text_field", 16, my_name},
       {"Settings", function() menu("settings") end}
-      {"Join the Castle Discord!", function() love.system.openURL("https://discordapp.com/invite/4C7yEEC") end}
+      {"Join the Castle Discord!", function() love.system.openURL("https:\/\/discordapp.com\/invite\/4C7yEEC") end}
     },
     cancel={
       {"Go Back", function() connecting=false main_menu() end}
