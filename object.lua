@@ -66,6 +66,7 @@ function register_object(o)
     end
     add(objs[reg],o)
   end
+  o.registered = (o.registered or 0) + 1
   o.__registered = true
 end
 
