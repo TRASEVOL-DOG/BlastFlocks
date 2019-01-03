@@ -217,7 +217,7 @@ function read_player_ships(p, p_d, id)
           s.type   = ship_types[s.typ_id]
           s.update_id = d[8]
         end
-      elseif not ship_list[s_id] then
+      else --if not (ship_list[s_id] and ship_list[s_id].t < 1) then
         s = create_ship(
           d[1] + delay*30*d[3],
           d[2] + delay*30*d[4],
