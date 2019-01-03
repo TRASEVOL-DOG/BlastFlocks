@@ -154,7 +154,7 @@ function _update(dt)
 --  if server then server.postupdate() end
 
   debuggg = ""..(client and client.id or "nil")
-  if (not server_only) and client and (restarting or connecting) then
+  if (not server_only) and client and connecting then
     read_client()
   end
 end
