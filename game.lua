@@ -594,8 +594,8 @@ function update_player(s)
   
   if s.ships and (s.it_me or server_only) then
     if s.shooting and (s.msize or 0) > 0 then
---      s.overheat = min(s.overheat + min(s.msize/50*0.4+0.05,0.66)*delta_time, 1.1)
---      
+      s.overheat = min(s.overheat + min(s.msize/50*0.4+0.05,0.66)*delta_time, 1.1)
+      
 --      if server_only and s.overheat>1.09 then
 --        local sh
 --        local typ = 1
@@ -616,8 +616,8 @@ function update_player(s)
 --        end
 --        s.overheat = 1.0
 --      end
---    else
---      s.overheat = max(s.overheat - 0.1*delta_time, 0)
+    else
+      s.overheat = max(s.overheat - 0.1*delta_time, 0)
     end
   end
   
