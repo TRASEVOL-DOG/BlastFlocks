@@ -610,7 +610,6 @@ function update_player(s)
         end
         if sh then
           destroy_ship(sh)
-          create_explosion(sh.x,sh.y,sh.info.hlen*2+12,sh.c)
         else
           castle_print("Could not destroy ship from overheat?")
         end
