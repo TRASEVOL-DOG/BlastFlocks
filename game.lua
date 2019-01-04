@@ -574,8 +574,27 @@ function update_player(s)
     s.boosting = mouse_btn(1)
     s.shooting = mouse_btn(0) and not s.boosting
     
+    --if s.shooting then
+    --  create_bullet(s.x, s.y, rnd(1), rnd(2), my_id or 0)
+    --end
+    
+    if mouse_btnp(0) then -- maybe make it so you hear other players do it too??
+      if s.boosting then
+        add_shake(2)
+      else
+        add_shake(4)
+        sfx("shootorder")
+      end
+    end
+    
+    if mouse_btnp(1) then
+      sfx("boost")
+    end
+  end
+  
+  if s.it_me or server_only then
     if s.shooting and (s.msize or 0) > 0 then
-      s.overheat = min(s.overheat + min(s.msize/50*0.2,0.5)*delta_time, 1.1)
+      s.overheat = min(s.overheat + min(s.msize/50*0.4+0.05,0.66)*delta_time, 1.1)
       
       if server_only and s.overheat>1.09 then
         local sh
@@ -593,23 +612,6 @@ function update_player(s)
       end
     else
       s.overheat = max(s.overheat - 0.1*delta_time, 0)
-    end
-    
-    --if s.shooting then
-    --  create_bullet(s.x, s.y, rnd(1), rnd(2), my_id or 0)
-    --end
-    
-    if mouse_btnp(0) then -- maybe make it so you hear other players do it too??
-      if s.boosting then
-        add_shake(2)
-      else
-        add_shake(4)
-        sfx("shootorder")
-      end
-    end
-    
-    if mouse_btnp(1) then
-      sfx("boost")
     end
   end
   
@@ -1369,7 +1371,7 @@ function draw_heatbar()
   local x = 4
   local y = scrnh-5-h
   
-  if player.overheat then
+  if player.overheat>=1.0 then
     x = x + rnd(4)-2
     y = y + rnd(4)-2
   end
@@ -1378,23 +1380,26 @@ function draw_heatbar()
   rect(x,y+1,x+w-1,y+h,22)
   rect(x,y,x+w-1,y+h-1,21)
   
-  local hh = mid(player.overheat, 0, 1)*(h-2)
+  local hh = mid(player.overheat, 0, 1)*(h-4)
   local c = 21
   if player.overheat >=0.95 then
-   local cs = {21,19,1,2,1,19}
-   c = cs[flr(t*100)%#cs+1]
-   pal(21,c)
-   spr(153, 0, x+w/2-16, y-34, 4, 3)
-   pal(21,21)
+    local cs = {21,19,1,2,1,19}
+    c = cs[flr(t*100)%#cs+1]
+    pal(21,c)
+    spr(153, 0, x+w/2, y-17, 4, 3)
+    pal(21,21)
   elseif player.overheat >= 0.75 then
-   local cs = {21,2,3,1,3,2}
-   c = cs[flr(t*50)%#cs+1]
-   if t%0.3<0.2 then
-     spr(153, 0, x+w/2-16, y-34, 4, 3)
-   end
-  elseif player.overheat >= 0.5 then
-   local cs = {21,13,14,15,14,13}
-   c = cs[flr(t*40)%#cs+1]
+    local cs = {21,2,3,1,3,2}
+    c = cs[flr(t*50)%#cs+1]
+    if t%0.3<0.2 then
+       spr(153, 0, x+w/2, y-17, 4, 3)
+    end
+  elseif player.overheat >= 5 then
+    local cs = {21,2,3,1,3,2}
+    c = cs[flr(t*25)%#cs+1]
+  else
+    local cs = {21,13,14,15,14,13}
+    c = cs[flr(t*10)%#cs+1]
   end
   
   rectfill(x+2, y+h-3-hh, x+w-3, y+h-3, c)
