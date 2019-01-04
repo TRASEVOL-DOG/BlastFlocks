@@ -592,7 +592,7 @@ function update_player(s)
     end
   end
   
-  if s.ships and (s.it_me or server_only) then
+  if s.ships and s.overheat and (s.it_me or server_only) then
     if s.shooting and (s.msize or 0) > 0 then
       s.overheat = min(s.overheat + min(s.msize/50*0.4+0.05,0.66)*delta_time, 1.1)
       
