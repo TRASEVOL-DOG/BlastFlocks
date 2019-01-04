@@ -486,7 +486,8 @@ function draw_mainmenu()
     local strb = "- right click to boost"
     local strc = "- save falling ships"
     
-    local cols = {15,14,13,21,21,21,21,21,21,21,21,21,21,13,14}
+--    local cols = {15,14,13,21,21,21,21,21,21,21,21,21,21,13,14}
+    local cols = {21,21,21,21,21,21,21,21,21,21,13,14,8,2,3,0,17,19}
     local c
 
     font("small")
@@ -1368,7 +1369,7 @@ function draw_heatbar()
   local x = 4
   local y = scrnh-5-h
   
-  if s.overheat then
+  if player.overheat then
     x = x + rnd(4)-2
     y = y + rnd(4)-2
   end
