@@ -120,7 +120,7 @@ function init_sprite_mgr()
     skull={
       only={
         sheet=0,
-        dt=0.01,
+        dt=0.02,
         w=2,
         h=2,
         cx=8,
@@ -223,6 +223,26 @@ function draw_anim_outline(x,y,object,state,t,outline_c,r,flipx,flipy)
   love.graphics.draw(info.sheet,quad,x,y+1,r*2*math.pi,flipx,flipy,info.cx,info.cy)
   set_shader()
   all_colors_to()
+end
+
+function draw_anim_outlined(x,y,object,state,t,outline_c,r,flipx,flipy)
+  local state=state or "only"
+  local flipx=flipx and -1 or 1
+  local flipy=flipy and -1 or 1
+  local r=r or 0
+  local info=sprite.anims[object][state]
+  
+  local quad=info.quads[flr(t/info.dt)%#info.quads+1]
+  
+  all_colors_to(outline_c)
+  plt_shader()
+  love.graphics.draw(info.sheet,quad,x-1,y,r*2*math.pi,flipx,flipy,info.cx,info.cy)
+  love.graphics.draw(info.sheet,quad,x+1,y,r*2*math.pi,flipx,flipy,info.cx,info.cy)
+  love.graphics.draw(info.sheet,quad,x,y-1,r*2*math.pi,flipx,flipy,info.cx,info.cy)
+  love.graphics.draw(info.sheet,quad,x,y+1,r*2*math.pi,flipx,flipy,info.cx,info.cy)
+  set_shader()
+  all_colors_to()
+  love.graphics.draw(info.sheet,quad,x,y,r*2*math.pi,flipx,flipy,info.cx,info.cy)
 end
 
 

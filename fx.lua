@@ -116,19 +116,22 @@ end
 --end
 
 function draw_explosion(s)
-  local c=({25,21,21,s.c,s.c,s.c})[flr(s.p+dt30f)]
+  local c=({25,25,21,21,21,21,21,s.c,s.c})[flr(s.p+dt30f)]
   local r=s.r+max(s.p-2,0)
   local foo
-  if s.p<4 then foo=circfill
+  if s.p<7 then foo=circfill
   else foo=circ end
   
   foo(s.x,s.y,r,c)
   
   if s.p==1 then
     if s.r>4 then
-      for i=0,2 do
-        local x=s.x+rnd(2.2*s.r)-1.1*s.r
-        local y=s.y+rnd(2.2*s.r)-1.1*s.r
+      for i=0,1 do
+        local a,l=rnd(1),(0.8+rnd(0.4))*s.r
+        local x = s.x + l*cos(a)
+        local y = s.y + l*sin(a)
+        --local x=s.x+rnd(2.2*s.r)-1.1*s.r
+        --local y=s.y+rnd(2.2*s.r)-1.1*s.r
         local r=0.25*s.r+rnd(0.5*s.r)
         create_explosion(x,y,r,s.c)
       end
@@ -140,7 +143,7 @@ function draw_explosion(s)
   end
   
   s.p=s.p+1
-  if s.p>=6 then
+  if s.p>=8 then
     deregister_object(s)
   end
 end
@@ -163,7 +166,7 @@ function create_skull(x,y)
     t=0,
     update=update_skull,
     draw=draw_skull,
-    regs={"to_update","to_draw3"}
+    regs={"to_update","to_draw4"}
   }
   
   register_object(s)
