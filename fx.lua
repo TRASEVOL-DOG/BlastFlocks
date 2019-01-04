@@ -12,7 +12,7 @@ require("sprite")
 function update_skull(s)
   s.t=s.t+0.01*dt30f
   
-  if s.t>=0.115 then
+  if s.t>=0.230 then
     deregister_object(s)
   end
 end
