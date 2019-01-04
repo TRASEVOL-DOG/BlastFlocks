@@ -594,7 +594,7 @@ function update_player(s)
   
   if s.ships and s.overheat and (s.it_me or server_only) then
     if s.shooting and (s.msize or 0) > 0 then
-      s.overheat = min(s.overheat + min(s.msize/50*0.4+0.05,0.66)*delta_time, 1.1)
+      s.overheat = min(s.overheat + min(s.msize/50*0.5,0.66)*delta_time, 1.1)
       
       if server_only and s.overheat>1.09 then
         local sh
@@ -1401,11 +1401,22 @@ function draw_heatbar()
        spr(153, 0, x+w/2, y-17, 4, 3)
     end
   elseif player.overheat >= 0.5 then
-    local cs = {21,2,3,1,3,2}
-    c = cs[flr(t*25)%#cs+1]
+    local cs = {21,13,14,15,14,13}
+    c = cs[flr(t*40)%#cs+1]
   else
     local cs = {21,21,21,13,14,15,14,13}
     c = cs[flr(t*25)%#cs+1]
+  end
+  
+  if player.overheat >= 0.75 then
+    local str = "OVERHEAT"
+    local nh = 12
+    local yy = y+h/2-nh*4
+    local xx = x+w+3
+    for i=1,8 do
+      draw_text(str:sub(i,i),xx,yy,0,nil,c)
+      yy = yy+nh
+    end
   end
   
   rectfill(x+2, y+h-3-hh, x+w-3, y+h-3, c)
