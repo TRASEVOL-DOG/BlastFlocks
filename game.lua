@@ -255,7 +255,7 @@ function update_game()
   if not server_only then
     if player.msize > 0 then
       massx, massy = player.mx, player.my
-    elseif not gameover and not mainmenu then
+    elseif not gameover and not mainmenu and not restarting then
       boomsfx()
       create_explosion(massx,massy,32,10)
       add_shake(64)
@@ -609,7 +609,7 @@ function update_player(s)
           if typ > 4 then break end
         end
         if sh then
-          create_explosion(s.x,s.y,s.info.hlen*2+8,s.c)
+          create_explosion(sh.x,sh.y,sh.info.hlen*2+8,sh.c)
           destroy_ship(sh)
         else
           castle_print("Could not destroy ship from overheat?")
