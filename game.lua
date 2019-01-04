@@ -596,26 +596,26 @@ function update_player(s)
     if s.shooting and (s.msize or 0) > 0 then
       s.overheat = min(s.overheat + min(s.msize/50*0.4+0.05,0.66)*delta_time, 1.1)
       
---      if server_only and s.overheat>1.09 then
---        local sh
---        local typ = 1
---        while not sh do
---          for _,shh in pairs(s.ships) do
---            if shh.typ_id == typ then
---              sh = shh
---              break
---            end
---          end
---          typ = typ+1
---          if typ > 4 then break end
---        end
---        if sh then
---          destroy_ship(sh)
---        else
---          castle_print("Could not destroy ship from overheat?")
---        end
---        s.overheat = 1.0
---      end
+      if server_only and s.overheat>1.09 then
+        local sh
+        local typ = 1
+        while not sh do
+          for _,shh in pairs(s.ships) do
+            if shh.typ_id == typ then
+              sh = shh
+              break
+            end
+          end
+          typ = typ+1
+          if typ > 4 then break end
+        end
+        if sh then
+          destroy_ship(sh)
+        else
+          castle_print("Could not destroy ship from overheat?")
+        end
+        s.overheat = 1.0
+      end
     else
       s.overheat = max(s.overheat - 0.1*delta_time, 0)
     end
@@ -1400,12 +1400,12 @@ function draw_heatbar()
     if t%0.3<0.2 then
        spr(153, 0, x+w/2, y-17, 4, 3)
     end
-  elseif player.overheat >= 5 then
+  elseif player.overheat >= 0.5 then
     local cs = {21,2,3,1,3,2}
     c = cs[flr(t*25)%#cs+1]
   else
-    local cs = {21,13,14,15,14,13}
-    c = cs[flr(t*10)%#cs+1]
+    local cs = {21,21,21,13,14,15,14,13}
+    c = cs[flr(t*25)%#cs+1]
   end
   
   rectfill(x+2, y+h-3-hh, x+w-3, y+h-3, c)
