@@ -609,7 +609,7 @@ function update_player(s)
           if typ > 4 then break end
         end
         if sh then
-          create_explosion(sh.x,sh.y,sh.info.hlen*2+8,sh.c)
+          create_explosion(sh.x,sh.y,sh.info.hlen*3+12,sh.c)
           destroy_ship(sh)
         else
           castle_print("Could not destroy ship from overheat?")
