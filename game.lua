@@ -171,11 +171,11 @@ function _draw()
   
   draw_network_state()
   
-  local scrnw,scrnh = screen_size()
-  font("small")
-  draw_text("/!\\ You're playing", 2, scrnh-36, 0, nil, 17)
-  draw_text("a work-in-progress", 2, scrnh-24, 0, nil, 17)
-  draw_text("version of the game.", 2, scrnh-12, 0, nil, 17)
+--  local scrnw,scrnh = screen_size()
+--  font("small")
+--  draw_text("/!\\ You're playing", 2, scrnh-36, 0, nil, 17)
+--  draw_text("a work-in-progress", 2, scrnh-24, 0, nil, 17)
+--  draw_text("version of the game.", 2, scrnh-12, 0, nil, 17)
 end
 
 
@@ -333,8 +333,7 @@ function define_menus()
       client_define_non_players()
     end
     
-    music("theme")
-    music_lowpass(false)
+    --music("theme")
     
     menu_back()
     menu_back()
@@ -610,6 +609,7 @@ function update_player(s)
           if typ > 4 then break end
         end
         if sh then
+          create_explosion(s.x,s.y,s.info.hlen*2+8,s.c)
           destroy_ship(sh)
         else
           castle_print("Could not destroy ship from overheat?")
@@ -1383,7 +1383,7 @@ function draw_heatbar()
   end
   
   rectfill(x-1,y-1,x+w,y+h+1,25)
-  rect(x,y+1,x+w-1,y+h,22)
+  rect(x,y+1,x+w-1,y+h,23)
   rect(x,y,x+w-1,y+h-1,21)
   
   local hh = mid(player.overheat, 0, 1)*(h-4)
@@ -1409,8 +1409,9 @@ function draw_heatbar()
   end
   
   if player.overheat >= 0.75 then
+    font("big")
     local str = "OVERHEAT"
-    local nh = 12
+    local nh = 14
     local yy = y+h/2-nh*4
     local xx = x+w+3
     for i=1,8 do
