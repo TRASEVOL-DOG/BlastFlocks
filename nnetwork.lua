@@ -50,18 +50,14 @@ end
 local delay
 function read_client()
   if not (client and client.connected) then
---    castle_print("client not connected?")
     return
   end
---    castle_print("hello??")
-  
+
   -- calculate delay
   if restarting or not (client.share[client.id] and client.share[client.id][99]) then
     return
   end
   my_id = client.id
-  
---    castle_print("hello??")
   
   local lt = client.share[my_id][99]
   delay = (love.timer.getTime() - lt)/2

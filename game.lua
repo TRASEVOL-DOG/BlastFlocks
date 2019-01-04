@@ -235,11 +235,11 @@ function update_game()
   
   shootshake=0
   
---  for id,p in pairs(players) do
---    if id>=0 and not p.__registered then
---      register_object(p)
---    end
---  end
+  for id,p in pairs(players) do
+    if id>=0 and not p.__registered then
+      register_object(p)
+    end
+  end
   
   update_gangs()
   update_objects()
@@ -296,6 +296,8 @@ function draw_game()
   
   camera(0,0)
 --  draw_levelup()
+
+  draw_heatbar()
 
   draw_leaderboard()
   draw_minimap()
@@ -570,6 +572,27 @@ function update_player(s)
     
     s.boosting = mouse_btn(1)
     s.shooting = mouse_btn(0) and not s.boosting
+    
+    if s.shooting and (s.msize or 0) > 0 then
+      s.overheat = min(s.overheat + min(s.msize/50*0.2,0.5)*delta_time, 1.1)
+      
+      if server_only and s.overheat>1.09 then
+        local sh
+        local typ = 1
+        while not sh do
+          for sh_id,shh in pairs(s.ships) do
+            if shh.typ_id == typ then
+              sh = shh
+              break
+            end
+          end
+        end
+        destroy_ships(sh)
+        s.overheat = 1.0
+      end
+    else
+      s.overheat = max(s.overheat - 0.1*delta_time, 0)
+    end
     
     --if s.shooting then
     --  create_bullet(s.x, s.y, rnd(1), rnd(2), my_id or 0)
@@ -1237,7 +1260,7 @@ function draw_minimap()
   
   pal(0,25)
   for id,gang in pairs(gang_grid) do
-    if gang.target and gang.size>0 then
+    if gang.target and gang.size and gang.size>0 then
       local mx,my = map_posb({mx=gang.x, my=gang.y})
       
       apply_pal_map(ship_plts[0])
@@ -1330,6 +1353,50 @@ function draw_levelup()
       draw_text(str,scrnw/2,scrnh/2,1,7,7,7)
     end
   end
+end
+
+function draw_heatbar()
+  if not player then
+    return
+  end
+
+  local scrnw,scrnh = screen_size()
+  
+  local w = 24
+  local h = 128
+  
+  local x = 4
+  local y = scrnh-5-h
+  
+  if s.overheat then
+    x = x + rnd(4)-2
+    y = y + rnd(4)-2
+  end
+  
+  rectfill(x-1,y-1,x+w,y+h+1,25)
+  rect(x,y+1,x+w-1,y+h,22)
+  rect(x,y,x+w-1,y+h-1,21)
+  
+  local hh = mid(player.overheat, 0, 1)*(h-2)
+  local c = 21
+  if player.overheat >=0.95 then
+   local cs = {21,19,1,2,1,19}
+   c = cs[flr(t*100)%#cs+1]
+   pal(21,c)
+   spr(153, 0, x+w/2-16, y-34, 4, 3)
+   pal(21,21)
+  elseif player.overheat >= 0.75 then
+   local cs = {21,2,3,1,3,2}
+   c = cs[flr(t*50)%#cs+1]
+   if t%0.3<0.2 then
+     spr(153, 0, x+w/2-16, y-34, 4, 3)
+   end
+  elseif player.overheat >= 0.5 then
+   local cs = {21,13,14,15,14,13}
+   c = cs[flr(t*40)%#cs+1]
+  end
+  
+  rectfill(x+2, y+h-3-hh, x+w-3, y+h-3, c)
 end
 
 function draw_score()
@@ -1615,6 +1682,7 @@ function create_player(x, y, colors, shooting, boosting, player_id)
     mx = 0,
     my = 0,
     msize = 0,
+    overheat = 0,
     colors   = colors,
     shooting = shooting,
     boosting = boost,

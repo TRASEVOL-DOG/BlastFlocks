@@ -1227,6 +1227,11 @@ function load_shipstats(s,typ, upgraded)
     s.stats[stat]=val[1]+lrnd(val[2])+(upgraded and val[3] or 0)
   end
   
+--  if s.player then
+--    local n = s.player.msize
+--    s.stats.spdcap
+--  end
+  
   s.retrievable = lrnd(100) < s.stats.revive
 end
 
