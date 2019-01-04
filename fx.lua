@@ -116,10 +116,10 @@ end
 --end
 
 function draw_explosion(s)
-  local c=({25,21,s.c,s.c,s.c})[s.p+1]
+  local c=({25,21,21,s.c,s.c,s.c})[flr(s.p+dt30f)]
   local r=s.r+max(s.p-2,0)
   local foo
-  if s.p<3 then foo=circfill
+  if s.p<4 then foo=circfill
   else foo=circ end
   
   foo(s.x,s.y,r,c)
@@ -140,7 +140,7 @@ function draw_explosion(s)
   end
   
   s.p=s.p+1
-  if s.p>=5 then
+  if s.p>=6 then
     deregister_object(s)
   end
 end
