@@ -487,7 +487,7 @@ function draw_mainmenu()
     local strc = "- save falling ships"
     
 --    local cols = {15,14,13,21,21,21,21,21,21,21,21,21,21,13,14}
-    local cols = {21,21,21,21,21,21,21,21,21,21,13,14,8,2,3,0,17,19}
+    local cols = {21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,13,14,8,2,3,0,17,19}
     local c
 
     font("small")
@@ -496,11 +496,11 @@ function draw_mainmenu()
 --    draw_text(stra, x, y, 0, nil, 19, 0) y,x = y + 14, x + 8
 --    draw_text(strb, x, y, 0, nil, 13, 14) y,x = y + 14, x + 8
 --    draw_text(strc, x, y, 0, nil, 8, 9)
-    c = cols[flr(t*50+2)%#cols+1]
+    c = cols[flr(t*75+4)%#cols+1]
     draw_text(stra, x, y, 0, nil, c) y,x = y + 10, x + 5
-    c = cols[flr(t*50+1)%#cols+1]
+    c = cols[flr(t*75+2)%#cols+1]
     draw_text(strb, x, y, 0, nil, c) y,x = y + 10, x + 5
-    c = cols[flr(t*50)%#cols+1]
+    c = cols[flr(t*75)%#cols+1]
     draw_text(strc, x, y, 0, nil, c)
   
     y = scrnh/2+56
@@ -592,7 +592,7 @@ function update_player(s)
     end
   end
   
-  if s.it_me or server_only then
+  if s.ships and (s.it_me or server_only) then
     if s.shooting and (s.msize or 0) > 0 then
       s.overheat = min(s.overheat + min(s.msize/50*0.4+0.05,0.66)*delta_time, 1.1)
       
@@ -600,14 +600,14 @@ function update_player(s)
         local sh
         local typ = 1
         while not sh do
-          for sh_id,shh in pairs(s.ships) do
+          for _,shh in pairs(s.ships) do
             if shh.typ_id == typ then
               sh = shh
               break
             end
           end
         end
-        destroy_ships(sh)
+        destroy_ship(sh)
         s.overheat = 1.0
       end
     else
