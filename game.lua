@@ -594,30 +594,30 @@ function update_player(s)
   
   if s.ships and (s.it_me or server_only) then
     if s.shooting and (s.msize or 0) > 0 then
-      s.overheat = min(s.overheat + min(s.msize/50*0.4+0.05,0.66)*delta_time, 1.1)
-      
-      if server_only and s.overheat>1.09 then
-        local sh
-        local typ = 1
-        while not sh do
-          for _,shh in pairs(s.ships) do
-            if shh.typ_id == typ then
-              sh = shh
-              break
-            end
-          end
-          typ = typ+1
-          if typ > 4 then break end
-        end
-        if sh then
-          destroy_ship(sh)
-        else
-          castle_print("Could not destroy ship from overheat?")
-        end
-        s.overheat = 1.0
-      end
-    else
-      s.overheat = max(s.overheat - 0.1*delta_time, 0)
+--      s.overheat = min(s.overheat + min(s.msize/50*0.4+0.05,0.66)*delta_time, 1.1)
+--      
+--      if server_only and s.overheat>1.09 then
+--        local sh
+--        local typ = 1
+--        while not sh do
+--          for _,shh in pairs(s.ships) do
+--            if shh.typ_id == typ then
+--              sh = shh
+--              break
+--            end
+--          end
+--          typ = typ+1
+--          if typ > 4 then break end
+--        end
+--        if sh then
+--          destroy_ship(sh)
+--        else
+--          castle_print("Could not destroy ship from overheat?")
+--        end
+--        s.overheat = 1.0
+--      end
+--    else
+--      s.overheat = max(s.overheat - 0.1*delta_time, 0)
     end
   end
   
