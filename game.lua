@@ -1623,7 +1623,7 @@ function draw_network_state()
         ping = client.getPing()
         ping_t = 0.2
       end
-      _log("Ping: "..ping, true, (ping<100) and 8 or (ping<300) and 3 or 0)
+      _log("Ping: "..ping, false, (ping<100) and 8 or (ping<300) and 3 or 0)
 
       if debug_mode > 0 then
         _log("My ID: "..(my_id or "missing"))
@@ -1644,6 +1644,9 @@ function draw_network_state()
       end
     else
       _log("Client not connected", true, 23)
+      if not castle.isLoggedIn then
+        _log("Please log in to Castle to play!", true, 0)
+      end
     end
   end
 
