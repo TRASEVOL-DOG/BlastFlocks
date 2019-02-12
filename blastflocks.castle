@@ -1,0 +1,11 @@
+---
+main: main.lua
+name: ✈️ BLAST FLOCKS ✈️
+username: trasevol-dog
+primarycolor: FF4D4D
+coverImageUrl: https://raw.githubusercontent.com/trasevol-dog/blastflocks/master/logo-500.png
+description: |
+    !! Control a flock of planes.
+    !! Destroy other planes.
+    !! Save those you can.
+    !! Dominate ✈️
