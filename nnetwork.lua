@@ -169,7 +169,7 @@ function read_player(p_d, id)
       p.y = p_d[2]
       p.shooting = p_d[3]
       p.boosting = p_d[4]
-    end   
+    end
   
     read_player_ships(p, p_d, id)
   end
