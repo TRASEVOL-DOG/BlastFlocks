@@ -56,6 +56,7 @@ function init_graphics(scx,scy)
   fts={}
   for name,info in pairs(fonts) do
     fts[name]=love.graphics.newFont("assets/"..info[1],info[2])
+    fts[name]:setFilter("nearest", "nearest", 0)
   end
   graphics.fonts=fts
   
