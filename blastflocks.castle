@@ -1,9 +1,12 @@
 ---
 main: main.lua
-name: ✈️ BLAST FLOCKS ✈️
-username: trasevol-dog
+title: ✈️ BLAST FLOCKS ✈️
+owner: trasevol-dog
 primaryColor: 28237b
 coverImageUrl: https://raw.githubusercontent.com/trasevol-dog/blastflocks/master/logo-500.png
+dimensions: full
+multiplayer:
+  enabled: true
 description: |
     !! Control a flock of planes.
     !! Destroy other planes.
