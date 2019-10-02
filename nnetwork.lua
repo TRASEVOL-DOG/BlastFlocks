@@ -1,7 +1,12 @@
 -- BLAST FLOCK source files
 -- by TRASEVOL_DOG (https://trasevol.dog/)
 
-local cs = require("cs")
+local cs
+if castle then
+  cs = require("https://raw.githubusercontent.com/castle-games/share.lua/master/cs.lua")
+else
+  cs = require("cs")
+end
 
 
 --client, server = nil, nil

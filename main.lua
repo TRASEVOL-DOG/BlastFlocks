@@ -17,8 +17,6 @@ if CASTLE_PREFETCH then
     'menu.lua',
     'fx.lua',
     'ships.lua',
-    'cs.lua',
-    'state.lua',
     'assets/Marksman.ttf',
     'assets/EffortsPro.ttf',
     'assets/sheet.png',
